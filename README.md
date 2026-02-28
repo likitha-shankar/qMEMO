@@ -14,19 +14,31 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 ## Key Findings
 
+### Throughput -- single core
+
+| Algorithm | Apple M2 Pro (ARM64) | Intel Xeon Gold 6242 (x86) |
+|-----------|---------------------:|---------------------------:|
+| Falcon-512 verify | 31,133 ops/sec | 23,885 ops/sec |
+| ML-DSA-44 verify | 25,904 ops/sec | **48,627 ops/sec** |
+| Ed25519 verify | 8,857 ops/sec | 9,013 ops/sec |
+| ECDSA secp256k1 verify | 4,026 ops/sec | 2,963 ops/sec |
+
+> ML-DSA-44 is 2x faster than Falcon-512 on x86 due to liboqs AVX-512 optimizations.
+> Falcon-512 leads on ARM. Measurement stability: CV 3.92% (ARM) vs 0.67% (x86 bare-metal).
+
+### Other findings
+
 | Metric | Value |
 |--------|-------|
-| **Falcon-512 verify (single core)** | ~44,000 ops/sec (median, 1,000 trials) |
-| **vs ECDSA secp256k1 verify** | Falcon is **~3.7x faster** |
-| **vs Ed25519 verify** | Falcon within **~1.5x** |
-| **Falcon-512 signature size** | Max 666 bytes vs ML-DSA-44's 2,420 bytes (3.6x smaller) |
-| **SLH-DSA-SHA2-128f sign rate** | ~50 ops/sec -- unsuitable for high-TPS |
-| **10-core Falcon-512 signing** | Scales near-linearly; aggregate >30K signs/sec |
-| **NIST security headroom (blockchain)** | All 5 PQC schemes exceed NIST Level 1 requirements |
+| **Falcon-512 vs ECDSA verify** | Falcon 7.6x faster (ARM), 8.1x faster (x86) |
+| **Falcon-512 signature size** | Max 752 bytes vs ML-DSA-44's 2,420 bytes (3.2x smaller) |
+| **SLH-DSA-SHA2-128f sign rate** | 36-45 ops/sec -- unsuitable for high-TPS |
+| **10-core Falcon-512 verify** | 239K ops/sec (ARM), 177K ops/sec (x86) -- ~8.8x speedup |
+| **Cycle count (RDTSC, x86)** | 146,778 cycles/verify @ 2.80 GHz |
 
 ---
 
-## Benchmark Suite (10 programs)
+## Benchmark Suite (11 programs)
 
 | Binary | Source | What it measures |
 |--------|--------|-----------------|
@@ -40,6 +52,7 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 | `signature_size_analysis` | `signature_size_analysis.c` | Falcon-512/padded-512/1024/padded-1024 size distributions (10K sigs each) |
 | `classical_benchmark` | `classical_benchmark.c` | ECDSA secp256k1 + Ed25519 baselines (OpenSSL 3.x EVP API) |
 | `comprehensive_comparison` | `comprehensive_comparison.c` | All 7 algorithms side-by-side: keygen / sign / verify throughput + key/sig sizes |
+| `key_inspection` | `key_inspection.c` | Key material inspection and correctness audit for all 7 algorithms |
 
 ---
 
@@ -81,6 +94,7 @@ cd benchmarks && make run
 ./bin/signature_size_analysis
 ./bin/classical_benchmark
 ./bin/comprehensive_comparison
+./bin/key_inspection
 ```
 
 ### Full Pipeline (timestamped results + Markdown report)
@@ -97,16 +111,13 @@ python3 scripts/generate_report.py
 
 | Path | Description |
 |------|-------------|
-| `benchmarks/src/` | C benchmark sources (10 programs + `bench_common.h`) |
+| `benchmarks/src/` | C benchmark sources (11 programs + `bench_common.h`) |
 | `benchmarks/bin/` | Compiled binaries (after `make all`) |
-| `benchmarks/results/` | Per-run JSON outputs and Markdown reports |
+| `benchmarks/results/` | Timestamped per-run log files |
 | `docs/` | Research documentation, analysis, and system specs |
-| `scripts/` | Automation: run all benchmarks, analyze results, generate report |
-| `archive/blockchain_prototype/` | Python devnet prototype (Phase 2, not the focus) |
-| `archive/session_notes/` | Working notes and professor meeting notes |
+| `scripts/` | Automation: `run_logged.sh` (timestamped runs), `chameleon_setup.sh` (bare-metal bootstrap) |
 | `liboqs_install/` | Local liboqs 0.15.0 install (built by `install_liboqs.sh`) |
 | `install_liboqs.sh` | Builds and installs liboqs locally |
-| `setup_project.sh` | Creates the initial directory layout |
 
 ---
 
@@ -127,8 +138,15 @@ python3 scripts/generate_report.py
 
 ## Hardware
 
-All primary results: **Apple M2 Pro** (10-core, 16 GB).
-See **[docs/SYSTEM_SPECS.md](docs/SYSTEM_SPECS.md)** for full hardware profile.
+Benchmarks run on two platforms:
+
+| Platform | CPU | Cores | RAM | OS |
+|----------|-----|------:|----:|-----|
+| Apple M2 Pro | ARM64, ~3.5 GHz (P-cores) | 10 | 16 GB | macOS Darwin arm64 |
+| Chameleon Cloud (compute_cascadelake_r650) | Intel Xeon Gold 6242 @ 2.80 GHz | 64 | 187 GB | Ubuntu 22.04 |
+
+The Cascade Lake node uses RDTSC for exact hardware cycle counting.
+See **[docs/SYSTEM_SPECS.md](docs/SYSTEM_SPECS.md)** for full profiles.
 
 ---
 
@@ -149,12 +167,13 @@ See **[docs/SYSTEM_SPECS.md](docs/SYSTEM_SPECS.md)** for full hardware profile.
 
 ## Limitations
 
-- **Single platform:** Primary results are from one machine (Apple M2 Pro).
-  Published cycle counts from Intel/AMD platforms are used for cross-validation.
-- **Reference implementation:** liboqs is a reference build; platform-optimised builds
-  (e.g. AVX-512 on x86, NEON on ARM) may differ.
-- **OpenSSL throughput:** Ed25519 and ECDSA numbers reflect OpenSSL's implementation;
+- **Reference implementation:** liboqs is a portable reference build. Platform-optimized
+  builds (AVX-512 for ML-DSA on x86, NEON for Falcon on ARM) could improve throughput 2-3x
+  for some algorithms. We use the reference build for fair cross-architecture comparison.
+- **OpenSSL throughput:** Ed25519 and ECDSA numbers reflect OpenSSL's EVP API;
   hand-optimised libraries (libsodium, secp256k1) can be faster.
+- **Two platforms only:** Results cover ARM64 (Apple M2 Pro) and x86-64 (Cascade Lake).
+  Other microarchitectures (AMD Zen, RISC-V) are not yet measured.
 
 ---
 
