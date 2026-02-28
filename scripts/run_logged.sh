@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# run_logged.sh — Run the full qMEMO benchmark suite with per-run log files.
+# run_logged.sh -- Run the full qMEMO benchmark suite with per-run log files.
 #
 # Creates: benchmarks/results/run_YYYYMMDD_HHMMSS/
-#   system_info.log          — hardware, OS, compiler, library versions
-#   key_inspection.log       — full hex dump of keys and signatures for all 7 algs
+#   system_info.log          -- hardware, OS, compiler, library versions
+#   key_inspection.log       -- full hex dump of keys and signatures for all 7 algs
 #   verify_benchmark.log
 #   statistical_benchmark.log
 #   comparison_benchmark.log
@@ -14,7 +14,7 @@
 #   signature_size_analysis.log
 #   classical_benchmark.log
 #   comprehensive_comparison.log
-#   SUMMARY.md               — extracted tables + JSON from every run
+#   SUMMARY.md               -- extracted tables + JSON from every run
 #
 # Usage:
 #   cd /path/to/qMEMO
@@ -84,7 +84,7 @@ echo ""
 
 # ── Build ──────────────────────────────────────────────────────────────────
 echo "================================================================"
-echo "  Building all benchmarks …"
+echo "  Building all benchmarks ..."
 echo "================================================================"
 (cd "$BENCH_DIR" && make clean all 2>&1) | tee "$RUN_DIR/build.log"
 echo ""
@@ -157,7 +157,7 @@ done
 # ── Generate SUMMARY.md ───────────────────────────────────────────────────
 SUMMARY="$RUN_DIR/SUMMARY.md"
 {
-    echo "# qMEMO Benchmark Run — $TIMESTAMP"
+    echo "# qMEMO Benchmark Run -- $TIMESTAMP"
     echo ""
     echo "**Platform:** $(uname -m) / $(uname -s)"
     echo "**Date:** $(date -u +%Y-%m-%dT%H:%M:%SZ)"

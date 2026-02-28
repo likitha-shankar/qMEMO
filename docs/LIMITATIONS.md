@@ -1,6 +1,6 @@
 # Research Limitations and Future Work
 
-**qMEMO Project — Illinois Institute of Technology, Chicago**
+**qMEMO Project -- Illinois Institute of Technology, Chicago**
 
 This document honestly acknowledges the limitations of this benchmarking study.
 
@@ -100,7 +100,7 @@ This document honestly acknowledges the limitations of this benchmarking study.
 
 **Impact:**
 
-- SPHINCS+ is a stateless hash-based scheme with no algebraic structure — a more conservative security assumption than lattice-based schemes. Missing it leaves a gap for long-lived validator keys where algebraic hardness assumptions may be undesirable.
+- SPHINCS+ is a stateless hash-based scheme with no algebraic structure -- a more conservative security assumption than lattice-based schemes. Missing it leaves a gap for long-lived validator keys where algebraic hardness assumptions may be undesirable.
 - Cannot present a full NIST PQC Level-1 three-way comparison (Falcon / ML-DSA / SLH-DSA) in the paper.
 
 **Future Work:** Add `sphincs_benchmark.c` using `OQS_SIG_alg_sphincs_sha2_128f_simple` and integrate into `comparison_benchmark.c`.
@@ -115,7 +115,7 @@ This document honestly acknowledges the limitations of this benchmarking study.
 
 **Impact:**
 
-- Blockchain transactions vary in size (100–1000 bytes typical)
+- Blockchain transactions vary in size (100-1000 bytes typical)
 - Cannot analyze message-size dependency
 - Hashing overhead not measured independently
 
@@ -164,7 +164,7 @@ This document honestly acknowledges the limitations of this benchmarking study.
 
 ### Simplified Cross-Shard Model
 
-**Limitation:** Assumed 20% cross-shard rate with 2× verification cost.
+**Limitation:** Assumed 20% cross-shard rate with 2x verification cost.
 
 **Impact:**
 
@@ -204,12 +204,12 @@ This document honestly acknowledges the limitations of this benchmarking study.
 
 ### Non-Normal Distribution
 
-**Limitation:** Distribution is non-Gaussian (Jarque–Bera test failed).
+**Limitation:** Distribution is non-Gaussian (Jarque-Bera test failed).
 
 **Impact:**
 
 - Cannot use parametric statistical tests (t-test, ANOVA)
-- Must use non-parametric tests (Mann–Whitney U)
+- Must use non-parametric tests (Mann-Whitney U)
 - Outliers affect mean more than median
 
 **Why This Happened:** OS scheduling, thermal effects, background processes.
@@ -331,13 +331,13 @@ This document honestly acknowledges the limitations of this benchmarking study.
 
 These limitations **do not** invalidate the core finding:
 
-**Falcon-512 provides 17× headroom for MEMO blockchain (conservative scenario).**
+**Falcon-512 provides 17x headroom for MEMO blockchain (conservative scenario).**
 
 Even accounting for:
 
-- Slower hardware (10× headroom still ample)
-- Cross-shard overhead (14.7× after adjustment)
-- Thermal throttling (P5 = 17× headroom)
+- Slower hardware (10x headroom still ample)
+- Cross-shard overhead (14.7x after adjustment)
+- Thermal throttling (P5 = 17x headroom)
 - OS interference (statistical analysis shows consistency)
 
 **The research question is answered conclusively** within the limitations described.

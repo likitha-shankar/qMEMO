@@ -1,5 +1,5 @@
 /*
- * key_inspection.c — Cryptographic Key Material Inspection
+ * key_inspection.c -- Cryptographic Key Material Inspection
  *
  * Part of the qMEMO project (IIT Chicago).
  *
@@ -10,14 +10,14 @@
  * For each scheme this program:
  *   1. Generates a fresh keypair and reports exact byte sizes.
  *   2. Dumps the full public key in hexdump -C format.
- *      (Secret key bytes are NEVER printed — only the size is reported.)
+ *      (Secret key bytes are NEVER printed -- only the size is reported.)
  *   3. Signs a fixed 64-byte test vector and dumps the full signature.
  *   4. Runs three correctness checks:
  *        (a) verify original  sig on original  msg → must PASS
  *        (b) verify corrupted sig on original  msg → must FAIL
  *        (c) verify original  sig on corrupted msg → must FAIL
  *   5. Reports single-operation timing (one keygen / one sign / one verify)
- *      as a latency reference — not for throughput; use the other benchmarks.
+ *      as a latency reference -- not for throughput; use the other benchmarks.
  *
  * Test vector (64 bytes, ASCII):
  *   "qMEMO key inspection test vector 2026-02-24 IIT Chicago!!!!!!!!"
@@ -32,7 +32,7 @@
  *   ./benchmarks/bin/key_inspection
  */
 
-#include "bench_common.h"       /* get_time, get_timestamp — must be first */
+#include "bench_common.h"       /* get_time, get_timestamp -- must be first */
 
 #include <oqs/oqs.h>
 #include <oqs/oqsconfig.h>      /* OQS_VERSION_TEXT */
@@ -72,7 +72,7 @@ static void hex_dump(const uint8_t *buf, size_t len, size_t max_show)
 
         printf("    [%04zx]", i);
 
-        /* Hex bytes — gap after byte 8 */
+        /* Hex bytes -- gap after byte 8 */
         for (size_t j = i; j < i + 16; j++) {
             if (j == i + 8) printf(" ");
             if (j < row_end) printf(" %02x", buf[j]);
@@ -98,9 +98,9 @@ static void section_header(int idx, const char *name, int nist_level,
     printf("\n");
     printf("────────────────────────────────────────────────────────────────\n");
     if (nist_level > 0)
-        printf("  [%d/7] %s  (NIST Level %d — %s)\n", idx, name, nist_level, type);
+        printf("  [%d/7] %s  (NIST Level %d -- %s)\n", idx, name, nist_level, type);
     else
-        printf("  [%d/7] %s  (Classical — %s)\n", idx, name, type);
+        printf("  [%d/7] %s  (Classical -- %s)\n", idx, name, type);
     printf("────────────────────────────────────────────────────────────────\n");
 }
 
@@ -131,7 +131,7 @@ static int inspect_oqs(int idx, const char *alg_id, const char *name,
     /* ── Key sizes ────────────────────────────────────────────────────── */
     printf("\n  Key Sizes:\n");
     printf("    Public key:  %zu bytes\n", sig->length_public_key);
-    printf("    Secret key:  %zu bytes  [NOT DISPLAYED — secret material]\n",
+    printf("    Secret key:  %zu bytes  [NOT DISPLAYED -- secret material]\n",
            sig->length_secret_key);
     printf("    Sig buffer:  %zu bytes  (maximum allocation)\n",
            sig->length_signature);
@@ -298,7 +298,7 @@ static int inspect_openssl(int idx, int pkey_type, int curve_nid,
     printf("\n  Key Sizes:\n");
     printf("    Public key:  %zu bytes%s\n", pk_len,
            (pkey_type != EVP_PKEY_ED25519) ? "  (DER SubjectPublicKeyInfo)" : "  (raw)");
-    printf("    Secret key:  %d bytes  [NOT DISPLAYED — secret material]\n", sk_size);
+    printf("    Secret key:  %d bytes  [NOT DISPLAYED -- secret material]\n", sk_size);
     printf("    Keygen time: %.1f µs\n", keygen_us);
 
     /* ── Public key hex dump ──────────────────────────────────────────── */
@@ -378,22 +378,22 @@ int main(void)
     int results[7];
 
     results[0] = inspect_oqs(1, OQS_SIG_alg_falcon_512,  "Falcon-512",  1,
-                              "NTRU Lattice — variable-length sig");
+                              "NTRU Lattice -- variable-length sig");
     results[1] = inspect_oqs(2, OQS_SIG_alg_falcon_1024, "Falcon-1024", 5,
-                              "NTRU Lattice — variable-length sig");
+                              "NTRU Lattice -- variable-length sig");
     results[2] = inspect_oqs(3, OQS_SIG_alg_ml_dsa_44,   "ML-DSA-44",   2,
                               "Module Lattice (Dilithium)");
     results[3] = inspect_oqs(4, OQS_SIG_alg_ml_dsa_65,   "ML-DSA-65",   3,
                               "Module Lattice (Dilithium)");
     results[4] = inspect_oqs(5, OQS_SIG_alg_slh_dsa_pure_sha2_128f,
                               "SLH-DSA-SHA2-128f", 1,
-                              "Hash-based (SPHINCS+) — fast variant");
+                              "Hash-based (SPHINCS+) -- fast variant");
     results[5] = inspect_openssl(6, EVP_PKEY_EC, NID_secp256k1, EVP_sha256(),
                                   "ECDSA secp256k1",
-                                  "Elliptic Curve — DER-encoded sig");
+                                  "Elliptic Curve -- DER-encoded sig");
     results[6] = inspect_openssl(7, EVP_PKEY_ED25519, 0, NULL,
                                   "Ed25519",
-                                  "Edwards Curve — fixed 64-byte sig");
+                                  "Edwards Curve -- fixed 64-byte sig");
 
     OQS_destroy();
 
@@ -413,14 +413,14 @@ int main(void)
     printf("  Algorithm           NIST  Inspected\n");
     printf("  ------------------  ----  ---------\n");
     for (int i = 0; i < 7; i++) {
-        const char *level = (nist[i] == 0) ? "   —"
+        const char *level = (nist[i] == 0) ? "   --"
                           : (nist[i] == 1) ? " L1 "
                           : (nist[i] == 2) ? " L2 "
                           : (nist[i] == 3) ? " L3 "
                                            : " L5 ";
         printf("  %-18s  %s  %s\n",
                names[i], level,
-               results[i] == 0 ? "PASS — all correctness checks OK" : "FAILED");
+               results[i] == 0 ? "PASS -- all correctness checks OK" : "FAILED");
     }
 
     printf("\n  Test vector: \"%.*s\"\n", TEST_MSG_LEN, (const char *)TEST_MSG);

@@ -1,12 +1,12 @@
 # Falcon-512 Verification Benchmark Results
 
-**qMEMO Project — Illinois Institute of Technology, Chicago**
+**qMEMO Project -- Illinois Institute of Technology, Chicago**
 
 ---
 
 ## Executive Summary
 
-**Can Falcon-512 meet MEMO's requirements?** Yes. A single CPU core achieves **44,131 verifications per second** (median over 1,000 trials, CV = 3.43%). MEMO's conservative scenario (10,000 TPS across 4 shards) requires 2,500 verif/sec per shard, yielding **17.7× headroom**; the target scenario (50,700 TPS across 256 shards) requires 198 verif/sec per shard, yielding **223× headroom**. Our cycle count (79,210 @ 3.5 GHz) is within 3.8% of the published Falcon reference (82,339 cycles on Intel i5-8259U). Falcon-512 verification is not a performance bottleneck for MEMO at any tested configuration.
+**Can Falcon-512 meet MEMO's requirements?** Yes. A single CPU core achieves **44,131 verifications per second** (median over 1,000 trials, CV = 3.43%). MEMO's conservative scenario (10,000 TPS across 4 shards) requires 2,500 verif/sec per shard, yielding **17.7x headroom**; the target scenario (50,700 TPS across 256 shards) requires 198 verif/sec per shard, yielding **223x headroom**. Our cycle count (79,210 @ 3.5 GHz) is within 3.8% of the published Falcon reference (82,339 cycles on Intel i5-8259U). Falcon-512 verification is not a performance bottleneck for MEMO at any tested configuration.
 
 ---
 
@@ -27,13 +27,13 @@
 - **Compiler:** clang 17.0.0 (Apple)
 - **Compiler flags:** `-O3 -mcpu=native -ffast-math`
 - **CPU extensions:** NEON, AES, SHA2, SHA3
-- **Build type:** Release (OQS_DIST_BUILD — portable)
+- **Build type:** Release (OQS_DIST_BUILD -- portable)
 - **Test date:** 2026-02-18
 
 ### Methodology
 
 - **Timing:** `clock_gettime(CLOCK_MONOTONIC)`
-- **Warm-up:** 100–200 iterations (cache priming)
+- **Warm-up:** 100-200 iterations (cache priming)
 - **Message size:** 256 bytes (blockchain transaction size)
 - **Fixed payload:** Deterministic 0x42 fill
 - **Zero overhead:** No I/O or allocations during timing
@@ -49,7 +49,7 @@
 | Throughput | 44,187 ops/sec |
 | Latency (mean) | 22.63 µs |
 | CPU cycles | 79,210 @ 3.5 GHz |
-| Signature size | 654–658 bytes |
+| Signature size | 654-658 bytes |
 | Public key size | 897 bytes |
 | Secret key size | 1,281 bytes |
 
@@ -76,7 +76,7 @@ Each trial: 100 verification operations.
 
 - **Skewness:** -1.76 (left-skewed)
 - **Kurtosis:** 29.04 (heavy tails)
-- **Normality test:** FAIL (Jarque–Bera >> 5.991)
+- **Normality test:** FAIL (Jarque-Bera >> 5.991)
 - **Interpretation:** Non-Gaussian distribution typical for CPU benchmarks due to OS scheduling, thermal effects, and background processes. We report **median and IQR** as the primary central tendency; the low CV (3.43%) indicates high measurement consistency.
 
 ---
@@ -90,7 +90,7 @@ Each trial: 100 verification operations.
 - **Variance:** -3.8% (we're faster)
 - **Expected ops/sec @ 2.3 GHz:** 27,939
 - **Our ops/sec @ 3.5 GHz:** 44,131
-- **Frequency scaling:** 1.52× expected vs 1.58× measured (reasonable)
+- **Frequency scaling:** 1.52x expected vs 1.58x measured (reasonable)
 
 ### Why We're 3.8% Faster
 
@@ -101,7 +101,7 @@ Each trial: 100 verification operations.
 
 ### Note on Optimization Level
 
-Our build uses OQS_DIST_BUILD (portable/reference implementation). Fully optimized NEON implementations could achieve 60–70K ops/sec based on published research (2.3–2.4× speedup). We intentionally use reference implementation as it represents realistic deployment scenario.
+Our build uses OQS_DIST_BUILD (portable/reference implementation). Fully optimized NEON implementations could achieve 60-70K ops/sec based on published research (2.3-2.4x speedup). We intentionally use reference implementation as it represents realistic deployment scenario.
 
 ---
 
@@ -113,8 +113,8 @@ Our build uses OQS_DIST_BUILD (portable/reference implementation). Fully optimiz
 - **Shards:** 4
 - **Per-shard requirement:** 2,500 verif/sec
 - **Our performance (median):** 44,131 verif/sec
-- **Headroom: 17.7×**
-- **Worst-case (P5):** 42,444 verif/sec = 17.0× headroom
+- **Headroom: 17.7x**
+- **Worst-case (P5):** 42,444 verif/sec = 17.0x headroom
 
 ### Target Scenario
 
@@ -122,20 +122,20 @@ Our build uses OQS_DIST_BUILD (portable/reference implementation). Fully optimiz
 - **Shards:** 256
 - **Per-shard requirement:** 198 verif/sec
 - **Our performance (median):** 44,131 verif/sec
-- **Headroom: 223×**
+- **Headroom: 223x**
 
 ### With Cross-Shard Overhead
 
 Assuming 20% cross-shard transactions requiring dual verification:
 
-- **Effective multiplier:** 1.2×
+- **Effective multiplier:** 1.2x
 - **Adjusted requirement (4 shards):** 3,000 verif/sec
-- **Adjusted headroom:** 14.7× (still ample)
+- **Adjusted headroom:** 14.7x (still ample)
 
 ---
 
 ## Conclusion
 
-Falcon-512 signature verification is **NOT** a performance bottleneck for MEMO blockchain at any tested configuration. Even using reference implementation on single CPU core, throughput exceeds requirements by **17×** (conservative) to **223×** (target scenario).
+Falcon-512 signature verification is **NOT** a performance bottleneck for MEMO blockchain at any tested configuration. Even using reference implementation on single CPU core, throughput exceeds requirements by **17x** (conservative) to **223x** (target scenario).
 
-Optimized implementations or hardware acceleration could provide additional 1.5–2× improvement if needed, but current headroom makes this unnecessary for MEMO's throughput targets.
+Optimized implementations or hardware acceleration could provide additional 1.5-2x improvement if needed, but current headroom makes this unnecessary for MEMO's throughput targets.

@@ -1,5 +1,5 @@
 /*
- * verify_benchmark.c — Falcon-512 Signature Verification Benchmark
+ * verify_benchmark.c -- Falcon-512 Signature Verification Benchmark
  *
  * Part of the qMEMO project: benchmarking post-quantum digital signatures
  * for blockchain transaction verification.
@@ -30,13 +30,13 @@
  *
  * Run:
  *   ../bin/verify_benchmark
- *   (rpath is embedded at build time — no LD_LIBRARY_PATH needed)
+ *   (rpath is embedded at build time -- no LD_LIBRARY_PATH needed)
  *
  * For true cycle counts, use `perf stat` (Linux) or Instruments (macOS)
  * rather than the wall-clock estimate below.
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp -- must be first */
 
 #include <oqs/oqs.h>
 #include <stdio.h>
@@ -53,7 +53,7 @@
 /*
  * Approximate clock frequency for cycle-cost estimation.
  * Apple M2 Pro performance cores boost to ~3.49 GHz.  This is NOT a
- * substitute for hardware cycle counters — it's a convenience for
+ * substitute for hardware cycle counters -- it's a convenience for
  * quick back-of-envelope comparisons.  Publication-quality cycle counts
  * should come from perf or PMU reads.
  */
@@ -139,7 +139,7 @@ int main(void)
      * We generate exactly one keypair.  Key generation cost is irrelevant
      * to this benchmark; validators verify with long-lived public keys.
      */
-    printf("[1/6] Generating Falcon-512 keypair …\n");
+    printf("[1/6] Generating Falcon-512 keypair ...\n");
     rc = OQS_SIG_keypair(sig, public_key, secret_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: Key generation failed (OQS_STATUS = %d).\n", rc);
@@ -155,7 +155,7 @@ int main(void)
      */
     size_t sig_len = 0;
 
-    printf("[2/6] Signing test message …\n");
+    printf("[2/6] Signing test message ...\n");
     rc = OQS_SIG_sign(sig, signature, &sig_len, message, MSG_LEN, secret_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: Signing failed (OQS_STATUS = %d).\n", rc);
@@ -169,7 +169,7 @@ int main(void)
      * If this single verification fails, there's no point running 10,000
      * of them.  Catches build misconfigurations or memory corruption early.
      */
-    printf("[3/6] Sanity check — verifying signature …\n");
+    printf("[3/6] Sanity check -- verifying signature ...\n");
     rc = OQS_SIG_verify(sig, message, MSG_LEN, signature, sig_len, public_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: Sanity-check verification FAILED (OQS_STATUS = %d).\n", rc);
@@ -190,7 +190,7 @@ int main(void)
      * Without warm-up, the first few hundred iterations would show 2-5x
      * higher latency from cold caches, polluting the mean.
      */
-    printf("[4/6] Warm-up: %d verifications …\n", WARMUP_ITERATIONS);
+    printf("[4/6] Warm-up: %d verifications ...\n", WARMUP_ITERATIONS);
 
     /*
      * `volatile` prevents the compiler from optimising away the verify
@@ -208,14 +208,14 @@ int main(void)
     /* ── Timed benchmark ──────────────────────────────────────────────────
      *
      * The critical section.  NOTHING except OQS_SIG_verify executes
-     * between the two clock reads — no printf, no branches, no counters
+     * between the two clock reads -- no printf, no branches, no counters
      * beyond the loop index.
      *
      * The loop variable `i` and `bench_rc` are the only writes.  Both
      * live in registers on any modern ABI, so there is zero store traffic
      * beyond what the verify function itself generates.
      */
-    printf("[5/6] Benchmarking: %d verifications …\n", BENCH_ITERATIONS);
+    printf("[5/6] Benchmarking: %d verifications ...\n", BENCH_ITERATIONS);
 
     volatile OQS_STATUS bench_rc;
     double t_start = get_time();
@@ -278,7 +278,7 @@ int main(void)
 
     /* ── Cleanup ──────────────────────────────────────────────────────────
      *
-     * OQS_MEM_secure_free overwrites the buffer before freeing — critical
+     * OQS_MEM_secure_free overwrites the buffer before freeing -- critical
      * for the secret key to avoid leaving key material in freed pages.
      * Public data uses OQS_MEM_insecure_free (plain free + NULL).
      */

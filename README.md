@@ -1,6 +1,6 @@
 # Post-Quantum Cryptographic Signature Benchmarking Suite
 
-**Graduate Research Project — Illinois Institute of Technology, Chicago**
+**Graduate Research Project -- Illinois Institute of Technology, Chicago**
 
 ---
 
@@ -8,7 +8,7 @@
 
 **How do post-quantum signature schemes (Falcon, ML-DSA, SLH-DSA) compare to classical
 baselines (ECDSA, Ed25519) in signing throughput, verification throughput, and on-chain
-overhead — and do they scale adequately for high-TPS blockchain workloads?**
+overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 ---
 
@@ -17,10 +17,10 @@ overhead — and do they scale adequately for high-TPS blockchain workloads?**
 | Metric | Value |
 |--------|-------|
 | **Falcon-512 verify (single core)** | ~44,000 ops/sec (median, 1,000 trials) |
-| **vs ECDSA secp256k1 verify** | Falcon is **~3.7× faster** |
-| **vs Ed25519 verify** | Falcon within **~1.5×** |
-| **Falcon-512 signature size** | Max 666 bytes vs ML-DSA-44's 2,420 bytes (3.6× smaller) |
-| **SLH-DSA-SHA2-128f sign rate** | ~50 ops/sec — unsuitable for high-TPS |
+| **vs ECDSA secp256k1 verify** | Falcon is **~3.7x faster** |
+| **vs Ed25519 verify** | Falcon within **~1.5x** |
+| **Falcon-512 signature size** | Max 666 bytes vs ML-DSA-44's 2,420 bytes (3.6x smaller) |
+| **SLH-DSA-SHA2-128f sign rate** | ~50 ops/sec -- unsuitable for high-TPS |
 | **10-core Falcon-512 signing** | Scales near-linearly; aggregate >30K signs/sec |
 | **NIST security headroom (blockchain)** | All 5 PQC schemes exceed NIST Level 1 requirements |
 
@@ -31,7 +31,7 @@ overhead — and do they scale adequately for high-TPS blockchain workloads?**
 | Binary | Source | What it measures |
 |--------|--------|-----------------|
 | `verify_benchmark` | `verify_benchmark.c` | Single-pass Falcon-512 verify throughput, 10K iterations |
-| `statistical_benchmark` | `statistical_benchmark.c` | 1,000 trials × 100 ops; median, IQR, CV, Jarque–Bera |
+| `statistical_benchmark` | `statistical_benchmark.c` | 1,000 trials x 100 ops; median, IQR, CV, Jarque-Bera |
 | `comparison_benchmark` | `comparison_benchmark.c` | Falcon-512 vs ML-DSA-44 side-by-side |
 | `multicore_benchmark` | `multicore_benchmark.c` | Falcon-512 verify throughput: 1/2/4/6/8/10 cores |
 | `concurrent_benchmark` | `concurrent_benchmark.c` | Thread-pool concurrent verification |
@@ -114,14 +114,14 @@ python3 scripts/generate_report.py
 
 - **Implementation:** C benchmarks using **liboqs 0.15.0** (Falcon-512, Falcon-1024,
   ML-DSA-44/65, SLH-DSA-SHA2-128f) and **OpenSSL 3.6.1** (ECDSA secp256k1, Ed25519).
-- **Timing:** `clock_gettime(CLOCK_MONOTONIC)` — nanosecond-precision, monotonic.
+- **Timing:** `clock_gettime(CLOCK_MONOTONIC)` -- nanosecond-precision, monotonic.
   Warm-up phases precede every timed loop; no I/O or logging inside timed sections.
 - **Statistics:** 1,000 independent trials for stability; median and IQR reported when
-  distribution is non-Gaussian (Jarque–Bera test).
+  distribution is non-Gaussian (Jarque-Bera test).
 - **Multicore:** pthread barrier synchronisation ensures all threads enter the timed
   section simultaneously; `t_start` is recorded after the barrier releases.
 - **Thread safety:** Signing benchmarks give each thread its own `OQS_SIG` context
-  (required — Falcon signing is stateful) and call `OQS_thread_stop()` on exit.
+  (required -- Falcon signing is stateful) and call `OQS_thread_stop()` on exit.
 
 ---
 
@@ -160,11 +160,11 @@ See **[docs/SYSTEM_SPECS.md](docs/SYSTEM_SPECS.md)** for full hardware profile.
 
 ## References
 
-- [Falcon — Fast-Fourier Lattice-based Compact Signatures over NTRU](https://falcon-sign.info/)
-- [FIPS 204 — ML-DSA (Dilithium)](https://csrc.nist.gov/pubs/fips/204/final)
-- [FIPS 205 — SLH-DSA (SPHINCS+)](https://csrc.nist.gov/pubs/fips/205/final)
+- [Falcon -- Fast-Fourier Lattice-based Compact Signatures over NTRU](https://falcon-sign.info/)
+- [FIPS 204 -- ML-DSA (Dilithium)](https://csrc.nist.gov/pubs/fips/204/final)
+- [FIPS 205 -- SLH-DSA (SPHINCS+)](https://csrc.nist.gov/pubs/fips/205/final)
 - [NIST Post-Quantum Cryptography Standardization](https://csrc.nist.gov/projects/post-quantum-cryptography)
-- [Open Quantum Safe (OQS) — liboqs](https://openquantumsafe.org/liboqs/)
+- [Open Quantum Safe (OQS) -- liboqs](https://openquantumsafe.org/liboqs/)
 - [OpenSSL 3.x](https://openssl.org/)
 
 ---

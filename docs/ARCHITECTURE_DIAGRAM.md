@@ -1,6 +1,6 @@
 # qMEMO Architecture Diagram
 
-**qMEMO Project — Illinois Institute of Technology, Chicago**
+**qMEMO Project -- Illinois Institute of Technology, Chicago**
 
 This document provides ASCII architecture diagrams covering:
 1. [Current benchmark pipeline](#1-benchmark-pipeline-current)
@@ -15,7 +15,7 @@ This document provides ASCII architecture diagrams covering:
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │                        qMEMO BENCHMARK PIPELINE                              │
-│                  Falcon-512 for MEMO Blockchain — IIT Chicago                │
+│                  Falcon-512 for MEMO Blockchain -- IIT Chicago                │
 └──────────────────────────────────────────────────────────────────────────────┘
 
  SETUP (one-time)
@@ -54,7 +54,7 @@ This document provides ASCII architecture diagrams covering:
   │  ┌──────────────────┐   ┌─────────────────────────────┐    │
   │  │ verify_benchmark │   │    statistical_benchmark     │    │
   │  │ ─────────────── │   │ ─────────────────────────── │    │
-  │  │ 1 run            │   │ 1,000 trials × 100 ops       │    │
+  │  │ 1 run            │   │ 1,000 trials x 100 ops       │    │
   │  │ 10,000 verif.    │   │ Stats: mean, median, SD, CV  │    │
   │  │ wall-clock timer │   │ JB normality, skew, kurtosis │    │
   │  │ → 42,853 ops/s   │   │ → median 44,228 ops/s        │    │
@@ -65,7 +65,7 @@ This document provides ASCII architecture diagrams covering:
   │  │ ─────────────────────────────────────────────────── │   │
   │  │ Falcon-512 vs ML-DSA-44 (Dilithium)                   │   │
   │  │ keygen: 100 trials / sign: 1K trials / verify: 10K   │   │
-  │  │ → Falcon 1.16× faster verify, 3.7× smaller signature │   │
+  │  │ → Falcon 1.16x faster verify, 3.7x smaller signature │   │
   │  └──────────────────────────────────────────────────────┘   │
   │                                                             │
   │  ┌──────────────────┐   ┌─────────────────────────────┐    │
@@ -96,7 +96,7 @@ This document provides ASCII architecture diagrams covering:
   ├── system_specs.json
   ├── verify_results.json       (42,853 ops/s)
   ├── statistical_results.json  (median 44,228 ops/s, CV 3.59%)
-  ├── comparison_results.json   (Falcon 1.16× faster, 3.7× smaller)
+  ├── comparison_results.json   (Falcon 1.16x faster, 3.7x smaller)
   ├── summary.json              (aggregated key metrics)
   ├── REPORT.md
   └── ANALYSIS.md
@@ -108,13 +108,13 @@ This document provides ASCII architecture diagrams covering:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                     MEMO BLOCKCHAIN — HIGH-LEVEL ARCHITECTURE                │
+│                     MEMO BLOCKCHAIN -- HIGH-LEVEL ARCHITECTURE                │
 └──────────────────────────────────────────────────────────────────────────────┘
 
   CONSENSUS LAYER: Proof-of-Space
   ─────────────────────────────────
   Validators prove allocated disk space ("plots").
-  Block producer is chosen by the PoSpace protocol — no energy-heavy mining.
+  Block producer is chosen by the PoSpace protocol -- no energy-heavy mining.
   PoSpace is hash-based → inherently quantum-safe (no discrete log).
 
   SHARDING LAYER
@@ -158,7 +158,7 @@ This document provides ASCII architecture diagrams covering:
   │  Cross-shard receipts    │ ECDSA                │ Falcon-512 ✅         │
   │  Merkle tree             │ SHA-256 (128-bit PQ) │ BLAKE3-512 ✅         │
   │  Block hash chaining     │ SHA-256              │ BLAKE3-512 ✅         │
-  │  Consensus (PoSpace)     │ —                    │ Hash-based ✅         │
+  │  Consensus (PoSpace)     │ --                    │ Hash-based ✅         │
   └────────────────────────────────────────────────────────────────────────┘
 
   TRANSACTION LIFECYCLE
@@ -193,7 +193,7 @@ This document provides ASCII architecture diagrams covering:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│           FALCON-512 IN MEMO — WHERE THE BENCHMARKS APPLY                    │
+│           FALCON-512 IN MEMO -- WHERE THE BENCHMARKS APPLY                    │
 └──────────────────────────────────────────────────────────────────────────────┘
 
   HOT PATH (every TX, every block, every full node)
@@ -203,8 +203,8 @@ This document provides ASCII architecture diagrams covering:
                         ~22.7 µs / call
                         44,228 ops/s (median, M2 Pro)
                               │
-                        Headroom at 2,500 TPS/shard:  17.7×  ← safe
-                        Headroom at   198 TPS/shard: 223×   ← very safe
+                        Headroom at 2,500 TPS/shard:  17.7x  ← safe
+                        Headroom at   198 TPS/shard: 223x   ← very safe
 
   COLD PATH (once per wallet address creation)
   ─────────────────────────────────────────────
@@ -212,7 +212,7 @@ This document provides ASCII architecture diagrams covering:
        │
   ~4,724 µs / call (211 keygen/s)
   Slow because: NTRU lattice basis sampling + Gram-Schmidt decomposition
-  Irrelevant for validators — happens once, keys are long-lived.
+  Irrelevant for validators -- happens once, keys are long-lived.
 
   WARM PATH (once per TX, at the sender's wallet)
   ─────────────────────────────────────────────────
@@ -220,7 +220,7 @@ This document provides ASCII architecture diagrams covering:
        │
   ~146 µs / call (6,872 sign/s)
   Uses discrete Gaussian sampling over NTRU lattice (rejection sampling).
-  Signature size varies per call (654–658 B), compressed to 655 B typical.
+  Signature size varies per call (654-658 B), compressed to 655 B typical.
 
   KEY SIZES (on-chain overhead per transaction)
   ──────────────────────────────────────────────
@@ -228,7 +228,7 @@ This document provides ASCII architecture diagrams covering:
   │              │ Falcon-512 │ ML-DSA-44  │  ECDSA (ref)    │
   ├──────────────┼────────────┼────────────┼─────────────────┤
   │ Public key   │   897 B    │  1,312 B   │    33 B         │
-  │ Signature    │   652 B    │  2,420 B   │  64–72 B        │
+  │ Signature    │   652 B    │  2,420 B   │  64-72 B        │
   │ TX overhead  │ 1,549 B    │  3,732 B   │  ~105 B         │
   ├──────────────┼────────────┼────────────┼─────────────────┤
   │ 4K-TX block  │   6.1 MB   │   14.6 MB  │   0.4 MB        │
@@ -263,7 +263,7 @@ This document provides ASCII architecture diagrams covering:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│              TEST MEMO BLOCKCHAIN — PLANNED ARCHITECTURE                      │
+│              TEST MEMO BLOCKCHAIN -- PLANNED ARCHITECTURE                      │
 │              (Future work: end-to-end validation of qMEMO findings)           │
 └──────────────────────────────────────────────────────────────────────────────┘
 
@@ -355,7 +355,7 @@ This document provides ASCII architecture diagrams covering:
   □ Does real-world Falcon-512 verify throughput match qMEMO predictions?
   □ What fraction of CPU is consumed by sig verify vs consensus vs networking?
   □ At what TPS does the node become CPU-bound on signature verification?
-  □ Does the 17× headroom (conservative scenario) hold under real load?
+  □ Does the 17x headroom (conservative scenario) hold under real load?
   □ What is the block propagation penalty of Falcon-512's larger TX size?
   □ How does cross-shard receipt signing interact with validator throughput?
 ```
@@ -369,7 +369,7 @@ This document provides ASCII architecture diagrams covering:
   ─────────────────────────             ──────────────────────────────
   Proven: Falcon-512 verify             Validate: end-to-end TPS under
   achieves 44,228 ops/s on             consensus + network + multi-shard
-  Apple M2 Pro (17× headroom)          conditions with real MEMO nodes
+  Apple M2 Pro (17x headroom)          conditions with real MEMO nodes
         │                                          │
         └──────────────────────────────────────────┘
          Same Falcon-512, same liboqs, same IIT research group

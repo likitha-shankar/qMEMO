@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-generate_report.py — Generate publication-ready benchmark documentation.
+generate_report.py -- Generate publication-ready benchmark documentation.
 
 Reads benchmark results from the most recent (or specified) run directory
-and produces docs/BENCHMARK_REPORT.md — a comprehensive research document
+and produces docs/BENCHMARK_REPORT.md -- a comprehensive research document
 suitable for inclusion in or alongside an academic paper.
 
 Usage:
@@ -152,7 +152,7 @@ def generate(run_dir: Path) -> str:
 
     r.w("# Falcon-512 Post-Quantum Signature Benchmark Report")
     r.blank()
-    r.w("**qMEMO Project — Illinois Institute of Technology, Chicago**")
+    r.w("**qMEMO Project -- Illinois Institute of Technology, Chicago**")
     r.blank()
     r.w(f"> Generated: {ts}")
     r.w(f"> Run tag: `{summary['run_tag']}`")
@@ -180,7 +180,7 @@ def generate(run_dir: Path) -> str:
     r.w("**YES.** The evidence is unambiguous:")
     r.blank()
 
-    # Central performance claim — use median if non-Gaussian
+    # Central performance claim -- use median if non-Gaussian
     if stat_block["normality_pass"]:
         central = (f"{fmt(stat_block['mean_ops_sec'])} ± "
                    f"{fmt(stat_block['stddev_ops_sec'])} ops/sec "
@@ -249,12 +249,12 @@ def generate(run_dir: Path) -> str:
 
     r.w("### 2.3 Timing & Anti-Optimisation")
     r.blank()
-    r.w("- **Clock:** `clock_gettime(CLOCK_MONOTONIC)` — nanosecond precision, "
+    r.w("- **Clock:** `clock_gettime(CLOCK_MONOTONIC)` -- nanosecond precision, "
         "immune to NTP adjustments. Overhead < 25 ns (negligible vs "
         f"~{measured_us:.0f} µs verify cost).")
     r.w("- **Anti-DCE:** Return values stored to `volatile` variables to prevent "
         "the compiler from eliminating benchmark loops under `-O3`.")
-    r.w("- **Warm-up:** 100–200 untimed verifications before each timed section "
+    r.w("- **Warm-up:** 100-200 untimed verifications before each timed section "
         "to stabilise instruction cache, data cache, and branch predictor.")
     r.w("- **Fixed payload:** 256 bytes (0x42 fill) modelling a blockchain "
         "transaction body. Deterministic input eliminates RNG and "
@@ -267,11 +267,11 @@ def generate(run_dir: Path) -> str:
         "sample times a batch of 100 verifications, producing one ops/sec "
         "measurement. This two-level design:")
     r.blank()
-    r.w("1. **Amortises clock overhead** — 25 ns clock cost vs ~2.3 ms batch "
+    r.w("1. **Amortises clock overhead** -- 25 ns clock cost vs ~2.3 ms batch "
         "duration (< 0.002% noise).")
-    r.w("2. **Invokes the Central Limit Theorem** — batch means trend Gaussian "
+    r.w("2. **Invokes the Central Limit Theorem** -- batch means trend Gaussian "
         "even if individual operation times are skewed.")
-    r.w("3. **Enables distribution analysis** — Jarque–Bera normality test, "
+    r.w("3. **Enables distribution analysis** -- Jarque-Bera normality test, "
         "skewness/kurtosis, coefficient of variation, and outlier detection.")
     r.blank()
     r.w("Statistical reporting follows the test outcome: mean ± SD for "
@@ -369,7 +369,7 @@ def generate(run_dir: Path) -> str:
         "making them a fair comparison pair.")
     r.blank()
 
-    r.w("#### Throughput (ops/sec — higher is better)")
+    r.w("#### Throughput (ops/sec -- higher is better)")
     r.blank()
     r.w("| Operation | Falcon-512 | ML-DSA-44 | Ratio |")
     r.w("|-----------|-----------|-----------|-------|")
@@ -384,7 +384,7 @@ def generate(run_dir: Path) -> str:
         f"**{comp['verify_speedup_falcon']:.2f}x Falcon** |")
     r.blank()
 
-    r.w("#### Latency (µs/op — lower is better)")
+    r.w("#### Latency (µs/op -- lower is better)")
     r.blank()
     r.w("| Operation | Falcon-512 | ML-DSA-44 |")
     r.w("|-----------|-----------|-----------|")
@@ -396,7 +396,7 @@ def generate(run_dir: Path) -> str:
         f"{mldsa['verify_us_op']:.1f} µs |")
     r.blank()
 
-    r.w("#### Sizes (bytes — lower is better)")
+    r.w("#### Sizes (bytes -- lower is better)")
     r.blank()
     r.w("| Component | Falcon-512 | ML-DSA-44 | Ratio |")
     r.w("|-----------|-----------|-----------|-------|")
@@ -420,7 +420,7 @@ def generate(run_dir: Path) -> str:
         try:
             sig_pk = str(int(row["pk"]) + int(row["sig_max"]))
         except (ValueError, TypeError):
-            sig_pk = "—"
+            sig_pk = "--"
         r.w(f"| {row['algo']} | {row['pk']} | {row['sk']} | "
             f"{row['sig_typ']} | {sig_pk} |")
     r.blank()
@@ -497,7 +497,7 @@ def generate(run_dir: Path) -> str:
     r.w(f"At 1 billion transactions per year, choosing Falcon-512 over ML-DSA-44 "
         f"saves approximately "
         f"**{1e9*(mldsa['total_tx_overhead']-falcon['total_tx_overhead'])/(1024**3):,.1f} GB** "
-        f"of chain data — a significant reduction in storage requirements, "
+        f"of chain data -- a significant reduction in storage requirements, "
         f"sync time, and bandwidth for full nodes.")
     r.blank()
 
@@ -558,7 +558,7 @@ def generate(run_dir: Path) -> str:
         r.w(f"| {pb['cpu']} | {pb['ghz']} | {fmt(pb['ops_sec'])} | "
             f"{fmt(pred)} | {error:+.1f}% |")
     r.blank()
-    r.w("The model (ops/sec = GHz × 10⁹ / cycles_per_verify) predicts "
+    r.w("The model (ops/sec = GHz x 10⁹ / cycles_per_verify) predicts "
         "published results within ~10%, confirming Falcon-512 verification "
         "is compute-bound and scales predictably with frequency.")
     r.blank()
@@ -609,7 +609,7 @@ def generate(run_dir: Path) -> str:
         "estimates; full ns-3 simulation is future work |")
     r.w("| Simplified cross-shard model | Assumes independent shard "
         "verification; ignores cross-shard transaction routing | Conservative "
-        "estimate — actual cross-shard overhead is additive, not multiplicative |")
+        "estimate -- actual cross-shard overhead is additive, not multiplicative |")
     r.w("| Fixed message size (256 B) | Real transactions vary in length | "
         "Signature verification cost is dominated by lattice arithmetic, "
         "not message hashing; length impact is negligible |")
@@ -633,7 +633,7 @@ def generate(run_dir: Path) -> str:
     r.blank()
     r.w(f"**Falcon-512 is a viable post-quantum signature scheme for "
         f"MEMO blockchain transaction verification.** A single CPU core "
-        f"achieves {fmt(measured_ops)} verifications per second — "
+        f"achieves {fmt(measured_ops)} verifications per second -- "
         f"{min_headroom:,.0f}x the per-shard requirement under the most "
         f"demanding scenario tested.")
     r.blank()
@@ -643,26 +643,26 @@ def generate(run_dir: Path) -> str:
     r.w("We recommend **Falcon-512** over ML-DSA-44 for MEMO's "
         "post-quantum signature scheme based on three findings:")
     r.blank()
-    r.w(f"1. **Faster verification** — "
+    r.w(f"1. **Faster verification** -- "
         f"{comp['verify_speedup_falcon']:.2f}x higher throughput than "
         f"ML-DSA-44. In a blockchain validator, verification is the "
         f"dominant signature operation (every node verifies every "
         f"transaction in every block).")
     r.blank()
-    r.w(f"2. **Smaller on-chain footprint** — "
+    r.w(f"2. **Smaller on-chain footprint** -- "
         f"{falcon['total_tx_overhead']} B per transaction vs "
         f"{mldsa['total_tx_overhead']} B "
         f"({1/comp['tx_overhead_ratio']:.1f}x reduction). At scale, "
         f"this saves hundreds of gigabytes of chain data annually.")
     r.blank()
-    r.w(f"3. **Adequate headroom** — "
+    r.w(f"3. **Adequate headroom** -- "
         f"Even single-threaded on a consumer laptop, Falcon-512 provides "
         f"{min_headroom:,.0f}x headroom over MEMO's per-shard TPS target. "
         f"Multi-threaded execution on server hardware would increase this "
         f"proportionally.")
     r.blank()
-    r.w("Falcon-512's disadvantages — slower key generation (4.7 ms vs "
-        "29 µs) and slower signing (146 µs vs 68 µs) — are irrelevant "
+    r.w("Falcon-512's disadvantages -- slower key generation (4.7 ms vs "
+        "29 µs) and slower signing (146 µs vs 68 µs) -- are irrelevant "
         "in the blockchain context where keygen is a one-time wallet "
         "operation and signing happens once per transaction at the sender.")
     r.blank()
@@ -695,7 +695,7 @@ def main():
         sys.exit(f"ERROR: Not a directory: {run_dir}")
 
     print(f"Reading results from: {run_dir}")
-    print("Generating report …")
+    print("Generating report ...")
 
     report_text = generate(run_dir)
 

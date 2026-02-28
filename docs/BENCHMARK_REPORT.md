@@ -1,6 +1,6 @@
 # Falcon-512 Post-Quantum Signature Benchmark Report
 
-**qMEMO Project — Illinois Institute of Technology, Chicago**
+**qMEMO Project -- Illinois Institute of Technology, Chicago**
 
 > Generated: 2026-02-19 01:41:53 UTC
 > Run tag: `20260217_211549`
@@ -57,18 +57,18 @@ Three complementary benchmarks measure different aspects of performance:
 
 ### 2.3 Timing & Anti-Optimisation
 
-- **Clock:** `clock_gettime(CLOCK_MONOTONIC)` — nanosecond precision, immune to NTP adjustments. Overhead < 25 ns (negligible vs ~23 µs verify cost).
+- **Clock:** `clock_gettime(CLOCK_MONOTONIC)` -- nanosecond precision, immune to NTP adjustments. Overhead < 25 ns (negligible vs ~23 µs verify cost).
 - **Anti-DCE:** Return values stored to `volatile` variables to prevent the compiler from eliminating benchmark loops under `-O3`.
-- **Warm-up:** 100–200 untimed verifications before each timed section to stabilise instruction cache, data cache, and branch predictor.
+- **Warm-up:** 100-200 untimed verifications before each timed section to stabilise instruction cache, data cache, and branch predictor.
 - **Fixed payload:** 256 bytes (0x42 fill) modelling a blockchain transaction body. Deterministic input eliminates RNG and payload-dependent branching from the timed section.
 
 ### 2.4 Statistical Approach
 
 The statistical benchmark collects 1,000 independent samples. Each sample times a batch of 100 verifications, producing one ops/sec measurement. This two-level design:
 
-1. **Amortises clock overhead** — 25 ns clock cost vs ~2.3 ms batch duration (< 0.002% noise).
-2. **Invokes the Central Limit Theorem** — batch means trend Gaussian even if individual operation times are skewed.
-3. **Enables distribution analysis** — Jarque–Bera normality test, skewness/kurtosis, coefficient of variation, and outlier detection.
+1. **Amortises clock overhead** -- 25 ns clock cost vs ~2.3 ms batch duration (< 0.002% noise).
+2. **Invokes the Central Limit Theorem** -- batch means trend Gaussian even if individual operation times are skewed.
+3. **Enables distribution analysis** -- Jarque-Bera normality test, skewness/kurtosis, coefficient of variation, and outlier detection.
 
 Statistical reporting follows the test outcome: mean ± SD for Gaussian distributions, median and IQR for non-Gaussian.
 
@@ -126,7 +126,7 @@ Our measurement of **42,853 ops/sec** is within **0.4%** of the cycle-count pred
 
 Both algorithms target NIST Security Level 1 (≈ AES-128 equivalent), making them a fair comparison pair.
 
-#### Throughput (ops/sec — higher is better)
+#### Throughput (ops/sec -- higher is better)
 
 | Operation | Falcon-512 | ML-DSA-44 | Ratio |
 |-----------|-----------|-----------|-------|
@@ -134,7 +134,7 @@ Both algorithms target NIST Security Level 1 (≈ AES-128 equivalent), making th
 | Signing | 6,872.3 | 14,785.5 | 2.2x ML-DSA |
 | **Verification** | **42,883.7** | 36,906.4 | **1.16x Falcon** |
 
-#### Latency (µs/op — lower is better)
+#### Latency (µs/op -- lower is better)
 
 | Operation | Falcon-512 | ML-DSA-44 |
 |-----------|-----------|-----------|
@@ -142,7 +142,7 @@ Both algorithms target NIST Security Level 1 (≈ AES-128 equivalent), making th
 | Signing | 145.5 µs | 67.6 µs |
 | **Verification** | **23.3 µs** | 27.1 µs |
 
-#### Sizes (bytes — lower is better)
+#### Sizes (bytes -- lower is better)
 
 | Component | Falcon-512 | ML-DSA-44 | Ratio |
 |-----------|-----------|-----------|-------|
@@ -203,7 +203,7 @@ Post-quantum signatures are significantly larger than classical ones. This secti
 | 100,000,000 tx | 144.26 GB | 347.57 GB | +203.31 GB |
 | 1,000,000,000 tx | 1,442.62 GB | 3,475.70 GB | +2,033.08 GB |
 
-At 1 billion transactions per year, choosing Falcon-512 over ML-DSA-44 saves approximately **2,033.1 GB** of chain data — a significant reduction in storage requirements, sync time, and bandwidth for full nodes.
+At 1 billion transactions per year, choosing Falcon-512 over ML-DSA-44 saves approximately **2,033.1 GB** of chain data -- a significant reduction in storage requirements, sync time, and bandwidth for full nodes.
 
 ### 4.3 Network Bandwidth Implications
 
@@ -243,7 +243,7 @@ If our measurement is valid, performance should scale linearly with clock freque
 | AMD Ryzen 7 3700X | 3.6 | 39,024 | 43,902 | +12.5% |
 | Intel i7-11700K | 3.6 | 41,500 | 43,902 | +5.8% |
 
-The model (ops/sec = GHz × 10⁹ / cycles_per_verify) predicts published results within ~10%, confirming Falcon-512 verification is compute-bound and scales predictably with frequency.
+The model (ops/sec = GHz x 10⁹ / cycles_per_verify) predicts published results within ~10%, confirming Falcon-512 verification is compute-bound and scales predictably with frequency.
 
 ### 5.3 Internal Consistency Checks
 
@@ -265,7 +265,7 @@ The model (ops/sec = GHz × 10⁹ / cycles_per_verify) predicts published result
 |-----------|--------|------------|
 | Single hardware platform (Apple M2 Pro) | Results may not generalise to server-class x86 CPUs | Frequency-scaling analysis (§5.2) shows consistent cycle counts across architectures |
 | No network simulation | Does not capture block propagation delays or P2P overhead | Bandwidth analysis (§4.3) provides estimates; full ns-3 simulation is future work |
-| Simplified cross-shard model | Assumes independent shard verification; ignores cross-shard transaction routing | Conservative estimate — actual cross-shard overhead is additive, not multiplicative |
+| Simplified cross-shard model | Assumes independent shard verification; ignores cross-shard transaction routing | Conservative estimate -- actual cross-shard overhead is additive, not multiplicative |
 | Fixed message size (256 B) | Real transactions vary in length | Signature verification cost is dominated by lattice arithmetic, not message hashing; length impact is negligible |
 | General-purpose OS | Background processes inject latency outliers | Warm-up phase, 1,000 trials, and outlier analysis account for this |
 | liboqs reference implementation | Production libraries may be faster or slower | Comparison against published cycle counts shows our numbers are representative |
@@ -277,19 +277,19 @@ The model (ops/sec = GHz × 10⁹ / cycles_per_verify) predicts published result
 
 ### Direct Answer
 
-**Falcon-512 is a viable post-quantum signature scheme for MEMO blockchain transaction verification.** A single CPU core achieves 42,853 verifications per second — 11x the per-shard requirement under the most demanding scenario tested.
+**Falcon-512 is a viable post-quantum signature scheme for MEMO blockchain transaction verification.** A single CPU core achieves 42,853 verifications per second -- 11x the per-shard requirement under the most demanding scenario tested.
 
 ### Recommendation for MEMO
 
 We recommend **Falcon-512** over ML-DSA-44 for MEMO's post-quantum signature scheme based on three findings:
 
-1. **Faster verification** — 1.16x higher throughput than ML-DSA-44. In a blockchain validator, verification is the dominant signature operation (every node verifies every transaction in every block).
+1. **Faster verification** -- 1.16x higher throughput than ML-DSA-44. In a blockchain validator, verification is the dominant signature operation (every node verifies every transaction in every block).
 
-2. **Smaller on-chain footprint** — 1549 B per transaction vs 3732 B (2.4x reduction). At scale, this saves hundreds of gigabytes of chain data annually.
+2. **Smaller on-chain footprint** -- 1549 B per transaction vs 3732 B (2.4x reduction). At scale, this saves hundreds of gigabytes of chain data annually.
 
-3. **Adequate headroom** — Even single-threaded on a consumer laptop, Falcon-512 provides 11x headroom over MEMO's per-shard TPS target. Multi-threaded execution on server hardware would increase this proportionally.
+3. **Adequate headroom** -- Even single-threaded on a consumer laptop, Falcon-512 provides 11x headroom over MEMO's per-shard TPS target. Multi-threaded execution on server hardware would increase this proportionally.
 
-Falcon-512's disadvantages — slower key generation (4.7 ms vs 29 µs) and slower signing (146 µs vs 68 µs) — are irrelevant in the blockchain context where keygen is a one-time wallet operation and signing happens once per transaction at the sender.
+Falcon-512's disadvantages -- slower key generation (4.7 ms vs 29 µs) and slower signing (146 µs vs 68 µs) -- are irrelevant in the blockchain context where keygen is a one-time wallet operation and signing happens once per transaction at the sender.
 
 
 ---

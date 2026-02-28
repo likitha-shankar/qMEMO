@@ -1,5 +1,5 @@
 /*
- * statistical_benchmark.c — Falcon-512 Verification with Statistical Analysis
+ * statistical_benchmark.c -- Falcon-512 Verification with Statistical Analysis
  *
  * Part of the qMEMO project: benchmarking post-quantum digital signatures
  * for blockchain transaction verification (IIT Chicago).
@@ -16,15 +16,15 @@
  *   ├────────────────────────────────────────────────────────┤
  *   │  Trial 0:   clock → 100 verifications → clock → Δt₀   │
  *   │  Trial 1:   clock → 100 verifications → clock → Δt₁   │
- *   │  …                                                     │
+ *   │  ...                                                     │
  *   │  Trial 999: clock → 100 verifications → clock → Δt₉₉₉ │
  *   └────────────────────────────────────────────────────────┘
  *
  * Batching 100 operations per trial amortises the clock_gettime overhead
- * (~25 ns) against the verify cost (~23 µs × 100 ≈ 2.3 ms per trial),
+ * (~25 ns) against the verify cost (~23 µs x 100 ≈ 2.3 ms per trial),
  * keeping timing noise below 0.002%.  By the Central Limit Theorem the
  * per-trial batch mean trends Gaussian even if individual verifications
- * have a skewed distribution — this is what makes parametric analysis
+ * have a skewed distribution -- this is what makes parametric analysis
  * applicable.
  *
  * Statistical outputs
@@ -33,9 +33,9 @@
  * - Coefficient of Variation (CV = σ/μ): < 2% is good, > 5% is noisy
  * - Percentiles via linear interpolation (matches NumPy default)
  * - Skewness & kurtosis (3rd/4th standardised moments)
- * - Jarque–Bera normality test at α = 0.05
+ * - Jarque-Bera normality test at α = 0.05
  *     → If JB passes: report mean ± SD, use t-test / ANOVA
- *     → If JB fails:  report median / IQR, use Mann–Whitney U
+ *     → If JB fails:  report median / IQR, use Mann-Whitney U
  * - Outlier count (> 3σ from mean)
  * - Full raw data array in JSON for offline re-analysis
  *
@@ -46,7 +46,7 @@
  *      -o benchmarks/bin/statistical_benchmark
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp -- must be first */
 
 #include <oqs/oqs.h>
 #include <math.h>
@@ -63,14 +63,14 @@
 #define MSG_FILL_BYTE        0x42
 
 /*
- * Jarque–Bera critical value for α = 0.05 with 2 degrees of freedom.
+ * Jarque-Bera critical value for α = 0.05 with 2 degrees of freedom.
  * JB ~ χ²(2); the 95th percentile of χ²(2) is 5.991.
  * If JB > 5.991 we reject the null hypothesis of normality.
  */
 #define JB_CRITICAL_005  5.991
 
 /* ══════════════════════════════════════════════════════════════════════════
- *  Statistics library — pure functions, no global state
+ *  Statistics library -- pure functions, no global state
  *
  *  Every function takes a (const double *, int) pair and returns a scalar.
  *  The percentile function requires a pre-sorted array.
@@ -106,7 +106,7 @@ static double stat_stddev(const double *data, int n, double mean)
  * Percentile via linear interpolation (method matches NumPy's default).
  *
  * Given a sorted array of n values and a percentile p ∈ [0, 100], compute
- * the linearly interpolated value at rank (p/100) × (n−1).  This is the
+ * the linearly interpolated value at rank (p/100) x (n−1).  This is the
  * same as numpy.percentile(data, p, interpolation='linear').
  *
  * PRECONDITION: `sorted` must be sorted in ascending order.
@@ -122,7 +122,7 @@ static double stat_percentile(const double *sorted, int n, double p)
 }
 
 /*
- * Skewness — the third standardised moment.
+ * Skewness -- the third standardised moment.
  *
  * Measures asymmetry of the distribution:
  *   > 0 → right-skewed (long tail towards high values; typical for
@@ -130,9 +130,9 @@ static double stat_percentile(const double *sorted, int n, double p)
  *   < 0 → left-skewed
  *   ≈ 0 → symmetric (Gaussian-like)
  *
- * This is the "adjusted Fisher–Pearson" formula used by Excel, SAS, and
+ * This is the "adjusted Fisher-Pearson" formula used by Excel, SAS, and
  * scipy.stats.skew with bias=False:
- *   G₁ = [n / ((n−1)(n−2))] × Σ[(xᵢ − x̄)/s]³
+ *   G₁ = [n / ((n−1)(n−2))] x Σ[(xᵢ − x̄)/s]³
  */
 static double stat_skewness(const double *data, int n, double mean, double sd)
 {
@@ -147,14 +147,14 @@ static double stat_skewness(const double *data, int n, double mean, double sd)
 }
 
 /*
- * Excess kurtosis — the fourth standardised moment minus 3.
+ * Excess kurtosis -- the fourth standardised moment minus 3.
  *
  * A Gaussian distribution has excess kurtosis = 0.
  *   > 0 → leptokurtic (heavy tails, more outliers than Gaussian)
  *   < 0 → platykurtic (light tails, fewer outliers than Gaussian)
  *
  * Uses the bias-corrected formula:
- *   G₂ = [(n(n+1)) / ((n−1)(n−2)(n−3))] × Σ[(xᵢ − x̄)/s]⁴
+ *   G₂ = [(n(n+1)) / ((n−1)(n−2)(n−3))] x Σ[(xᵢ − x̄)/s]⁴
  *        − [3(n−1)² / ((n−2)(n−3))]
  */
 static double stat_kurtosis(const double *data, int n, double mean, double sd)
@@ -176,9 +176,9 @@ static double stat_kurtosis(const double *data, int n, double mean, double sd)
 }
 
 /*
- * Jarque–Bera test for normality.
+ * Jarque-Bera test for normality.
  *
- * JB = (n/6) × [ S² + (K²/4) ]
+ * JB = (n/6) x [ S² + (K²/4) ]
  *
  * where S = skewness, K = excess kurtosis (both from the raw-moment
  * formulas, not the bias-corrected ones).  Under H₀ (normality),
@@ -186,7 +186,7 @@ static double stat_kurtosis(const double *data, int n, double mean, double sd)
  *
  * NOTE: we use the *sample* (bias-corrected) skewness and kurtosis as
  * inputs.  For n = 1,000 the difference from the raw-moment versions is
- * negligible — the correction factors are ~ 1.001.  This avoids computing
+ * negligible -- the correction factors are ~ 1.001.  This avoids computing
  * a second set of moments.
  */
 static double stat_jarque_bera(int n, double skew, double kurt)
@@ -198,7 +198,7 @@ static double stat_jarque_bera(int n, double skew, double kurt)
  * Count values more than 3 standard deviations from the mean.
  *
  * For a Gaussian distribution, P(|X − μ| > 3σ) ≈ 0.27%, so we expect
- * about 2–3 outliers in 1,000 trials.  Significantly more suggests
+ * about 2-3 outliers in 1,000 trials.  Significantly more suggests
  * non-Gaussian tails (OS scheduling jitter, thermal throttling, etc.)
  * and should be noted in the paper.
  */
@@ -269,7 +269,7 @@ int main(void)
 
     /*
      * Raw data array: one ops/sec measurement per trial.
-     * Heap-allocated because 1,000 × 8 bytes = 8 KB which is fine,
+     * Heap-allocated because 1,000 x 8 bytes = 8 KB which is fine,
      * but we keep it off the stack to be safe on embedded/CI systems.
      */
     double *ops_data = malloc(NUM_TRIALS * sizeof(double));
@@ -287,7 +287,7 @@ int main(void)
 
     memset(message, MSG_FILL_BYTE, MSG_LEN);
 
-    printf("[1/7] Generating Falcon-512 keypair …\n");
+    printf("[1/7] Generating Falcon-512 keypair ...\n");
     rc = OQS_SIG_keypair(sig, public_key, secret_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: Key generation failed (OQS_STATUS = %d).\n", rc);
@@ -296,7 +296,7 @@ int main(void)
     printf("       Done.\n");
 
     size_t sig_len = 0;
-    printf("[2/7] Signing test message …\n");
+    printf("[2/7] Signing test message ...\n");
     rc = OQS_SIG_sign(sig, signature, &sig_len, message, MSG_LEN, secret_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: Signing failed (OQS_STATUS = %d).\n", rc);
@@ -304,7 +304,7 @@ int main(void)
     }
     printf("       Signature: %zu bytes.\n", sig_len);
 
-    printf("[3/7] Sanity check …\n");
+    printf("[3/7] Sanity check ...\n");
     rc = OQS_SIG_verify(sig, message, MSG_LEN, signature, sig_len, public_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: Verification FAILED (OQS_STATUS = %d).\n", rc);
@@ -314,10 +314,10 @@ int main(void)
 
     /* ── Warm-up ──────────────────────────────────────────────────────────
      *
-     * 200 iterations (2× the per-trial batch) to stabilise caches and
+     * 200 iterations (2x the per-trial batch) to stabilise caches and
      * let the CPU governor ramp to sustained boost frequency.
      */
-    printf("[4/7] Warm-up: %d verifications …\n", WARMUP_ITERATIONS);
+    printf("[4/7] Warm-up: %d verifications ...\n", WARMUP_ITERATIONS);
 
     volatile OQS_STATUS warmup_rc;
     for (int i = 0; i < WARMUP_ITERATIONS; i++) {
@@ -330,13 +330,13 @@ int main(void)
     /* ── Data collection ──────────────────────────────────────────────────
      *
      * Each trial wraps its own clock pair around exactly ITERS_PER_TRIAL
-     * verifications.  Nothing else executes between the clocks — no
+     * verifications.  Nothing else executes between the clocks -- no
      * printf, no array stores beyond the single result write after t_end.
      *
      * `volatile` on bench_rc prevents dead-code elimination of the verify
      * calls under -O3.
      */
-    printf("[5/7] Running %d trials × %d iterations …\n",
+    printf("[5/7] Running %d trials x %d iterations ...\n",
            NUM_TRIALS, ITERS_PER_TRIAL);
 
     volatile OQS_STATUS bench_rc;
@@ -354,7 +354,7 @@ int main(void)
         ops_data[t] = (double)ITERS_PER_TRIAL / (t_end - t_start);
 
         if ((t + 1) % 200 == 0)
-            printf("       … %d / %d trials\n", t + 1, NUM_TRIALS);
+            printf("       ... %d / %d trials\n", t + 1, NUM_TRIALS);
     }
     (void)bench_rc;
     printf("       Data collection complete.\n");
@@ -364,7 +364,7 @@ int main(void)
      * We work on the ops_data array (ops/sec per trial) and also create a
      * sorted copy for percentile calculations.
      */
-    printf("[6/7] Analysing …\n\n");
+    printf("[6/7] Analysing ...\n\n");
 
     sorted = malloc(NUM_TRIALS * sizeof(double));
     if (!sorted) {
@@ -394,7 +394,7 @@ int main(void)
     /* ── Human-readable output ────────────────────────────────────────────── */
 
     printf("  ┌───────────────────────────────────────────────────────────┐\n");
-    printf("  │  Falcon-512 Verification — Statistical Analysis          │\n");
+    printf("  │  Falcon-512 Verification -- Statistical Analysis          │\n");
     printf("  ├───────────────────────────────────────────────────────────┤\n");
     printf("  │  Trials              : %6d                              │\n", NUM_TRIALS);
     printf("  │  Iterations / trial  : %6d                              │\n", ITERS_PER_TRIAL);
@@ -421,7 +421,7 @@ int main(void)
     if (kurt > 0.5)       printf("(heavy tails)       │\n");
     else if (kurt < -0.5) printf("(light tails)       │\n");
     else                  printf("(near-Gaussian)     │\n");
-    printf("  │  Jarque–Bera stat    : %12.4f                      │\n", jb);
+    printf("  │  Jarque-Bera stat    : %12.4f                      │\n", jb);
     printf("  │  Normality (α=0.05)  : %s                      │\n",
            normal ? "PASS (Gaussian) " : "FAIL (non-Gauss.)");
     printf("  │  Outliers (> 3σ)     : %6d / %d                        │\n",
@@ -435,15 +435,15 @@ int main(void)
         printf("\n  → Distribution departs from Gaussian (JB = %.2f > %.3f).\n",
                jb, JB_CRITICAL_005);
         printf("    Report: median and IQR.  Use non-parametric tests ");
-        printf("(Mann–Whitney U).\n");
+        printf("(Mann-Whitney U).\n");
     }
 
     if (cv < 2.0)
-        printf("  → CV = %.2f%% — excellent measurement stability.\n\n", cv);
+        printf("  → CV = %.2f%% -- excellent measurement stability.\n\n", cv);
     else if (cv < 5.0)
-        printf("  → CV = %.2f%% — acceptable; consider closing background apps.\n\n", cv);
+        printf("  → CV = %.2f%% -- acceptable; consider closing background apps.\n\n", cv);
     else
-        printf("  → CV = %.2f%% — noisy; isolate CPUs or use a dedicated bench machine.\n\n", cv);
+        printf("  → CV = %.2f%% -- noisy; isolate CPUs or use a dedicated bench machine.\n\n", cv);
 
     /* ── JSON output ──────────────────────────────────────────────────────
      *

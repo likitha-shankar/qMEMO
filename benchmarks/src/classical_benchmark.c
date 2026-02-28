@@ -1,20 +1,20 @@
 /*
- * classical_benchmark.c — ECDSA secp256k1 and Ed25519 Baseline Benchmarks
+ * classical_benchmark.c -- ECDSA secp256k1 and Ed25519 Baseline Benchmarks
  *
  * Part of the qMEMO project (IIT Chicago): measures classical signature
  * scheme performance for comparison against Falcon-512 and ML-DSA.
  *
  * Uses OpenSSL 3.x at /opt/homebrew/opt/openssl/ via the high-level
- * EVP_PKEY / EVP_PKEY_CTX / EVP_DigestSign API — not the deprecated
+ * EVP_PKEY / EVP_PKEY_CTX / EVP_DigestSign API -- not the deprecated
  * EC_ / ECDSA_ low-level API.
  *
  * Schemes:
- *   ECDSA secp256k1  — the curve used by Bitcoin and Ethereum.
+ *   ECDSA secp256k1  -- the curve used by Bitcoin and Ethereum.
  *                      EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL)
  *                      Signatures are DER-encoded (variable length).
- *   Ed25519          — deterministic EdDSA over Curve25519 (RFC 8032).
+ *   Ed25519          -- deterministic EdDSA over Curve25519 (RFC 8032).
  *                      EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL)
- *                      One-shot sign — no digest initialisation needed.
+ *                      One-shot sign -- no digest initialisation needed.
  *
  * Methodology:
  *   10,000 iterations each of keygen, sign, verify (timed separately).
@@ -31,7 +31,7 @@
  *   ./benchmarks/bin/classical_benchmark
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp -- must be first */
 
 #include <openssl/evp.h>
 #include <openssl/ec.h>
@@ -159,7 +159,7 @@ static EVP_PKEY *ed25519_keygen(void)
 }
 
 /*
- * Ed25519 is one-shot — no digest context needed, no EVP_DigestSignInit
+ * Ed25519 is one-shot -- no digest context needed, no EVP_DigestSignInit
  * with a digest argument (pass NULL).
  */
 static size_t ed25519_sign(EVP_PKEY *pkey,
@@ -314,7 +314,7 @@ int main(void)
     printf("\n");
     printf("================================================================\n");
     printf("  Classical Signature Baselines  (qMEMO / IIT Chicago)\n");
-    printf("  OpenSSL 3.x — EVP_PKEY high-level API\n");
+    printf("  OpenSSL 3.x -- EVP_PKEY high-level API\n");
     printf("================================================================\n");
     printf("  Iterations: %d (+ %d warm-up) per phase\n\n",
            BENCH_ITERS, WARMUP_ITERS);
@@ -323,7 +323,7 @@ int main(void)
     int      ok[NUM_SCHEMES];
 
     for (int i = 0; i < NUM_SCHEMES; i++) {
-        printf("Benchmarking %-16s …", SCHEMES[i].name);
+        printf("Benchmarking %-16s ...", SCHEMES[i].name);
         fflush(stdout);
         ok[i] = run_scheme(&SCHEMES[i], &results[i]);
         if (ok[i] == 0)

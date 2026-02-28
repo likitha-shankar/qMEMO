@@ -1,5 +1,5 @@
 /*
- * multicore_benchmark.c — Falcon-512 Verification Across Multiple Cores
+ * multicore_benchmark.c -- Falcon-512 Verification Across Multiple Cores
  *
  * Part of the qMEMO project (IIT Chicago): benchmarks post-quantum
  * signature verification for MEMO blockchain.
@@ -7,7 +7,7 @@
  * Measures total verification throughput when running N threads in
  * parallel (N = 1, 2, 4, 6, 8, 10). Each thread has its own copy of
  * the public key, message, and signature to avoid cache-line contention.
- * Wall-clock time is used so throughput = (N × verifications_per_thread) / duration.
+ * Wall-clock time is used so throughput = (N x verifications_per_thread) / duration.
  *
  * Methodology (aligned with verify_benchmark.c):
  *   - One keypair and one signature generated in the main thread.
@@ -17,7 +17,7 @@
  *     excludes warm-up time from the measurement and ensures all threads
  *     enter the timed loop simultaneously.
  *   - Each thread performs VERIF_PER_THREAD verifications in the timed section.
- *   - Total throughput = (N × VERIF_PER_THREAD) / (t_end − t_start).
+ *   - Total throughput = (N x VERIF_PER_THREAD) / (t_end − t_start).
  *
  * Compile (from project root, after install_liboqs.sh):
  *   make multicore
@@ -26,7 +26,7 @@
  *   ./benchmarks/bin/multicore_benchmark
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp, barrier_t — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp, barrier_t -- must be first */
 
 #include <oqs/oqs.h>
 #include <pthread.h>
@@ -192,7 +192,7 @@ int main(void)
     OQS_STATUS rc;
     char timestamp[64];
 
-    /* Sized to NUM_CORE_CONFIGS — update the enum above if CORE_COUNTS changes. */
+    /* Sized to NUM_CORE_CONFIGS -- update the enum above if CORE_COUNTS changes. */
     double ops_per_sec[NUM_CORE_CONFIGS];
     double speedup[NUM_CORE_CONFIGS];
     double efficiency[NUM_CORE_CONFIGS];
@@ -228,7 +228,7 @@ int main(void)
 
     memset(message, MSG_FILL_BYTE, MSG_LEN);
 
-    printf("Generating keypair and signing message …\n");
+    printf("Generating keypair and signing message ...\n");
     rc = OQS_SIG_keypair(sig, public_key, secret_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: Key generation failed.\n");
@@ -270,7 +270,7 @@ int main(void)
     /* ── JSON output ──────────────────────────────────────────────────────
      *
      * Arrays are printed via loops so the output adapts automatically
-     * when CORE_COUNTS is extended — no hardcoded index literals.
+     * when CORE_COUNTS is extended -- no hardcoded index literals.
      */
     printf("\n--- JSON ---\n");
     printf("{\n");

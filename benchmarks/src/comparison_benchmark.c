@@ -1,5 +1,5 @@
 /*
- * comparison_benchmark.c — Falcon-512 vs ML-DSA-44 (Dilithium2) Comparison
+ * comparison_benchmark.c -- Falcon-512 vs ML-DSA-44 (Dilithium2) Comparison
  *
  * Part of the qMEMO project (IIT Chicago): benchmarking post-quantum
  * digital signatures for blockchain transaction verification.
@@ -17,7 +17,7 @@
  *
  *   ML-DSA-44   → larger signatures and public keys, but simpler
  *                 implementation with constant-time signing and no
- *                 floating-point dependency (module lattice + Fiat–Shamir).
+ *                 floating-point dependency (module lattice + Fiat-Shamir).
  *
  * For blockchain, *verification* dominates: every full node verifies every
  * transaction in every block.  Signing happens once per transaction at the
@@ -44,7 +44,7 @@
  *      -o benchmarks/bin/comparison_benchmark
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp -- must be first */
 
 #include <oqs/oqs.h>
 #include <stdio.h>
@@ -125,18 +125,18 @@ static int benchmark_algorithm(AlgResult *r)
     /* ── Key generation ───────────────────────────────────────────────────
      *
      * Falcon keygen is noticeably slower than ML-DSA because it must
-     * sample an NTRU lattice basis and compute its Gram–Schmidt
+     * sample an NTRU lattice basis and compute its Gram-Schmidt
      * decomposition (the "tree" used for fast-Fourier signing).
      * ML-DSA keygen is a simple matrix-vector multiply.
      */
-    printf("  [keygen] warm-up …");
+    printf("  [keygen] warm-up ...");
     fflush(stdout);
     int warmup = KEYGEN_TRIALS / WARMUP_FRAC;
     if (warmup < 5) warmup = 5;
     for (int i = 0; i < warmup; i++) {
         vrc = OQS_SIG_keypair(sig, pk, sk);
     }
-    printf(" benchmarking %d trials …", KEYGEN_TRIALS);
+    printf(" benchmarking %d trials ...", KEYGEN_TRIALS);
     fflush(stdout);
 
     t0 = get_time();
@@ -154,15 +154,15 @@ static int benchmark_algorithm(AlgResult *r)
      *
      * Falcon signing uses discrete Gaussian sampling over the NTRU
      * lattice (rejection sampling on a tree), so it has higher variance
-     * than ML-DSA's deterministic Fiat–Shamir-with-Aborts.
+     * than ML-DSA's deterministic Fiat-Shamir-with-Aborts.
      */
-    printf("  [sign]   warm-up …");
+    printf("  [sign]   warm-up ...");
     fflush(stdout);
     warmup = SIGN_TRIALS / WARMUP_FRAC;
     for (int i = 0; i < warmup; i++) {
         vrc = OQS_SIG_sign(sig, s, &sig_len, msg, MSG_LEN, sk);
     }
-    printf(" benchmarking %d trials …", SIGN_TRIALS);
+    printf(" benchmarking %d trials ...", SIGN_TRIALS);
     fflush(stdout);
 
     t0 = get_time();
@@ -199,13 +199,13 @@ static int benchmark_algorithm(AlgResult *r)
      * sustained.  Both algorithms clear this easily, but the margin is
      * what determines block size headroom and hardware cost.
      */
-    printf("  [verify] warm-up …");
+    printf("  [verify] warm-up ...");
     fflush(stdout);
     warmup = VERIFY_TRIALS / WARMUP_FRAC;
     for (int i = 0; i < warmup; i++) {
         vrc = OQS_SIG_verify(sig, msg, MSG_LEN, s, sig_len, pk);
     }
-    printf(" benchmarking %d trials …", VERIFY_TRIALS);
+    printf(" benchmarking %d trials ...", VERIFY_TRIALS);
     fflush(stdout);
 
     t0 = get_time();
@@ -400,7 +400,7 @@ int main(void)
         printf("  ► Recommendation: Falcon-512\n");
         printf("    Faster verification AND smaller on-chain footprint make it\n");
         printf("    the stronger choice for blockchain transaction signing.\n");
-        printf("    The slower keygen is irrelevant — addresses are generated\n");
+        printf("    The slower keygen is irrelevant -- addresses are generated\n");
         printf("    once, while signatures are verified millions of times.\n");
     } else {
         printf("  ► Recommendation: ML-DSA-44\n");

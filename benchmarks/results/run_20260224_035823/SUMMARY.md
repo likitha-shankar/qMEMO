@@ -1,4 +1,4 @@
-# qMEMO Benchmark Run — 20260224_035823
+# qMEMO Benchmark Run -- 20260224_035823
 
 **Platform:** arm64 / Darwin
 **Date:** 2026-02-24T03:59:33Z
@@ -15,11 +15,11 @@
     (b) Verify corrupted sig  / correct msg:  FAIL ✓ (expected)
     (c) Verify correct sig   / corrupted msg: FAIL ✓ (expected)
 ────────────────────────────────────────────────────────────────
-  [7/7] Ed25519  (Classical — Edwards Curve — fixed 64-byte sig)
+  [7/7] Ed25519  (Classical -- Edwards Curve -- fixed 64-byte sig)
 ────────────────────────────────────────────────────────────────
   Key Sizes:
     Public key:  32 bytes  (raw)
-    Secret key:  32 bytes  [NOT DISPLAYED — secret material]
+    Secret key:  32 bytes  [NOT DISPLAYED -- secret material]
     Keygen time: 42.0 µs
   Public Key (32 bytes):
     [0000] 8d d2 e9 66 82 e4 b3 8c  7c 93 06 7d 6f 6d 2c c0  |...f....|..}om,.|
@@ -39,13 +39,13 @@
 ════════════════════════════════════════════════════════════════
   Algorithm           NIST  Inspected
   ------------------  ----  ---------
-  Falcon-512           L1   PASS — all correctness checks OK
-  Falcon-1024          L5   PASS — all correctness checks OK
-  ML-DSA-44            L2   PASS — all correctness checks OK
-  ML-DSA-65            L3   PASS — all correctness checks OK
-  SLH-DSA-SHA2-128f    L1   PASS — all correctness checks OK
-  ECDSA secp256k1        —  PASS — all correctness checks OK
-  Ed25519                —  PASS — all correctness checks OK
+  Falcon-512           L1   PASS -- all correctness checks OK
+  Falcon-1024          L5   PASS -- all correctness checks OK
+  ML-DSA-44            L2   PASS -- all correctness checks OK
+  ML-DSA-65            L3   PASS -- all correctness checks OK
+  SLH-DSA-SHA2-128f    L1   PASS -- all correctness checks OK
+  ECDSA secp256k1        --  PASS -- all correctness checks OK
+  Ed25519                --  PASS -- all correctness checks OK
   Test vector: "qMEMO key inspection test vector 2026-02-24 IIT Chicago!!!!!!!!"
   Timestamp:   2026-02-24T03:58:24Z
   [Elapsed: 259 ms]
@@ -66,15 +66,15 @@ Max signature    : 752 bytes
 Warmup iterations: 100
 Bench iterations : 10000
 Message length   : 256 bytes (0x42 fill)
-[1/6] Generating Falcon-512 keypair …
+[1/6] Generating Falcon-512 keypair ...
        Key pair generated.
-[2/6] Signing test message …
+[2/6] Signing test message ...
        Signature produced: 655 bytes (max 752).
-[3/6] Sanity check — verifying signature …
+[3/6] Sanity check -- verifying signature ...
        Verification passed.
-[4/6] Warm-up: 100 verifications …
+[4/6] Warm-up: 100 verifications ...
        Warm-up complete.
-[5/6] Benchmarking: 10000 verifications …
+[5/6] Benchmarking: 10000 verifications ...
 [6/6] Results:
   ┌─────────────────────────────────────────────┐
   │  Falcon-512 Verification Benchmark Results  │
@@ -123,18 +123,18 @@ Benchmark complete.
 
 ```
        Passed.
-[4/7] Warm-up: 200 verifications …
+[4/7] Warm-up: 200 verifications ...
        Complete.
-[5/7] Running 1000 trials × 100 iterations …
-       … 200 / 1000 trials
-       … 400 / 1000 trials
-       … 600 / 1000 trials
-       … 800 / 1000 trials
-       … 1000 / 1000 trials
+[5/7] Running 1000 trials x 100 iterations ...
+       ... 200 / 1000 trials
+       ... 400 / 1000 trials
+       ... 600 / 1000 trials
+       ... 800 / 1000 trials
+       ... 1000 / 1000 trials
        Data collection complete.
-[6/7] Analysing …
+[6/7] Analysing ...
   ┌───────────────────────────────────────────────────────────┐
-  │  Falcon-512 Verification — Statistical Analysis          │
+  │  Falcon-512 Verification -- Statistical Analysis          │
   ├───────────────────────────────────────────────────────────┤
   │  Trials              :   1000                              │
   │  Iterations / trial  :    100                              │
@@ -154,13 +154,13 @@ Benchmark complete.
   ├───────────────────────────────────────────────────────────┤
   │  Skewness            :      -5.6157  (left-skewed)       │
   │  Excess kurtosis     :      53.0674  (heavy tails)       │
-  │  Jarque–Bera stat    :  122595.5670                      │
+  │  Jarque-Bera stat    :  122595.5670                      │
   │  Normality (α=0.05)  : FAIL (non-Gauss.)                      │
   │  Outliers (> 3σ)     :     14 / 1000                        │
   └───────────────────────────────────────────────────────────┘
   → Distribution departs from Gaussian (JB = 122595.57 > 5.991).
-    Report: median and IQR.  Use non-parametric tests (Mann–Whitney U).
-  → CV = 4.75% — acceptable; consider closing background apps.
+    Report: median and IQR.  Use non-parametric tests (Mann-Whitney U).
+  → CV = 4.75% -- acceptable; consider closing background apps.
 [7/7] JSON output:
 ```
 
@@ -1213,13 +1213,13 @@ Statistical benchmark complete.
   Falcon-512 vs ML-DSA-44 Comparison  (qMEMO / IIT Chicago)
 ================================================================
 ─── Falcon-512 ───
-  [keygen] warm-up … benchmarking 100 trials … 212.5 ops/sec
-  [sign]   warm-up … benchmarking 1000 trials … 7052.7 ops/sec
-  [verify] warm-up … benchmarking 10000 trials … 44321.7 ops/sec
+  [keygen] warm-up ... benchmarking 100 trials ... 212.5 ops/sec
+  [sign]   warm-up ... benchmarking 1000 trials ... 7052.7 ops/sec
+  [verify] warm-up ... benchmarking 10000 trials ... 44321.7 ops/sec
 ─── ML-DSA-44 ───
-  [keygen] warm-up … benchmarking 100 trials … 35906.6 ops/sec
-  [sign]   warm-up … benchmarking 1000 trials … 14936.1 ops/sec
-  [verify] warm-up … benchmarking 10000 trials … 37813.2 ops/sec
+  [keygen] warm-up ... benchmarking 100 trials ... 35906.6 ops/sec
+  [sign]   warm-up ... benchmarking 1000 trials ... 14936.1 ops/sec
+  [verify] warm-up ... benchmarking 10000 trials ... 37813.2 ops/sec
 ================================================================
   HEAD-TO-HEAD COMPARISON
 ================================================================
@@ -1248,7 +1248,7 @@ Statistical benchmark complete.
   ► Recommendation: Falcon-512
     Faster verification AND smaller on-chain footprint make it
     the stronger choice for blockchain transaction signing.
-    The slower keygen is irrelevant — addresses are generated
+    The slower keygen is irrelevant -- addresses are generated
     once, while signatures are verified millions of times.
 ```
 
@@ -1317,7 +1317,7 @@ Comparison benchmark complete.
 ================================================================
   Falcon-512 Multicore Verification Benchmark  (qMEMO / IIT Chicago)
 ================================================================
-Generating keypair and signing message …
+Generating keypair and signing message ...
 OK. Signature length: 657 bytes.
 Cores  |  Throughput (ops/sec)  |  Speedup  |  Efficiency
 -------|------------------------|-----------|------------
@@ -1359,7 +1359,7 @@ Multicore benchmark complete.
 ================================================================
   Falcon-512 Concurrent Verification Benchmark  (qMEMO / IIT Chicago)
 ================================================================
-Generating 100 keypairs and signatures …
+Generating 100 keypairs and signatures ...
 OK.
 Concurrent (4 workers): 0.711 ms total, 0.0071 ms avg, 140647 ops/sec
 Sequential (baseline):   2.528 ms total, 0.0253 ms avg, 39557 ops/sec
@@ -1408,12 +1408,12 @@ Tasks       : 100 signing operations
 Workers     : 4 concurrent threads
 Message len : 256 bytes
 Key sizes   : pk=897 B  sk=1281 B  sig_max=752 B
-Generating keypair … done.
+Generating keypair ... done.
 Task buffers allocated.
-Running concurrent signing (4 workers) …
+Running concurrent signing (4 workers) ...
   Signature sizes (n=100, max-buf=656 B):
     min=650   max=661   avg=655.1  std=2.2 bytes
-Running sequential signing (baseline) …
+Running sequential signing (baseline) ...
   Signature sizes (n=100, max-buf=652 B):
     min=650   max=661   avg=655.5  std=2.2 bytes
 ================================================================
@@ -1480,7 +1480,7 @@ Concurrent signing benchmark complete.
 ================================================================
   Falcon-512 Multicore Signing Benchmark  (qMEMO / IIT Chicago)
 ================================================================
-Generating keypair …
+Generating keypair ...
 OK. Public key: 897 bytes, Secret key: 1281 bytes.
 Config:  50 warm-up signs, 500 timed signs per thread
 Cores  |  Throughput (ops/sec)  |  Per-thread (ops/sec)  |  Speedup  |  Efficiency
@@ -1526,10 +1526,10 @@ Multicore signing benchmark complete.
   Schemes: Falcon-512, Falcon-padded-512,
            Falcon-1024, Falcon-padded-1024
   Signatures per scheme: 10000
-Analysing Falcon-512               … done.
-Analysing Falcon-padded-512        … done.
-Analysing Falcon-1024              … done.
-Analysing Falcon-padded-1024       … done.
+Analysing Falcon-512               ... done.
+Analysing Falcon-padded-512        ... done.
+Analysing Falcon-1024              ... done.
+Analysing Falcon-padded-1024       ... done.
 Scheme                    NIST  SpecMax  Min    Max    Mean   StdDev  p25  p50  p75  p95   p99
 ------------------------  ----  -------  -----  -----  -----  ------  ---  ---  ---  ----  ----
 Falcon-512                L1      666    647    663  655.1     2.2   654  655  657   659   660
@@ -1620,11 +1620,11 @@ Signature size analysis complete.
 ```
 ================================================================
   Classical Signature Baselines  (qMEMO / IIT Chicago)
-  OpenSSL 3.x — EVP_PKEY high-level API
+  OpenSSL 3.x -- EVP_PKEY high-level API
 ================================================================
   Iterations: 10000 (+ 100 warm-up) per phase
-Benchmarking ECDSA secp256k1  … done.
-Benchmarking Ed25519          … done.
+Benchmarking ECDSA secp256k1  ... done.
+Benchmarking Ed25519          ... done.
 Scheme            Keygen (ops/s)   Sign (ops/s)   Verify (ops/s)   Avg Sig (bytes)
 ----------------  --------------   ------------   --------------   ---------------
 ECDSA secp256k1             5105           5146             5503              71.0
@@ -1674,13 +1674,13 @@ Classical baseline benchmark complete.
   7 algorithms: 5 PQC (liboqs) + 2 classical (OpenSSL 3.x)
 ================================================================
   1000 iterations per phase  |  message: 256 bytes 0x42
-  [1/7] Falcon-512 … done.
-  [2/7] Falcon-1024 … done.
-  [3/7] ML-DSA-44 … done.
-  [4/7] ML-DSA-65 … done.
-  [5/7] SLH-DSA-SHA2-128f … done.
-  [6/7] ECDSA secp256k1 … done.
-  [7/7] Ed25519 … done.
+  [1/7] Falcon-512 ... done.
+  [2/7] Falcon-1024 ... done.
+  [3/7] ML-DSA-44 ... done.
+  [4/7] ML-DSA-65 ... done.
+  [5/7] SLH-DSA-SHA2-128f ... done.
+  [6/7] ECDSA secp256k1 ... done.
+  [7/7] Ed25519 ... done.
 Algorithm           NIST  PubKey  SecKey  SigBytes  Keygen/s    Sign/s    Verify/s
 ------------------  ----  ------  ------  --------  --------  --------  --------
 Falcon-512           L1      897    1281       752       212      7014     43787

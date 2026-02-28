@@ -1,5 +1,5 @@
 /*
- * signature_size_analysis.c — Falcon Signature Size Distribution
+ * signature_size_analysis.c -- Falcon Signature Size Distribution
  *
  * Part of the qMEMO project (IIT Chicago): analyses the variable-length
  * signature output of all four Falcon variants.
@@ -30,7 +30,7 @@
  *   ./benchmarks/bin/signature_size_analysis
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp -- must be first */
 
 #include <oqs/oqs.h>
 #include <math.h>
@@ -201,7 +201,7 @@ int main(void)
     int     ok[NUM_SCHEMES];
 
     for (int i = 0; i < NUM_SCHEMES; i++) {
-        printf("Analysing %-24s …", SCHEMES[i].name);
+        printf("Analysing %-24s ...", SCHEMES[i].name);
         fflush(stdout);
         ok[i] = analyse_scheme(&SCHEMES[i], &results[i]);
         if (ok[i] == 0)

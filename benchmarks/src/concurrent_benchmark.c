@@ -1,5 +1,5 @@
 /*
- * concurrent_benchmark.c — Falcon-512 Concurrent Signature Verification
+ * concurrent_benchmark.c -- Falcon-512 Concurrent Signature Verification
  *
  * Part of the qMEMO project (IIT Chicago): benchmarks post-quantum
  * signature verification for blockchain nodes.
@@ -11,8 +11,8 @@
  *
  * Timing correctness
  * ──────────────────
- * A common mistake is recording t_start before pthread_create — this
- * includes thread-spawn overhead (~50–200 µs each) in the "concurrent"
+ * A common mistake is recording t_start before pthread_create -- this
+ * includes thread-spawn overhead (~50-200 µs each) in the "concurrent"
  * timing and makes it look slower than sequential.  We fix this with a
  * startup barrier: all NUM_WORKERS threads block at the barrier after
  * being spawned; the main thread joins the barrier, records t_start, and
@@ -32,7 +32,7 @@
  *   ./benchmarks/bin/concurrent_benchmark
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp, barrier_t — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp, barrier_t -- must be first */
 
 #include <oqs/oqs.h>
 #include <pthread.h>
@@ -73,7 +73,7 @@ static void *worker(void *arg)
 {
     pool_t *pool = (pool_t *)arg;
 
-    /* Block until all workers and main are ready — then start simultaneously. */
+    /* Block until all workers and main are ready -- then start simultaneously. */
     barrier_wait(&pool->start_barrier);
 
     while (1) {
@@ -124,14 +124,14 @@ static double run_concurrent(pool_t *pool)
     for (int i = 0; i < NUM_WORKERS; i++) {
         if (pthread_create(&threads[i], NULL, worker, pool) != 0) {
             fprintf(stderr, "FATAL: pthread_create failed for thread %d.\n", i);
-            /* Workers 0..i-1 are stuck at the barrier — unrecoverable. */
+            /* Workers 0..i-1 are stuck at the barrier -- unrecoverable. */
             exit(EXIT_FAILURE);
         }
     }
 
     /*
      * Join the barrier: this releases all workers simultaneously.
-     * t_start is recorded immediately after — within nanoseconds of
+     * t_start is recorded immediately after -- within nanoseconds of
      * the workers beginning to pull tasks.
      */
     barrier_wait(&pool->start_barrier);
@@ -210,7 +210,7 @@ int main(void)
     }
 
     /* Generate 100 keypairs and 100 signatures */
-    printf("Generating %d keypairs and signatures …\n", NUM_SIGNATURES);
+    printf("Generating %d keypairs and signatures ...\n", NUM_SIGNATURES);
     uint8_t *secret_key = malloc(sig->length_secret_key);
     if (!secret_key) {
         fprintf(stderr, "ERROR: malloc secret_key failed\n");

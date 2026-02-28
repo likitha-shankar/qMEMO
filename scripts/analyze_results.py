@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-analyze_results.py — Validate benchmark results against published baselines.
+analyze_results.py -- Validate benchmark results against published baselines.
 
 Part of the qMEMO project (IIT Chicago): benchmarking post-quantum digital
 signatures for blockchain transaction verification.
@@ -17,7 +17,7 @@ Usage:
     If no path is given, the script auto-detects the most recent run.
 
 Output:
-    <run_dir>/ANALYSIS.md   — human-readable validation report
+    <run_dir>/ANALYSIS.md   -- human-readable validation report
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ import numpy as np
 
 # ── Published baselines ────────────────────────────────────────────────────
 # Sources:
-#   [1] Falcon specification, §6.3 — reference C implementation benchmarks
+#   [1] Falcon specification, §6.3 -- reference C implementation benchmarks
 #   [2] PQCrypto 2020 benchmarks (Intel Core i5-8259U, 2.3 GHz, Turbo 3.8 GHz)
 #   [3] liboqs speed benchmarks (CI matrix, various CPUs)
 
@@ -76,8 +76,8 @@ MEMO_SCENARIOS = [
 
 # ── Statistical quality thresholds ─────────────────────────────────────────
 
-CV_EXCELLENT = 2.0    # % — very low noise
-CV_ACCEPTABLE = 5.0   # % — ok for publication
+CV_EXCELLENT = 2.0    # % -- very low noise
+CV_ACCEPTABLE = 5.0   # % -- ok for publication
 OUTLIER_THRESHOLD = 1.0  # % of trials
 
 
@@ -198,9 +198,9 @@ def analyze_distribution(raw: list[float], stats: dict) -> DistributionAnalysis:
 
     # Overall: must meet all three criteria for a clean bill of health
     if cv_grade in ("EXCELLENT", "ACCEPTABLE") and outlier_grade == "PASS":
-        overall_grade = "GOOD — suitable for publication"
+        overall_grade = "GOOD -- suitable for publication"
     else:
-        overall_grade = "REVIEW — check environment before publishing"
+        overall_grade = "REVIEW -- check environment before publishing"
 
     return DistributionAnalysis(
         n=n, mean=mean, median=median, std=std, cv_pct=cv_pct,
@@ -302,7 +302,7 @@ def generate_report(
     min_headroom = min(r["headroom"] for r in memo_rows)
     if min_headroom >= 10:
         w(f"Even under the most demanding scenario, we have "
-          f"**{min_headroom:,.0f}x headroom** — Falcon-512 verification is "
+          f"**{min_headroom:,.0f}x headroom** -- Falcon-512 verification is "
           f"not a bottleneck for MEMO.")
     elif min_headroom >= 2:
         w(f"Headroom of {min_headroom:.0f}x is adequate but tight for the "
@@ -335,7 +335,7 @@ def generate_report(
       f"{mldsa['total_tx_overhead']} B | "
       f"Falcon {mldsa['total_tx_overhead']/falcon['total_tx_overhead']:.1f}x smaller |")
     w("")
-    w("**For blockchain:** Falcon-512 wins on the two metrics that matter most — "
+    w("**For blockchain:** Falcon-512 wins on the two metrics that matter most -- "
       "verification speed and on-chain size. ML-DSA-44's advantages (faster "
       "signing and keygen) are irrelevant in a validator context where "
       "verification is the hot path.")
@@ -356,7 +356,7 @@ def generate_report(
       f"**{dist.cv_grade}** |")
     w(f"| Outliers (> 3σ) | {dist.outlier_count} ({dist.outlier_pct:.2f}%) | "
       f"< {OUTLIER_THRESHOLD}% | **{dist.outlier_grade}** |")
-    w(f"| Normality (Jarque–Bera) | "
+    w(f"| Normality (Jarque-Bera) | "
       f"{'pass' if dist.normality_pass else 'fail'} | "
       f"pass → mean±SD; fail → median/IQR | "
       f"{'Gaussian' if dist.normality_pass else 'Non-Gaussian'} |")
@@ -379,8 +379,8 @@ def generate_report(
           "OS scheduling jitter). For the paper, report:")
         w(f"  - **Median: {dist.median:,.0f} ops/sec** "
           f"(IQR: {dist.iqr:,.0f})")
-        w(f"  - **P5–P95 range: {dist.p5:,.0f} – {dist.p95:,.0f} ops/sec**")
-        w("  - Use non-parametric tests (Mann–Whitney U) for comparison.")
+        w(f"  - **P5-P95 range: {dist.p5:,.0f} - {dist.p95:,.0f} ops/sec**")
+        w("  - Use non-parametric tests (Mann-Whitney U) for comparison.")
     w("")
 
     # ── Section 5: Recommended paper claims ────────────────────────────
@@ -439,7 +439,7 @@ def generate_report(
     w("- Cycle estimates use a flat 3.5 GHz assumption; actual M2 Pro "
       "P-core frequency varies with thermal state (3.49 GHz sustained, "
       "briefly higher on boost).")
-    w("- The Jarque–Bera normality test is sensitive at n=1000; "
+    w("- The Jarque-Bera normality test is sensitive at n=1000; "
       "slight departures from Gaussian are statistically detectable "
       "but may not be practically significant.")
     w("- liboqs is a reference/research implementation; production "
@@ -486,19 +486,19 @@ def main():
     measured = summary["verify_benchmark"]["ops_per_sec"]
 
     # Run analyses
-    print("Comparing against published baselines …")
+    print("Comparing against published baselines ...")
     baseline_rows = analyze_baselines(measured)
 
-    print("Checking MEMO throughput requirements …")
+    print("Checking MEMO throughput requirements ...")
     memo_rows = analyze_memo(measured)
 
-    print("Validating statistical quality …")
+    print("Validating statistical quality ...")
     raw_data = stat_results.get("raw_data", [])
     stats_block = stat_results.get("statistics", {})
     dist = analyze_distribution(raw_data, stats_block)
 
     # Generate report
-    print("Generating ANALYSIS.md …")
+    print("Generating ANALYSIS.md ...")
     report = generate_report(run_dir, summary, stat_results,
                              baseline_rows, memo_rows, dist)
 

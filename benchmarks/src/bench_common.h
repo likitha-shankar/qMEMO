@@ -1,12 +1,12 @@
 /*
- * bench_common.h — Shared utilities for all qMEMO benchmark programs.
+ * bench_common.h -- Shared utilities for all qMEMO benchmark programs.
  *
  * Part of the qMEMO project (IIT Chicago).
  *
  * Provides:
- *   - get_time()       — nanosecond-precision monotonic timer
- *   - get_timestamp()  — ISO-8601 UTC wall-clock string (thread-safe)
- *   - barrier_t        — portable pthread barrier (macOS lacks one by default)
+ *   - get_time()       -- nanosecond-precision monotonic timer
+ *   - get_timestamp()  -- ISO-8601 UTC wall-clock string (thread-safe)
+ *   - barrier_t        -- portable pthread barrier (macOS lacks one by default)
  *
  * IMPORTANT: Include this header BEFORE all other headers in each benchmark
  * file.  The _POSIX_C_SOURCE feature-test macro must be set before any
@@ -26,7 +26,7 @@
  *
  * CLOCK_MONOTONIC is immune to NTP adjustments and wall-clock slew.
  * On macOS (commpage/vDSO) and Linux (vDSO) the syscall overhead is
- * < 25 ns — negligible against the tens-of-microsecond Falcon-512
+ * < 25 ns -- negligible against the tens-of-microsecond Falcon-512
  * verification cost.
  */
 static inline double get_time(void)
@@ -39,7 +39,7 @@ static inline double get_time(void)
 /* ── ISO-8601 UTC timestamp ──────────────────────────────────────────────────
  *
  * Uses gmtime_r (POSIX.1-2008, thread-safe) rather than gmtime (not
- * thread-safe — uses a single static buffer shared across threads).
+ * thread-safe -- uses a single static buffer shared across threads).
  * Embeds the wall-clock time of the run so result files are
  * self-documenting when collected across machines and dates.
  */

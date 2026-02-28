@@ -1,18 +1,18 @@
 /*
- * comprehensive_comparison.c — All 7 Algorithms Side-by-Side
+ * comprehensive_comparison.c -- All 7 Algorithms Side-by-Side
  *
  * Part of the qMEMO project (IIT Chicago): single-threaded benchmark
  * comparing post-quantum and classical signature schemes across keygen,
  * sign, and verify throughput with a unified output table.
  *
  * Algorithms (in order):
- *   1. Falcon-512           (liboqs)  — NIST Level 1, lattice
- *   2. Falcon-1024          (liboqs)  — NIST Level 5, lattice
- *   3. ML-DSA-44            (liboqs)  — NIST Level 2, module lattice
- *   4. ML-DSA-65            (liboqs)  — NIST Level 3, module lattice
- *   5. SLH-DSA (SHA2-128f)  (liboqs)  — NIST Level 1, hash-based (fast)
- *   6. ECDSA secp256k1      (OpenSSL) — classical, Bitcoin/Ethereum curve
- *   7. Ed25519              (OpenSSL) — classical, EdDSA
+ *   1. Falcon-512           (liboqs)  -- NIST Level 1, lattice
+ *   2. Falcon-1024          (liboqs)  -- NIST Level 5, lattice
+ *   3. ML-DSA-44            (liboqs)  -- NIST Level 2, module lattice
+ *   4. ML-DSA-65            (liboqs)  -- NIST Level 3, module lattice
+ *   5. SLH-DSA (SHA2-128f)  (liboqs)  -- NIST Level 1, hash-based (fast)
+ *   6. ECDSA secp256k1      (OpenSSL) -- classical, Bitcoin/Ethereum curve
+ *   7. Ed25519              (OpenSSL) -- classical, EdDSA
  *
  * Methodology:
  *   Per algorithm: 1000 iterations of keygen, 1000 of sign, 1000 of verify,
@@ -29,7 +29,7 @@
  *   ./benchmarks/bin/comprehensive_comparison
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp -- must be first */
 
 #include <oqs/oqs.h>
 #include <openssl/evp.h>
@@ -231,8 +231,8 @@ static int bench_openssl(int pkey_type, int curve_nid, const EVP_MD *md,
 
     /*
      * Key sizes for supported algorithms:
-     *   ECDSA secp256k1 — 65-byte uncompressed public point, 32-byte scalar
-     *   Ed25519         — 32-byte public key, 32-byte seed (secret key)
+     *   ECDSA secp256k1 -- 65-byte uncompressed public point, 32-byte scalar
+     *   Ed25519         -- 32-byte public key, 32-byte seed (secret key)
      */
     out->pubkey_bytes = (pkey_type == EVP_PKEY_ED25519) ? 32u : 65u;
     out->seckey_bytes = 32u;
@@ -314,39 +314,39 @@ int main(void)
 
     /* ── PQC schemes (liboqs) ───────────────────────────────────────────── */
 
-    printf("  [1/7] Falcon-512 …");           fflush(stdout);
+    printf("  [1/7] Falcon-512 ...");           fflush(stdout);
     ok[0] = bench_oqs(OQS_SIG_alg_falcon_512, 1,
                       "Falcon-512", WARMUP_ITERS, &results[0]);
     printf(" %s\n", ok[0] == 0 ? "done." : "FAILED.");
 
-    printf("  [2/7] Falcon-1024 …");          fflush(stdout);
+    printf("  [2/7] Falcon-1024 ...");          fflush(stdout);
     ok[1] = bench_oqs(OQS_SIG_alg_falcon_1024, 5,
                       "Falcon-1024", WARMUP_ITERS, &results[1]);
     printf(" %s\n", ok[1] == 0 ? "done." : "FAILED.");
 
-    printf("  [3/7] ML-DSA-44 …");            fflush(stdout);
+    printf("  [3/7] ML-DSA-44 ...");            fflush(stdout);
     ok[2] = bench_oqs(OQS_SIG_alg_ml_dsa_44, 2,
                       "ML-DSA-44", WARMUP_ITERS, &results[2]);
     printf(" %s\n", ok[2] == 0 ? "done." : "FAILED.");
 
-    printf("  [4/7] ML-DSA-65 …");            fflush(stdout);
+    printf("  [4/7] ML-DSA-65 ...");            fflush(stdout);
     ok[3] = bench_oqs(OQS_SIG_alg_ml_dsa_65, 3,
                       "ML-DSA-65", WARMUP_ITERS, &results[3]);
     printf(" %s\n", ok[3] == 0 ? "done." : "FAILED.");
 
-    printf("  [5/7] SLH-DSA-SHA2-128f …");   fflush(stdout);
+    printf("  [5/7] SLH-DSA-SHA2-128f ...");   fflush(stdout);
     ok[4] = bench_oqs(OQS_SIG_alg_slh_dsa_pure_sha2_128f, 1,
                       "SLH-DSA-SHA2-128f", WARMUP_SLOW, &results[4]);
     printf(" %s\n", ok[4] == 0 ? "done." : "FAILED.");
 
     /* ── Classical (OpenSSL) ────────────────────────────────────────────── */
 
-    printf("  [6/7] ECDSA secp256k1 …");      fflush(stdout);
+    printf("  [6/7] ECDSA secp256k1 ...");      fflush(stdout);
     ok[5] = bench_openssl(EVP_PKEY_EC, NID_secp256k1, EVP_sha256(),
                           "ECDSA secp256k1", 0, &results[5]);
     printf(" %s\n", ok[5] == 0 ? "done." : "FAILED.");
 
-    printf("  [7/7] Ed25519 …");              fflush(stdout);
+    printf("  [7/7] Ed25519 ...");              fflush(stdout);
     ok[6] = bench_openssl(EVP_PKEY_ED25519, 0, NULL,
                           "Ed25519", 0, &results[6]);
     printf(" %s\n", ok[6] == 0 ? "done." : "FAILED.");

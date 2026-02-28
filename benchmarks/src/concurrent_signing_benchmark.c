@@ -1,5 +1,5 @@
 /*
- * concurrent_signing_benchmark.c — Falcon-512 Concurrent Signature Generation
+ * concurrent_signing_benchmark.c -- Falcon-512 Concurrent Signature Generation
  *
  * Part of the qMEMO project (IIT Chicago): benchmarks post-quantum signature
  * signing for high-throughput blockchain transaction submission.
@@ -22,7 +22,7 @@
  *      single context across threads would cause data races.
  *
  *   2. The secret key buffer is shared read-only.  Falcon does NOT mutate
- *      the key during signing — only the working memory changes.
+ *      the key during signing -- only the working memory changes.
  *
  *   3. Each task has its own output signature buffer (trivially separate).
  *
@@ -44,7 +44,7 @@
  *
  * Blockchain relevance
  * ────────────────────
- * Validator nodes only run verify — signing never appears on the hot path.
+ * Validator nodes only run verify -- signing never appears on the hot path.
  * Concurrent signing matters for:
  *   - tx_generator.py: must sign >= target TPS before submitting to the node.
  *     Sequential signing at ~7,000 ops/sec covers 500 TPS easily; concurrent
@@ -65,7 +65,7 @@
  *   ./benchmarks/bin/concurrent_signing_benchmark
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp, barrier_t — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp, barrier_t -- must be first */
 
 #include <oqs/oqs.h>
 #include <pthread.h>
@@ -99,7 +99,7 @@ typedef struct {
 /*
  * Worker function.
  *
- * Each worker creates its own OQS_SIG context — this is the key difference
+ * Each worker creates its own OQS_SIG context -- this is the key difference
  * from concurrent verification, where a single shared context is safe.
  * For signing, each context owns internal temporary working memory that
  * would race if shared.
@@ -123,7 +123,7 @@ static void *signing_worker(void *arg)
     /*
      * Block at startup barrier.  All NUM_WORKERS workers + main must arrive
      * before any worker starts pulling tasks.  This ensures t_start (recorded
-     * by main immediately after barrier_wait) is accurate — no worker has
+     * by main immediately after barrier_wait) is accurate -- no worker has
      * begun signing before the clock starts.
      */
     barrier_wait(&pool->start_barrier);
@@ -164,7 +164,7 @@ static void *signing_worker(void *arg)
 }
 
 /*
- * run_concurrent — dispatch all NUM_SIGNING_TASKS to a pool of NUM_WORKERS.
+ * run_concurrent -- dispatch all NUM_SIGNING_TASKS to a pool of NUM_WORKERS.
  *
  * Returns total wall-clock time in seconds (spawn + context init excluded),
  * or -1.0 on error.
@@ -188,7 +188,7 @@ static double run_concurrent(sign_pool_t *pool)
     /*
      * Main joins the barrier.  All workers are now guaranteed to have
      * created their OQS_SIG contexts and to be blocked at the barrier.
-     * The instant the barrier releases, t_start is recorded — workers
+     * The instant the barrier releases, t_start is recorded -- workers
      * and the clock start simultaneously.
      */
     barrier_wait(&pool->start_barrier);
@@ -209,7 +209,7 @@ static double run_concurrent(sign_pool_t *pool)
 }
 
 /*
- * run_sequential — sign all NUM_SIGNING_TASKS with a single OQS_SIG context.
+ * run_sequential -- sign all NUM_SIGNING_TASKS with a single OQS_SIG context.
  *
  * Uses fresh output buffers (out_sig_lens reset before timing).
  */
@@ -294,7 +294,7 @@ int main(void)
 
     /* ── Key generation ────────────────────────────────────────────────────
      *
-     * One keypair.  All workers will sign with the same secret key —
+     * One keypair.  All workers will sign with the same secret key --
      * this is the realistic scenario (one wallet, concurrent sign calls).
      */
     uint8_t *public_key  = malloc(pk_len);
@@ -306,7 +306,7 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    printf("Generating keypair … ");
+    printf("Generating keypair ... ");
     fflush(stdout);
     {
         OQS_SIG *tmp = OQS_SIG_new(OQS_SIG_alg_falcon_512);
@@ -336,7 +336,7 @@ int main(void)
             fprintf(stderr, "ERROR: malloc failed for task %d buffers\n", i);
             goto cleanup_tasks;
         }
-        /* Distinct message per task — different byte fill per index. */
+        /* Distinct message per task -- different byte fill per index. */
         memset(messages[i], (i & 0xff), MSG_LEN);
     }
     printf("Task buffers allocated.\n\n");
@@ -355,7 +355,7 @@ int main(void)
     pthread_cond_init(&pool.done_cond, NULL);
 
     /* ── Concurrent run ───────────────────────────────────────────────────── */
-    printf("Running concurrent signing (%d workers) …\n", NUM_WORKERS);
+    printf("Running concurrent signing (%d workers) ...\n", NUM_WORKERS);
     double t_concurrent = run_concurrent(&pool);
     if (t_concurrent < 0.0) {
         fprintf(stderr, "ERROR: concurrent run failed\n");
@@ -364,7 +364,7 @@ int main(void)
     print_sig_size_stats(out_sig_lens, NUM_SIGNING_TASKS);
 
     /* ── Sequential run ───────────────────────────────────────────────────── */
-    printf("\nRunning sequential signing (baseline) …\n");
+    printf("\nRunning sequential signing (baseline) ...\n");
     double t_sequential = run_sequential(&pool);
     if (t_sequential < 0.0) {
         fprintf(stderr, "ERROR: sequential run failed\n");

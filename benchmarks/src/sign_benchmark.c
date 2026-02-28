@@ -1,12 +1,12 @@
 /*
- * sign_benchmark.c — Falcon-512 Multicore Signing Throughput
+ * sign_benchmark.c -- Falcon-512 Multicore Signing Throughput
  *
  * Part of the qMEMO project (IIT Chicago): benchmarks post-quantum
  * cryptographic signing performance across multiple cores.
  *
  * Measures total signing throughput when running N threads in parallel
  * (N = 1, 2, 4, 6, 8, 10).  Unlike verification, each thread MUST own
- * its own OQS_SIG context and secret key — the Falcon signing path is
+ * its own OQS_SIG context and secret key -- the Falcon signing path is
  * stateful (uses a PRNG seeded from the secret key) and is NOT safe to
  * share across threads.
  *
@@ -19,7 +19,7 @@
  *     records t_start immediately after the barrier releases.  Excludes
  *     warm-up and thread-spawn overhead from the measurement.
  *   - Each thread performs SIGN_PER_THREAD signs in the timed section.
- *   - Total throughput = (N × SIGN_PER_THREAD) / (t_end − t_start).
+ *   - Total throughput = (N x SIGN_PER_THREAD) / (t_end − t_start).
  *   - Each thread calls OQS_thread_stop() before exit to release
  *     per-thread liboqs RNG state.
  *
@@ -32,7 +32,7 @@
  *   ./benchmarks/bin/sign_benchmark
  */
 
-#include "bench_common.h"   /* get_time, get_timestamp, barrier_t — must be first */
+#include "bench_common.h"   /* get_time, get_timestamp, barrier_t -- must be first */
 
 #include <oqs/oqs.h>
 #include <pthread.h>
@@ -79,7 +79,7 @@ static void *worker(void *arg)
     /* Each thread creates its own OQS_SIG context (mandatory for signing). */
     OQS_SIG *sig = OQS_SIG_new(OQS_SIG_alg_falcon_512);
     if (sig == NULL) {
-        fprintf(stderr, "ERROR: thread %d — OQS_SIG_new failed.\n", a->id);
+        fprintf(stderr, "ERROR: thread %d -- OQS_SIG_new failed.\n", a->id);
         OQS_thread_stop();
         return NULL;
     }
@@ -88,7 +88,7 @@ static void *worker(void *arg)
     size_t   sig_len   = 0;
 
     if (!signature) {
-        fprintf(stderr, "ERROR: thread %d — malloc for signature failed.\n", a->id);
+        fprintf(stderr, "ERROR: thread %d -- malloc for signature failed.\n", a->id);
         OQS_SIG_free(sig);
         OQS_thread_stop();
         return NULL;
@@ -233,7 +233,7 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    printf("Generating keypair …\n");
+    printf("Generating keypair ...\n");
     rc = OQS_SIG_keypair(sig, public_key, secret_key);
     if (rc != OQS_SUCCESS) {
         fprintf(stderr, "ERROR: Key generation failed.\n");

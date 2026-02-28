@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# run_all_benchmarks.sh — Run all qMEMO benchmarks and aggregate results
+# run_all_benchmarks.sh -- Run all qMEMO benchmarks and aggregate results
 #
 # One command for full reproducibility: compiles all benchmarks from a
 # clean state, runs them, captures JSON output, collects system specs,
@@ -81,7 +81,7 @@ fmt_duration() {
 # ── Banner ──────────────────────────────────────────────────────────────────
 
 printf "\n${BOLD}═══════════════════════════════════════════════════════════════${RESET}\n"
-printf "${BOLD}  qMEMO — Full Benchmark Suite${RESET}\n"
+printf "${BOLD}  qMEMO -- Full Benchmark Suite${RESET}\n"
 printf "${BOLD}  %s${RESET}\n" "$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 printf "${BOLD}═══════════════════════════════════════════════════════════════${RESET}\n"
 
@@ -199,7 +199,7 @@ run_benchmark() {
     local duration=$(( t_end - t_start ))
 
     if [ $rc -ne 0 ]; then
-        warn "$name exited with code $rc — see $full_out"
+        warn "$name exited with code $rc -- see $full_out"
         # Write an empty object so --slurpfile in the aggregate step always succeeds.
         printf '{}' > "$json_out"
         return 1
@@ -210,7 +210,7 @@ run_benchmark() {
     if jq empty "$json_out" 2>/dev/null; then
         ok "$name completed in $(fmt_duration $duration) → $(basename "$json_out")"
     else
-        warn "$name produced invalid JSON — see $full_out"
+        warn "$name produced invalid JSON -- see $full_out"
         printf '{}' > "$json_out"
         return 1
     fi
@@ -394,23 +394,23 @@ ${S_TRIALS} independent trials, each timing a batch of 100 verifications.
 | Normality (JB) | ${S_NORM} |
 
 **Interpretation:** CV < 2% indicates excellent measurement stability.
-$([ "$S_NORM" = "true" ] && echo "Distribution is Gaussian — report mean ± SD." || echo "Distribution is non-Gaussian — report median and IQR.")
+$([ "$S_NORM" = "true" ] && echo "Distribution is Gaussian -- report mean ± SD." || echo "Distribution is non-Gaussian -- report median and IQR.")
 
 ---
 
 ## 3. Algorithm Comparison: Falcon-512 vs ML-DSA-44
 
-### Throughput (ops/sec — higher is better)
+### Throughput (ops/sec -- higher is better)
 
 | Operation | Falcon-512 | ML-DSA-44 | Ratio (F/D) |
 |-----------|-----------|-----------|-------------|
 | Verification | ${F_VER} | ${D_VER} | **${C_SPEEDUP}x** |
 
-### Sizes (bytes — lower is better)
+### Sizes (bytes -- lower is better)
 
 | Component | Falcon-512 | ML-DSA-44 | Ratio (F/D) |
 |-----------|-----------|-----------|-------------|
-| Public Key | ${F_PK} | ${D_PK} | — |
+| Public Key | ${F_PK} | ${D_PK} | -- |
 | Signature | ${F_SIG} | ${D_SIG} | **${C_SIGRATIO}x** |
 | Tx Overhead (sig+pk) | ${F_TX} | ${D_TX} | **${C_TXRATIO}x** |
 
