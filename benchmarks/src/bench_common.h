@@ -51,6 +51,44 @@ static inline void get_timestamp(char *buf, size_t len)
     strftime(buf, len, "%Y-%m-%dT%H:%M:%SZ", &utc);
 }
 
+/* ── Cycle counter ----------------------------------------------------------
+ *
+ * On x86-64 we read RDTSC directly for true hardware cycle counts.
+ * This matches the measurement method used in the Falcon spec (Appendix B),
+ * CRYSTALS-Dilithium, and SPHINCS+ reference benchmarks -- enabling
+ * apples-to-apples comparison with published cycle counts.
+ *
+ * On ARM (Apple M2 Pro, Chameleon compute_arm64) we estimate cycles from
+ * the wall clock. Set BENCH_FREQ_GHZ to your P-core frequency.
+ * M2 Pro = 3.504 GHz, Cascade Lake Xeon = use RDTSC (exact).
+ *
+ * Usage in benchmark files:
+ *   uint64_t t0 = get_cycles();
+ *   ... operation ...
+ *   uint64_t cycles = get_cycles() - t0;
+ */
+#include <stdint.h>
+
+#if defined(__x86_64__) || defined(__amd64__)
+static inline uint64_t get_cycles(void)
+{
+    uint32_t lo, hi;
+    __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));
+    return ((uint64_t)hi << 32) | (uint64_t)lo;
+}
+#define BENCH_CYCLES_EXACT 1
+#else
+/* ARM / other: estimate from wall clock. Adjust for your hardware. */
+#ifndef BENCH_FREQ_GHZ
+#  define BENCH_FREQ_GHZ 3.504   /* Apple M2 Pro P-core */
+#endif
+static inline uint64_t get_cycles(void)
+{
+    return (uint64_t)(get_time() * BENCH_FREQ_GHZ * 1e9);
+}
+#define BENCH_CYCLES_EXACT 0
+#endif
+
 /* ── Portable pthread barrier ────────────────────────────────────────────────
  *
  * macOS does not export pthread_barrier_t by default (it is an optional

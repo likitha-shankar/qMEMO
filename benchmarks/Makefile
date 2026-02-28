@@ -12,11 +12,20 @@
 #   make help     # list available targets
 # ──────────────────────────────────────────────────────────────────────────────
 
-# ── Paths (all relative to this Makefile's directory: benchmarks/) ─────────
+# ── Paths (all relative to this Makefile's directory: benchmarks/) ---------
 SRCDIR       := src
 BINDIR       := bin
 OQS_ROOT     := ../liboqs_install
-OPENSSL_ROOT := /opt/homebrew/opt/openssl
+
+# OpenSSL: Homebrew on macOS, system package on Linux.
+# Override on the command line if your install is elsewhere:
+#   make OPENSSL_ROOT=/usr/local all
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    OPENSSL_ROOT := /opt/homebrew/opt/openssl
+else
+    OPENSSL_ROOT := /usr
+endif
 
 # ── Toolchain ──────────────────────────────────────────────────────────────
 # Use whatever `cc` resolves to (Apple Clang on macOS, GCC on most Linux).
