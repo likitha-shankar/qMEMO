@@ -1,0 +1,63 @@
+================================================================
+  Verify Benchmark (single-pass, 10K iterations)
+  Run: 20260228_223247
+================================================================
+
+
+================================================================
+  Falcon-512 Verification Benchmark  (qMEMO / IIT Chicago)
+================================================================
+
+Algorithm        : Falcon-512
+Public key size  : 897 bytes
+Secret key size  : 1281 bytes
+Max signature    : 752 bytes
+Warmup iterations: 100
+Bench iterations : 10000
+Message length   : 256 bytes (0x42 fill)
+
+[1/6] Generating Falcon-512 keypair ...
+       Key pair generated.
+[2/6] Signing test message ...
+       Signature produced: 653 bytes (max 752).
+[3/6] Sanity check -- verifying signature ...
+       Verification passed.
+[4/6] Warm-up: 100 verifications ...
+       Warm-up complete.
+[5/6] Benchmarking: 10000 verifications ...
+[6/6] Results:
+
+  ┌─────────────────────────────────────────────┐
+  │  Falcon-512 Verification Benchmark Results  │
+  ├─────────────────────────────────────────────┤
+  │  Iterations    :      10000                  │
+  │  Total time    :      0.419364 sec            │
+  │  Ops/sec       :      23845.60                │
+  │  Per operation :      0.042 ms              │
+  │                       41.94 µs              │
+  │  Est. cycles   :     146778  (@ 3.5 GHz)  │
+  │  Signature     :   653 bytes               │
+  │  Public key    :   897 bytes               │
+  │  Secret key    :  1281 bytes               │
+  └─────────────────────────────────────────────┘
+
+--- JSON ---
+{
+  "test_name": "falcon512_verify",
+  "timestamp": "2026-02-28T22:32:49Z",
+  "algorithm": "Falcon-512",
+  "iterations": 10000,
+  "warmup": 100,
+  "total_time_sec": 0.419364,
+  "ops_per_sec": 23845.60,
+  "ms_per_op": 0.042,
+  "us_per_op": 41.94,
+  "cycles_per_op": 146777.57,
+  "signature_bytes": 653,
+  "pubkey_bytes": 897,
+  "seckey_bytes": 1281
+}
+
+Benchmark complete.
+
+  [Elapsed: 440 ms]

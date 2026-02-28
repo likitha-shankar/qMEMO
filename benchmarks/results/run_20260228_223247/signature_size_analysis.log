@@ -1,0 +1,94 @@
+================================================================
+  Signature Size Distribution (10K sigs each)
+  Run: 20260228_223247
+================================================================
+
+
+================================================================
+  Falcon Signature Size Distribution  (qMEMO / IIT Chicago)
+================================================================
+  Schemes: Falcon-512, Falcon-padded-512,
+           Falcon-1024, Falcon-padded-1024
+  Signatures per scheme: 10000
+
+Analysing Falcon-512               ... done.
+Analysing Falcon-padded-512        ... done.
+Analysing Falcon-1024              ... done.
+Analysing Falcon-padded-1024       ... done.
+
+Scheme                    NIST  SpecMax  Min    Max    Mean   StdDev  p25  p50  p75  p95   p99
+------------------------  ----  -------  -----  -----  -----  ------  ---  ---  ---  ----  ----
+Falcon-512                L1      666    647    663  655.0     2.2   654  655  656   659   660
+Falcon-padded-512         L1      666    666    666  666.0     0.0   666  666  666   666   666
+Falcon-1024               L5     1280   1257   1282  1270.6     3.1  1269 1271 1273  1276  1278
+Falcon-padded-1024        L5     1280   1280   1280  1280.0     0.0  1280 1280 1280  1280  1280
+
+--- JSON ---
+{
+  "test_name": "falcon_signature_size_distribution",
+  "timestamp": "2026-02-28T22:32:58Z",
+  "num_signatures": 10000,
+  "message_len": 256,
+  "schemes": [
+    {
+      "name": "Falcon-512",
+      "nist_level": 1,
+      "spec_max_bytes": 666,
+      "min": 647,
+      "max": 663,
+      "mean": 655.05,
+      "std_dev": 2.19,
+      "p25": 654,
+      "p50": 655,
+      "p75": 656,
+      "p95": 659,
+      "p99": 660
+    },
+    {
+      "name": "Falcon-padded-512",
+      "nist_level": 1,
+      "spec_max_bytes": 666,
+      "min": 666,
+      "max": 666,
+      "mean": 666.00,
+      "std_dev": 0.00,
+      "p25": 666,
+      "p50": 666,
+      "p75": 666,
+      "p95": 666,
+      "p99": 666
+    },
+    {
+      "name": "Falcon-1024",
+      "nist_level": 5,
+      "spec_max_bytes": 1280,
+      "min": 1257,
+      "max": 1282,
+      "mean": 1270.60,
+      "std_dev": 3.15,
+      "p25": 1269,
+      "p50": 1271,
+      "p75": 1273,
+      "p95": 1276,
+      "p99": 1278
+    },
+    {
+      "name": "Falcon-padded-1024",
+      "nist_level": 5,
+      "spec_max_bytes": 1280,
+      "min": 1280,
+      "max": 1280,
+      "mean": 1280.00,
+      "std_dev": 0.00,
+      "p25": 1280,
+      "p50": 1280,
+      "p75": 1280,
+      "p95": 1280,
+      "p99": 1280
+    }
+  ]
+}
+
+Signature size analysis complete.
+
+  [Elapsed: 13964 ms]

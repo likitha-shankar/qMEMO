@@ -1,0 +1,47 @@
+================================================================
+  Classical Baselines (ECDSA secp256k1 + Ed25519)
+  Run: 20260228_223247
+================================================================
+
+
+================================================================
+  Classical Signature Baselines  (qMEMO / IIT Chicago)
+  OpenSSL 3.x -- EVP_PKEY high-level API
+================================================================
+  Iterations: 10000 (+ 100 warm-up) per phase
+
+Benchmarking ECDSA secp256k1  ... done.
+Benchmarking Ed25519          ... done.
+
+Scheme            Keygen (ops/s)   Sign (ops/s)   Verify (ops/s)   Avg Sig (bytes)
+----------------  --------------   ------------   --------------   ---------------
+ECDSA secp256k1             2655           2638             2963              71.0
+Ed25519                    23062          23184             8984              64.0
+
+--- JSON ---
+{
+  "test_name": "classical_signature_baselines",
+  "timestamp": "2026-02-28T22:33:12Z",
+  "bench_iters": 10000,
+  "message_len": 256,
+  "schemes": [
+    {
+      "name": "ECDSA secp256k1",
+      "keygen_ops_per_sec": 2655,
+      "sign_ops_per_sec": 2638,
+      "verify_ops_per_sec": 2963,
+      "avg_sig_bytes": 71.0
+    },
+    {
+      "name": "Ed25519",
+      "keygen_ops_per_sec": 23062,
+      "sign_ops_per_sec": 23184,
+      "verify_ops_per_sec": 8984,
+      "avg_sig_bytes": 64.0
+    }
+  ]
+}
+
+Classical baseline benchmark complete.
+
+  [Elapsed: 13052 ms]

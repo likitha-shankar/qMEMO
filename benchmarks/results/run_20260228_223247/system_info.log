@@ -1,0 +1,26 @@
+================================================================
+  qMEMO System Information
+  Generated: 2026-02-28T22:32:47Z
+================================================================
+
+--- OS / Kernel ---
+Linux qmemo-cascade-bench 5.15.0-144-generic #157-Ubuntu SMP Mon Jun 16 07:33:10 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+
+--- CPU ---
+model name	: Intel(R) Xeon(R) Gold 6242 CPU @ 2.80GHz
+Logical cores: 64
+MemTotal:       196460476 kB
+
+--- Compiler ---
+cc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+
+--- liboqs ---
+#define OQS_VERSION_TEXT "0.15.0"
+
+--- OpenSSL ---
+OpenSSL 3.0.2 15 Mar 2022 (Library: OpenSSL 3.0.2 15 Mar 2022)
+
+--- Build flags ---
+OQS_ROOT     := ../liboqs_install
+CFLAGS := -O3 $(ARCH_FLAG) -ffast-math -Wall -Wextra
