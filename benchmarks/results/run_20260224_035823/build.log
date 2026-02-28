@@ -1,0 +1,38 @@
+Cleaning bin/ …
+rm -f bin/verify_benchmark bin/statistical_benchmark bin/comparison_benchmark bin/multicore_benchmark bin/concurrent_benchmark bin/concurrent_signing_benchmark bin/sign_benchmark bin/signature_size_analysis bin/classical_benchmark bin/comprehensive_comparison bin/key_inspection
+Done.
+[CC]  src/verify_benchmark.c → bin/verify_benchmark
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/verify_benchmark.c -loqs -o bin/verify_benchmark
+      done.
+[CC]  src/statistical_benchmark.c → bin/statistical_benchmark
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/statistical_benchmark.c -loqs -lm -o bin/statistical_benchmark
+      done.
+[CC]  src/comparison_benchmark.c → bin/comparison_benchmark
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/comparison_benchmark.c -loqs -o bin/comparison_benchmark
+      done.
+[CC]  src/multicore_benchmark.c → bin/multicore_benchmark
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/multicore_benchmark.c -loqs -lpthread -o bin/multicore_benchmark
+      done.
+[CC]  src/concurrent_benchmark.c → bin/concurrent_benchmark
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/concurrent_benchmark.c -loqs -lpthread -o bin/concurrent_benchmark
+      done.
+[CC]  src/concurrent_signing_benchmark.c → bin/concurrent_signing_benchmark
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/concurrent_signing_benchmark.c -loqs -lpthread -lm -o bin/concurrent_signing_benchmark
+      done.
+[CC]  src/sign_benchmark.c → bin/sign_benchmark
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/sign_benchmark.c -loqs -lpthread -o bin/sign_benchmark
+      done.
+[CC]  src/signature_size_analysis.c → bin/signature_size_analysis
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/signature_size_analysis.c -loqs -lm -o bin/signature_size_analysis
+      done.
+[CC]  src/classical_benchmark.c → bin/classical_benchmark
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/classical_benchmark.c -loqs -lcrypto -o bin/classical_benchmark
+      done.
+[CC]  src/comprehensive_comparison.c → bin/comprehensive_comparison
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/comprehensive_comparison.c -loqs -lcrypto -lm -o bin/comprehensive_comparison
+      done.
+[CC]  src/key_inspection.c → bin/key_inspection
+cc -O3 -mcpu=native -ffast-math -Wall -Wextra -I../liboqs_install/include -I/opt/homebrew/opt/openssl/include -L../liboqs_install/lib -L/opt/homebrew/opt/openssl/lib -Wl,-rpath,/Users/likithashankar/Desktop/hmm/qMEMO/liboqs_install/lib -Wl,-rpath,/opt/homebrew/opt/openssl/lib src/key_inspection.c -loqs -lcrypto -o bin/key_inspection
+      done.
+
+All benchmarks built in bin/.

@@ -1,0 +1,40 @@
+================================================================
+  Multicore Signing (1/2/4/6/8/10 cores)
+  Run: 20260224_035823
+================================================================
+
+
+================================================================
+  Falcon-512 Multicore Signing Benchmark  (qMEMO / IIT Chicago)
+================================================================
+
+Generating keypair …
+OK. Public key: 897 bytes, Secret key: 1281 bytes.
+
+Config:  50 warm-up signs, 500 timed signs per thread
+
+Cores  |  Throughput (ops/sec)  |  Per-thread (ops/sec)  |  Speedup  |  Efficiency
+-------|------------------------|------------------------|-----------|------------
+   1   |                6122     |                6122     |    1.00   |  100.0%
+   2   |               13779     |                6890     |    2.25   |  112.5%
+   4   |               26889     |                6722     |    4.39   |  109.8%
+   6   |               35318     |                5886     |    5.77   |   96.1%
+   8   |               42435     |                5304     |    6.93   |   86.6%
+  10   |               52702     |                5270     |    8.61   |   86.1%
+
+--- JSON ---
+{
+  "test_name": "falcon512_multicore_sign",
+  "timestamp": "2026-02-24T03:58:30Z",
+  "algorithm": "Falcon-512",
+  "sign_per_thread": 500,
+  "warmup_per_thread": 50,
+  "cores": [1, 2, 4, 6, 8, 10],
+  "ops_per_sec": [6122, 13779, 26889, 35318, 42435, 52702],
+  "speedup": [1.00, 2.25, 4.39, 5.77, 6.93, 8.61],
+  "efficiency_pct": [100.0, 112.5, 109.8, 96.1, 86.6, 86.1]
+}
+
+Multicore signing benchmark complete.
+
+  [Elapsed: 746 ms]

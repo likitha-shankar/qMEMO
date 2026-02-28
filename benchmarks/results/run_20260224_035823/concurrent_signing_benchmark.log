@@ -1,0 +1,80 @@
+================================================================
+  Concurrent Signing (thread pool)
+  Run: 20260224_035823
+================================================================
+
+
+================================================================
+  Falcon-512 Concurrent Signing Benchmark  (qMEMO / IIT Chicago)
+================================================================
+
+Algorithm   : Falcon-512
+Tasks       : 100 signing operations
+Workers     : 4 concurrent threads
+Message len : 256 bytes
+Key sizes   : pk=897 B  sk=1281 B  sig_max=752 B
+
+Generating keypair … done.
+Task buffers allocated.
+
+Running concurrent signing (4 workers) …
+  Signature sizes (n=100, max-buf=656 B):
+    min=650   max=661   avg=655.1  std=2.2 bytes
+
+Running sequential signing (baseline) …
+  Signature sizes (n=100, max-buf=652 B):
+    min=650   max=661   avg=655.5  std=2.2 bytes
+
+================================================================
+  RESULTS
+================================================================
+
+  Concurrent (4 workers):   5.913 ms total |  0.0591 ms/op |    16912 ops/sec
+  Sequential (baseline):   20.169 ms total |  0.2017 ms/op |     4958 ops/sec
+
+  Speedup:  3.41x
+  Concurrent yields 3.4x speedup (70.7% faster than sequential)
+
+  For context:
+    Concurrent verify throughput (from concurrent_benchmark): ~141,643 ops/sec
+    Signing is compute-heavier (FFT Gaussian sampling) so lower
+    parallelism efficiency is expected.
+
+  Blockchain relevance:
+    Sequential signing covers 500 TPS load tests easily.
+    Concurrent signing needed for >5,000 TPS stress tests.
+
+--- JSON ---
+{
+  "test_name": "falcon512_concurrent_sign",
+  "timestamp": "2026-02-24T03:58:30Z",
+  "algorithm": "Falcon-512",
+  "config": {
+    "signing_tasks": 100,
+    "worker_threads": 4,
+    "message_len": 256,
+    "sig_max_bytes": 752
+  },
+  "concurrent": {
+    "total_time_ms": 5.9130,
+    "avg_latency_ms": 0.0591,
+    "throughput_ops_sec": 16912
+  },
+  "sequential": {
+    "total_time_ms": 20.1690,
+    "avg_latency_ms": 0.2017,
+    "throughput_ops_sec": 4958
+  },
+  "speedup": 3.4110,
+  "sig_size_stats": {
+    "min_bytes": 650,
+    "max_bytes": 661,
+    "avg_bytes": 655.5,
+    "spec_max_bytes": 752
+  },
+  "analysis": "Concurrent yields 3.4x speedup (70.7% faster than sequential)"
+}
+
+Concurrent signing benchmark complete.
+
+  [Elapsed: 217 ms]
