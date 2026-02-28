@@ -1,6 +1,6 @@
 ================================================================
   Comparison Benchmark (Falcon-512 vs ML-DSA-44)
-  Run: 20260224_035823
+  Run: 20260228_203535
 ================================================================
 
 
@@ -9,14 +9,14 @@
 ================================================================
 
 ─── Falcon-512 ───
-  [keygen] warm-up … benchmarking 100 trials … 212.5 ops/sec
-  [sign]   warm-up … benchmarking 1000 trials … 7052.7 ops/sec
-  [verify] warm-up … benchmarking 10000 trials … 44321.7 ops/sec
+  [keygen] warm-up ... benchmarking 100 trials ... 148.4 ops/sec
+  [sign]   warm-up ... benchmarking 1000 trials ... 4934.9 ops/sec
+  [verify] warm-up ... benchmarking 10000 trials ... 31087.0 ops/sec
 
 ─── ML-DSA-44 ───
-  [keygen] warm-up … benchmarking 100 trials … 35906.6 ops/sec
-  [sign]   warm-up … benchmarking 1000 trials … 14936.1 ops/sec
-  [verify] warm-up … benchmarking 10000 trials … 37813.2 ops/sec
+  [keygen] warm-up ... benchmarking 100 trials ... 25201.6 ops/sec
+  [sign]   warm-up ... benchmarking 1000 trials ... 10090.6 ops/sec
+  [verify] warm-up ... benchmarking 10000 trials ... 25622.2 ops/sec
 
 ================================================================
   HEAD-TO-HEAD COMPARISON
@@ -24,18 +24,18 @@
 
   Metric                      Falcon-512       ML-DSA-44  Winner
   ──────────────────────  ──────────────  ──────────────  ──────────
-  Keygen throughput             212.5 /s      35906.6 /s    faster ►
-  Sign throughput              7052.7 /s      14936.1 /s    faster ►
-  Verify throughput           44321.7 /s      37813.2 /s  ◄ faster
+  Keygen throughput             148.4 /s      25201.6 /s    faster ►
+  Sign throughput              4934.9 /s      10090.6 /s    faster ►
+  Verify throughput           31087.0 /s      25622.2 /s  ◄ faster
 
-  Keygen latency              4706.1 µs         27.9 µs     faster ►
-  Sign latency                 141.8 µs         67.0 µs     faster ►
-  Verify latency                22.6 µs         26.4 µs   ◄ faster
+  Keygen latency              6740.7 µs         39.7 µs     faster ►
+  Sign latency                 202.6 µs         99.1 µs     faster ►
+  Verify latency                32.2 µs         39.0 µs   ◄ faster
 
   Public key size                897 B           1312 B     ◄ smaller
   Secret key size               1281 B           2560 B     ◄ smaller
-  Signature size                 657 B           2420 B     ◄ smaller
-  On-chain tx overhead          1554 B           3732 B     ◄ smaller
+  Signature size                 655 B           2420 B     ◄ smaller
+  On-chain tx overhead          1552 B           3732 B     ◄ smaller
 
 ================================================================
   BLOCKCHAIN IMPACT ANALYSIS
@@ -43,24 +43,24 @@
 
   Scenario: 4000 transactions per block (single-threaded verification)
 
-  Falcon-512 block verify time :     90.2 ms
-  ML-DSA-44  block verify time :    105.8 ms
-  Speedup (Falcon / ML-DSA)    :     1.17x
+  Falcon-512 block verify time :    128.7 ms
+  ML-DSA-44  block verify time :    156.1 ms
+  Speedup (Falcon / ML-DSA)    :     1.21x
 
-  Falcon-512 block sig data    :   6070.3 KB  (1554 B/tx)
+  Falcon-512 block sig data    :   6062.5 KB  (1552 B/tx)
   ML-DSA-44  block sig data    :  14578.1 KB  (3732 B/tx)
   Size ratio (Falcon / ML-DSA) :     0.42x
 
   ► Recommendation: Falcon-512
     Faster verification AND smaller on-chain footprint make it
     the stronger choice for blockchain transaction signing.
-    The slower keygen is irrelevant — addresses are generated
+    The slower keygen is irrelevant -- addresses are generated
     once, while signatures are verified millions of times.
 
 --- JSON ---
 {
   "test_name": "falcon512_vs_mldsa44",
-  "timestamp": "2026-02-24T03:58:27Z",
+  "timestamp": "2026-02-28T20:35:41Z",
   "config": {
     "keygen_trials": 100,
     "sign_trials": 1000,
@@ -69,24 +69,24 @@
   },
   "algorithms": {
     "Falcon-512": {
-      "keygen_ops_sec": 212.49,
-      "keygen_us_op": 4706.15,
-      "sign_ops_sec": 7052.68,
-      "sign_us_op": 141.79,
-      "verify_ops_sec": 44321.72,
-      "verify_us_op": 22.56,
+      "keygen_ops_sec": 148.35,
+      "keygen_us_op": 6740.74,
+      "sign_ops_sec": 4934.91,
+      "sign_us_op": 202.64,
+      "verify_ops_sec": 31086.99,
+      "verify_us_op": 32.17,
       "pubkey_bytes": 897,
       "privkey_bytes": 1281,
-      "signature_bytes": 657,
-      "total_tx_overhead": 1554
+      "signature_bytes": 655,
+      "total_tx_overhead": 1552
     },
     "ML-DSA-44": {
-      "keygen_ops_sec": 35906.64,
-      "keygen_us_op": 27.85,
-      "sign_ops_sec": 14936.07,
-      "sign_us_op": 66.95,
-      "verify_ops_sec": 37813.19,
-      "verify_us_op": 26.45,
+      "keygen_ops_sec": 25201.61,
+      "keygen_us_op": 39.68,
+      "sign_ops_sec": 10090.61,
+      "sign_us_op": 99.10,
+      "verify_ops_sec": 25622.24,
+      "verify_us_op": 39.03,
       "pubkey_bytes": 1312,
       "privkey_bytes": 2560,
       "signature_bytes": 2420,
@@ -94,17 +94,17 @@
     }
   },
   "comparison": {
-    "verify_speedup_falcon": 1.1721,
-    "sign_speedup_falcon": 0.4722,
+    "verify_speedup_falcon": 1.2133,
+    "sign_speedup_falcon": 0.4891,
     "keygen_speedup_falcon": 0.0059,
-    "signature_size_ratio": 0.2715,
+    "signature_size_ratio": 0.2707,
     "pubkey_size_ratio": 0.6837,
-    "total_tx_overhead_falcon": 1554,
+    "total_tx_overhead_falcon": 1552,
     "total_tx_overhead_dilithium": 3732,
-    "tx_overhead_ratio": 0.4164
+    "tx_overhead_ratio": 0.4159
   }
 }
 
 Comparison benchmark complete.
 
-  [Elapsed: 1477 ms]
+  [Elapsed: 2098 ms]

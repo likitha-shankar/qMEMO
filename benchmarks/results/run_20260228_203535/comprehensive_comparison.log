@@ -1,6 +1,6 @@
 ================================================================
   Comprehensive Comparison (all 7 algorithms)
-  Run: 20260224_035823
+  Run: 20260228_203535
 ================================================================
 
 
@@ -10,28 +10,28 @@
 ================================================================
   1000 iterations per phase  |  message: 256 bytes 0x42
 
-  [1/7] Falcon-512 … done.
-  [2/7] Falcon-1024 … done.
-  [3/7] ML-DSA-44 … done.
-  [4/7] ML-DSA-65 … done.
-  [5/7] SLH-DSA-SHA2-128f … done.
-  [6/7] ECDSA secp256k1 … done.
-  [7/7] Ed25519 … done.
+  [1/7] Falcon-512 ... done.
+  [2/7] Falcon-1024 ... done.
+  [3/7] ML-DSA-44 ... done.
+  [4/7] ML-DSA-65 ... done.
+  [5/7] SLH-DSA-SHA2-128f ... done.
+  [6/7] ECDSA secp256k1 ... done.
+  [7/7] Ed25519 ... done.
 
 Algorithm           NIST  PubKey  SecKey  SigBytes  Keygen/s    Sign/s    Verify/s
 ------------------  ----  ------  ------  --------  --------  --------  --------
-Falcon-512           L1      897    1281       752       212      7014     43787
-Falcon-1024          L5     1793    2305      1462        65      3502     22102
-ML-DSA-44            L2     1312    2560      2420     36065     15307     37343
-ML-DSA-65            L3     1952    4032      3309     20711      9741     22340
-SLH-DSA-SHA2-128f    L1       32      64     17088      1214        52       832
-ECDSA secp256k1       -       65      32        71      5108      5153      5621
-Ed25519               -       32      32        64     34711     34335     12491
+Falcon-512           L1      897    1281       752       148      4805     30569
+Falcon-1024          L5     1793    2305      1462        46      2436     15618
+ML-DSA-44            L2     1312    2560      2420     24610     10273     25904
+ML-DSA-65            L3     1952    4032      3309     14327      6745     15369
+SLH-DSA-SHA2-128f    L1       32      64     17088       836        36       599
+ECDSA secp256k1       -       65      32        71      3595      3608      4026
+Ed25519               -       32      32        64     24483     24276      8857
 
 --- JSON ---
 {
   "test_name": "comprehensive_signature_comparison",
-  "timestamp": "2026-02-24T03:58:47Z",
+  "timestamp": "2026-02-28T20:36:09Z",
   "bench_iters": 1000,
   "message_len": 256,
   "algorithms": [
@@ -41,9 +41,9 @@ Ed25519               -       32      32        64     34711     34335     12491
       "pubkey_bytes": 897,
       "seckey_bytes": 1281,
       "sig_bytes": 752,
-      "keygen_ops_per_sec": 212,
-      "sign_ops_per_sec": 7014,
-      "verify_ops_per_sec": 43787
+      "keygen_ops_per_sec": 148,
+      "sign_ops_per_sec": 4805,
+      "verify_ops_per_sec": 30569
     },
     {
       "name": "Falcon-1024",
@@ -51,9 +51,9 @@ Ed25519               -       32      32        64     34711     34335     12491
       "pubkey_bytes": 1793,
       "seckey_bytes": 2305,
       "sig_bytes": 1462,
-      "keygen_ops_per_sec": 65,
-      "sign_ops_per_sec": 3502,
-      "verify_ops_per_sec": 22102
+      "keygen_ops_per_sec": 46,
+      "sign_ops_per_sec": 2436,
+      "verify_ops_per_sec": 15618
     },
     {
       "name": "ML-DSA-44",
@@ -61,9 +61,9 @@ Ed25519               -       32      32        64     34711     34335     12491
       "pubkey_bytes": 1312,
       "seckey_bytes": 2560,
       "sig_bytes": 2420,
-      "keygen_ops_per_sec": 36065,
-      "sign_ops_per_sec": 15307,
-      "verify_ops_per_sec": 37343
+      "keygen_ops_per_sec": 24610,
+      "sign_ops_per_sec": 10273,
+      "verify_ops_per_sec": 25904
     },
     {
       "name": "ML-DSA-65",
@@ -71,9 +71,9 @@ Ed25519               -       32      32        64     34711     34335     12491
       "pubkey_bytes": 1952,
       "seckey_bytes": 4032,
       "sig_bytes": 3309,
-      "keygen_ops_per_sec": 20711,
-      "sign_ops_per_sec": 9741,
-      "verify_ops_per_sec": 22340
+      "keygen_ops_per_sec": 14327,
+      "sign_ops_per_sec": 6745,
+      "verify_ops_per_sec": 15369
     },
     {
       "name": "SLH-DSA-SHA2-128f",
@@ -81,9 +81,9 @@ Ed25519               -       32      32        64     34711     34335     12491
       "pubkey_bytes": 32,
       "seckey_bytes": 64,
       "sig_bytes": 17088,
-      "keygen_ops_per_sec": 1214,
-      "sign_ops_per_sec": 52,
-      "verify_ops_per_sec": 832
+      "keygen_ops_per_sec": 836,
+      "sign_ops_per_sec": 36,
+      "verify_ops_per_sec": 599
     },
     {
       "name": "ECDSA secp256k1",
@@ -91,9 +91,9 @@ Ed25519               -       32      32        64     34711     34335     12491
       "pubkey_bytes": 65,
       "seckey_bytes": 32,
       "sig_bytes": 71,
-      "keygen_ops_per_sec": 5108,
-      "sign_ops_per_sec": 5153,
-      "verify_ops_per_sec": 5621
+      "keygen_ops_per_sec": 3595,
+      "sign_ops_per_sec": 3608,
+      "verify_ops_per_sec": 4026
     },
     {
       "name": "Ed25519",
@@ -101,13 +101,13 @@ Ed25519               -       32      32        64     34711     34335     12491
       "pubkey_bytes": 32,
       "seckey_bytes": 32,
       "sig_bytes": 64,
-      "keygen_ops_per_sec": 34711,
-      "sign_ops_per_sec": 34335,
-      "verify_ops_per_sec": 12491
+      "keygen_ops_per_sec": 24483,
+      "sign_ops_per_sec": 24276,
+      "verify_ops_per_sec": 8857
     }
   ]
 }
 
 Comprehensive comparison complete.
 
-  [Elapsed: 45621 ms]
+  [Elapsed: 65266 ms]

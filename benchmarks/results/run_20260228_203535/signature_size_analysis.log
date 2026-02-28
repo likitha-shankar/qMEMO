@@ -1,6 +1,6 @@
 ================================================================
   Signature Size Distribution (10K sigs each)
-  Run: 20260224_035823
+  Run: 20260228_203535
 ================================================================
 
 
@@ -11,22 +11,22 @@
            Falcon-1024, Falcon-padded-1024
   Signatures per scheme: 10000
 
-Analysing Falcon-512               … done.
-Analysing Falcon-padded-512        … done.
-Analysing Falcon-1024              … done.
-Analysing Falcon-padded-1024       … done.
+Analysing Falcon-512               ... done.
+Analysing Falcon-padded-512        ... done.
+Analysing Falcon-1024              ... done.
+Analysing Falcon-padded-1024       ... done.
 
 Scheme                    NIST  SpecMax  Min    Max    Mean   StdDev  p25  p50  p75  p95   p99
 ------------------------  ----  -------  -----  -----  -----  ------  ---  ---  ---  ----  ----
-Falcon-512                L1      666    647    663  655.1     2.2   654  655  657   659   660
+Falcon-512                L1      666    647    663  655.1     2.2   654  655  656   659   660
 Falcon-padded-512         L1      666    666    666  666.0     0.0   666  666  666   666   666
-Falcon-1024               L5     1280   1260   1282  1270.7     3.1  1269 1271 1273  1276  1278
+Falcon-1024               L5     1280   1260   1283  1270.6     3.1  1269 1271 1273  1276  1278
 Falcon-padded-1024        L5     1280   1280   1280  1280.0     0.0  1280 1280 1280  1280  1280
 
 --- JSON ---
 {
   "test_name": "falcon_signature_size_distribution",
-  "timestamp": "2026-02-24T03:58:31Z",
+  "timestamp": "2026-02-28T20:35:46Z",
   "num_signatures": 10000,
   "message_len": 256,
   "schemes": [
@@ -36,11 +36,11 @@ Falcon-padded-1024        L5     1280   1280   1280  1280.0     0.0  1280 1280 1
       "spec_max_bytes": 666,
       "min": 647,
       "max": 663,
-      "mean": 655.07,
-      "std_dev": 2.20,
+      "mean": 655.06,
+      "std_dev": 2.16,
       "p25": 654,
       "p50": 655,
-      "p75": 657,
+      "p75": 656,
       "p95": 659,
       "p99": 660
     },
@@ -63,9 +63,9 @@ Falcon-padded-1024        L5     1280   1280   1280  1280.0     0.0  1280 1280 1
       "nist_level": 5,
       "spec_max_bytes": 1280,
       "min": 1260,
-      "max": 1282,
-      "mean": 1270.71,
-      "std_dev": 3.11,
+      "max": 1283,
+      "mean": 1270.63,
+      "std_dev": 3.14,
       "p25": 1269,
       "p50": 1271,
       "p75": 1273,
@@ -91,4 +91,4 @@ Falcon-padded-1024        L5     1280   1280   1280  1280.0     0.0  1280 1280 1
 
 Signature size analysis complete.
 
-  [Elapsed: 8761 ms]
+  [Elapsed: 12542 ms]

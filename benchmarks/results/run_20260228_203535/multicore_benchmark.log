@@ -1,6 +1,6 @@
 ================================================================
   Multicore Verification (1/2/4/6/8/10 cores)
-  Run: 20260224_035823
+  Run: 20260228_203535
 ================================================================
 
 
@@ -8,31 +8,31 @@
   Falcon-512 Multicore Verification Benchmark  (qMEMO / IIT Chicago)
 ================================================================
 
-Generating keypair and signing message …
-OK. Signature length: 657 bytes.
+Generating keypair and signing message ...
+OK. Signature length: 655 bytes.
 
 Cores  |  Throughput (ops/sec)  |  Speedup  |  Efficiency
 -------|------------------------|-----------|------------
-   1   |               34153     |    1.00   |  100.0%
-   2   |               80502     |    2.36   |  117.9%
-   4   |              170140     |    4.98   |  124.5%
-   6   |              234110     |    6.85   |  114.2%
-   8   |              249875     |    7.32   |   91.5%
-  10   |              382175     |   11.19   |  111.9%
+   1   |               27022     |    1.00   |  100.0%
+   2   |               62203     |    2.30   |  115.1%
+   4   |              119900     |    4.44   |  110.9%
+   6   |              186463     |    6.90   |  115.0%
+   8   |              195757     |    7.24   |   90.6%
+  10   |              239297     |    8.86   |   88.6%
 
 --- JSON ---
 {
   "test_name": "falcon512_multicore_verify",
-  "timestamp": "2026-02-24T03:58:29Z",
+  "timestamp": "2026-02-28T20:35:43Z",
   "algorithm": "Falcon-512",
   "verif_per_thread": 1000,
   "warmup_per_thread": 100,
   "cores": [1, 2, 4, 6, 8, 10],
-  "ops_per_sec": [34153, 80502, 170140, 234110, 249875, 382175],
-  "speedup": [1.00, 2.36, 4.98, 6.85, 7.32, 11.19],
-  "efficiency_pct": [100.0, 117.9, 124.5, 114.2, 91.5, 111.9]
+  "ops_per_sec": [27022, 62203, 119900, 186463, 195757, 239297],
+  "speedup": [1.00, 2.30, 4.44, 6.90, 7.24, 8.86],
+  "efficiency_pct": [100.0, 115.1, 110.9, 115.0, 90.6, 88.6]
 }
 
 Multicore benchmark complete.
 
-  [Elapsed: 378 ms]
+  [Elapsed: 467 ms]

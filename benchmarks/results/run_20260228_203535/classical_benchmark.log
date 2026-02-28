@@ -1,42 +1,42 @@
 ================================================================
   Classical Baselines (ECDSA secp256k1 + Ed25519)
-  Run: 20260224_035823
+  Run: 20260228_203535
 ================================================================
 
 
 ================================================================
   Classical Signature Baselines  (qMEMO / IIT Chicago)
-  OpenSSL 3.x — EVP_PKEY high-level API
+  OpenSSL 3.x -- EVP_PKEY high-level API
 ================================================================
   Iterations: 10000 (+ 100 warm-up) per phase
 
-Benchmarking ECDSA secp256k1  … done.
-Benchmarking Ed25519          … done.
+Benchmarking ECDSA secp256k1  ... done.
+Benchmarking Ed25519          ... done.
 
 Scheme            Keygen (ops/s)   Sign (ops/s)   Verify (ops/s)   Avg Sig (bytes)
 ----------------  --------------   ------------   --------------   ---------------
-ECDSA secp256k1             5105           5146             5503              71.0
-Ed25519                    34512          34486            12471              64.0
+ECDSA secp256k1             3583           3598             3966              71.0
+Ed25519                    24193          23929             8795              64.0
 
 --- JSON ---
 {
   "test_name": "classical_signature_baselines",
-  "timestamp": "2026-02-24T03:58:40Z",
+  "timestamp": "2026-02-28T20:35:58Z",
   "bench_iters": 10000,
   "message_len": 256,
   "schemes": [
     {
       "name": "ECDSA secp256k1",
-      "keygen_ops_per_sec": 5105,
-      "sign_ops_per_sec": 5146,
-      "verify_ops_per_sec": 5503,
+      "keygen_ops_per_sec": 3583,
+      "sign_ops_per_sec": 3598,
+      "verify_ops_per_sec": 3966,
       "avg_sig_bytes": 71.0
     },
     {
       "name": "Ed25519",
-      "keygen_ops_per_sec": 34512,
-      "sign_ops_per_sec": 34486,
-      "verify_ops_per_sec": 12471,
+      "keygen_ops_per_sec": 24193,
+      "sign_ops_per_sec": 23929,
+      "verify_ops_per_sec": 8795,
       "avg_sig_bytes": 64.0
     }
   ]
@@ -44,4 +44,4 @@ Ed25519                    34512          34486            12471              64
 
 Classical baseline benchmark complete.
 
-  [Elapsed: 7370 ms]
+  [Elapsed: 10409 ms]

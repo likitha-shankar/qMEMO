@@ -1,6 +1,6 @@
 ================================================================
   Verify Benchmark (single-pass, 10K iterations)
-  Run: 20260224_035823
+  Run: 20260228_203535
 ================================================================
 
 
@@ -16,27 +16,27 @@ Warmup iterations: 100
 Bench iterations : 10000
 Message length   : 256 bytes (0x42 fill)
 
-[1/6] Generating Falcon-512 keypair …
+[1/6] Generating Falcon-512 keypair ...
        Key pair generated.
-[2/6] Signing test message …
-       Signature produced: 655 bytes (max 752).
-[3/6] Sanity check — verifying signature …
+[2/6] Signing test message ...
+       Signature produced: 657 bytes (max 752).
+[3/6] Sanity check -- verifying signature ...
        Verification passed.
-[4/6] Warm-up: 100 verifications …
+[4/6] Warm-up: 100 verifications ...
        Warm-up complete.
-[5/6] Benchmarking: 10000 verifications …
+[5/6] Benchmarking: 10000 verifications ...
 [6/6] Results:
 
   ┌─────────────────────────────────────────────┐
   │  Falcon-512 Verification Benchmark Results  │
   ├─────────────────────────────────────────────┤
   │  Iterations    :      10000                  │
-  │  Total time    :      0.231025 sec            │
-  │  Ops/sec       :      43285.36                │
-  │  Per operation :      0.023 ms              │
-  │                       23.10 µs              │
-  │  Est. cycles   :      80859  (@ 3.5 GHz)  │
-  │  Signature     :   655 bytes               │
+  │  Total time    :      0.325130 sec            │
+  │  Ops/sec       :      30756.93                │
+  │  Per operation :      0.033 ms              │
+  │                       32.51 µs              │
+  │  Est. cycles   :     113796  (@ 3.5 GHz)  │
+  │  Signature     :   657 bytes               │
   │  Public key    :   897 bytes               │
   │  Secret key    :  1281 bytes               │
   └─────────────────────────────────────────────┘
@@ -44,20 +44,20 @@ Message length   : 256 bytes (0x42 fill)
 --- JSON ---
 {
   "test_name": "falcon512_verify",
-  "timestamp": "2026-02-24T03:58:24Z",
+  "timestamp": "2026-02-28T20:35:37Z",
   "algorithm": "Falcon-512",
   "iterations": 10000,
   "warmup": 100,
-  "total_time_sec": 0.231025,
-  "ops_per_sec": 43285.36,
-  "ms_per_op": 0.023,
-  "us_per_op": 23.10,
-  "cycles_per_op": 80858.75,
-  "signature_bytes": 655,
+  "total_time_sec": 0.325130,
+  "ops_per_sec": 30756.93,
+  "ms_per_op": 0.033,
+  "us_per_op": 32.51,
+  "cycles_per_op": 113795.50,
+  "signature_bytes": 657,
   "pubkey_bytes": 897,
   "seckey_bytes": 1281
 }
 
 Benchmark complete.
 
-  [Elapsed: 415 ms]
+  [Elapsed: 549 ms]
