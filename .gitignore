@@ -1,0 +1,30 @@
+# Build artifacts
+benchmarks/bin/
+*.o
+*.a
+*.so
+*.dylib
+
+# liboqs source and install (built locally, not tracked)
+liboqs/
+liboqs_install/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs (runtime output — committed only as snapshots under benchmarks/results/)
+*.log
+!benchmarks/results/**/*.log
