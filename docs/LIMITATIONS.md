@@ -8,26 +8,27 @@ This document honestly acknowledges the limitations of this benchmarking study.
 
 ## Hardware Limitations
 
-### Single Platform Testing
+### Platform Coverage -- Partially Resolved
 
-**Limitation:** All benchmarks conducted on Apple M2 Pro only.
+**Status: Partially resolved.** Benchmarks now run on two independent platforms.
 
-**Impact:**
+**Platforms measured:**
 
-- Cannot generalize to other ARM processors (Cortex-A, Graviton, etc.)
-- Cannot generalize to x86-64 platforms (Intel, AMD)
-- Cannot validate on embedded devices (Raspberry Pi)
-- Cannot test on server-grade hardware (EPYC, Xeon)
+- Apple M2 Pro (ARM64, macOS) -- single-core median 31,133 ops/sec, CV 3.92%
+- Intel Xeon Gold 6242 (x86-64, Cascade Lake, Ubuntu 22.04) -- median 23,885 ops/sec,
+  CV 0.67%, 146,778 RDTSC exact cycles
 
-**Mitigation:** Results validated against published Intel baseline (3.8% variance).
+**Key cross-architecture finding:** ML-DSA-44 is 2x faster than Falcon-512 on x86 (AVX-512);
+Falcon-512 is 18% faster on ARM. Algorithm selection should depend on deployment architecture.
 
-**Future Work:** Cross-platform benchmarking on:
+**Remaining gaps:**
 
-- Intel Xeon (server)
-- AMD EPYC (server)
-- ARM Graviton (cloud)
-- Raspberry Pi 4 (embedded)
-- RISC-V platforms
+- AMD EPYC (Zen architecture) not yet measured
+- ARM Graviton (cloud) not yet measured
+- Raspberry Pi / embedded not yet measured
+- RISC-V not yet measured
+
+**Future Work:** AMD EPYC and ARM Graviton benchmarks on Chameleon Cloud.
 
 ### Thermal Management Unknown
 
@@ -64,46 +65,43 @@ This document honestly acknowledges the limitations of this benchmarking study.
 **Impact:**
 
 - Not using fully optimized NEON implementation
-- Leaving ~40% performance on table (64K vs 44K ops/sec)
+- Leaving ~2-3x performance on table vs fully optimized NEON/AVX-512 builds
 - Results represent "safe default" not "maximum possible"
 
 **Why This Is OK:** Reference implementation is what most systems deploy for portability.
 
 **Future Work:** Benchmark with OQS_OPT_TARGET=native for full NEON optimization.
 
-### Multi-core Results Not Integrated Into Main Analysis
+### Multi-core Results -- Resolved
 
-**Limitation:** `multicore_benchmark.c` (scaling across 1/2/4/6/8/10 cores) and `concurrent_benchmark.c` (4-worker thread pool) exist and compile, but their results are not referenced in `THROUGHPUT_ANALYSIS.md`, `ANALYSIS.md`, or the main `BENCHMARK_REPORT.md`.
+**Status: Resolved.** Multicore scaling is now measured and documented.
 
-**Impact:**
+**Measured scaling (1/2/4/6/8/10 cores):**
 
-- The paper's throughput headroom claims rest on single-core numbers only. Multi-core scaling data (which would show near-linear speedup) is collected but unused.
-- The `make run` target and `run_all_benchmarks.sh` do not execute these two benchmarks, so their results are never aggregated into `summary.json`.
+| Cores | M2 Pro | Cascade Lake |
+|------:|-------:|-------------:|
+| 1 | 27,022 | 20,013 |
+| 10 | 239,297 (8.86x) | 176,714 (8.83x) |
 
-**Future Work:** Run `multicore_benchmark` and `concurrent_benchmark` in the automated pipeline; add a "Multi-core Scaling" section to `THROUGHPUT_ANALYSIS.md` showing measured speedup and parallel efficiency across core counts.
+Both platforms show near-linear scaling to 4 cores and approximately 8.8x at 10 cores.
+Results are in `docs/COMPREHENSIVE_COMPARISON.md` and `benchmarks/results/`.
 
-### No Comparison to Classical ECDSA
+### Classical Baseline Comparison -- Resolved
 
-**Limitation:** Did not benchmark secp256k1 or Ed25519 for comparison.
+**Status: Resolved.** `classical_benchmark.c` and `comprehensive_comparison.c` both cover
+ECDSA secp256k1 and Ed25519 via OpenSSL 3.x EVP API.
 
-**Impact:**
+Key results (verify ops/sec):
+- Falcon-512 is 7.6x faster than ECDSA secp256k1 on ARM, 8.1x on x86
+- Falcon-512 is 3.5x slower than Ed25519 on ARM, 2.7x on x86
 
-- Cannot quantify "cost of quantum resistance"
-- Missing baseline for blockchain developers
-- Cannot show verification speed advantage
+### SLH-DSA (SPHINCS+) Comparison -- Resolved
 
-**Future Work:** Add ECDSA/EdDSA benchmarks using same methodology.
+**Status: Resolved.** `comprehensive_comparison.c` includes SLH-DSA-SHA2-128f alongside
+all other algorithms. Full NIST PQC Level-1 three-way comparison is now available.
 
-### No Comparison to SPHINCS+ (SLH-DSA)
-
-**Limitation:** `comparison_benchmark.c` covers Falcon-512 vs ML-DSA-44 (Dilithium). SPHINCS+ / SLH-DSA is not yet benchmarked.
-
-**Impact:**
-
-- SPHINCS+ is a stateless hash-based scheme with no algebraic structure -- a more conservative security assumption than lattice-based schemes. Missing it leaves a gap for long-lived validator keys where algebraic hardness assumptions may be undesirable.
-- Cannot present a full NIST PQC Level-1 three-way comparison (Falcon / ML-DSA / SLH-DSA) in the paper.
-
-**Future Work:** Add `sphincs_benchmark.c` using `OQS_SIG_alg_sphincs_sha2_128f_simple` and integrate into `comparison_benchmark.c`.
+Key results: SLH-DSA signs at 36-45 ops/sec (unusable for high-TPS), verifies at 600-730
+ops/sec, but has 32-byte public keys and purely hash-based security assumptions.
 
 ---
 
@@ -256,17 +254,17 @@ This document honestly acknowledges the limitations of this benchmarking study.
 
 **Future Work:** Validate against multiple published benchmarks.
 
-### No Hardware Performance Counters
+### Hardware Performance Counters -- Partially Resolved
 
-**Limitation:** Used wall-clock time, not CPU cycle counters (PMCCNTR, RDTSC).
+**Status: Partially resolved.** RDTSC exact cycle counting is now implemented for x86-64.
 
-**Impact:**
+- **x86-64 (Cascade Lake):** `get_cycles()` uses RDTSC -- exact hardware cycle counts,
+  zero OS overhead. Result: 146,778 cycles/verify (gold standard for comparison).
+- **ARM (M2 Pro):** `get_cycles()` estimates from wall clock at BENCH_FREQ_GHZ (3.504 GHz).
+  ARM PMU cycle counter (PMCCNTR_EL0) requires kernel privilege on macOS -- not available
+  without a custom kernel extension.
 
-- Includes ~1% OS overhead
-- Cannot measure exact instruction counts
-- Cannot analyze cache misses, branch mispredictions
-
-**Future Work:** Use Linux perf or Apple Instruments for cycle-accurate measurements.
+**Future Work:** Use `perf stat` on Linux ARM (Graviton) for exact ARM PMU cycle counts.
 
 ---
 
@@ -329,17 +327,23 @@ This document honestly acknowledges the limitations of this benchmarking study.
 
 ## Conclusion
 
-These limitations **do not** invalidate the core finding:
+These limitations **do not** invalidate the core findings:
 
-**Falcon-512 provides 17x headroom for MEMO blockchain (conservative scenario).**
+**Falcon-512 provides 9.5-12.5x single-core headroom (10,000 TPS / 4 shards scenario),
+expanding to 70x+ with 10-core scaling. Both ARM and x86 platforms confirm this.**
 
-Even accounting for:
+Key limitations resolved in current work:
+- [x] Multi-platform (ARM + x86 now measured)
+- [x] Classical baselines (ECDSA + Ed25519 included)
+- [x] SLH-DSA comparison (comprehensive_comparison covers all 7 algorithms)
+- [x] Multicore scaling (measured on both platforms)
+- [x] Hardware cycle counters (RDTSC on x86)
 
-- Slower hardware (10x headroom still ample)
-- Cross-shard overhead (14.7x after adjustment)
-- Thermal throttling (P5 = 17x headroom)
-- OS interference (statistical analysis shows consistency)
+Remaining limitations for future work:
+- [ ] AMD and Graviton platforms
+- [ ] ARM PMU cycle counters
+- [ ] Long-duration sustained-load testing
+- [ ] CPU affinity pinning on macOS
 
-**The research question is answered conclusively** within the limitations described.
-
-Future work should address these limitations for production deployment, but current results are sufficient for algorithm selection and architectural planning.
+**The research question is answered conclusively** within these limitations. Results are
+sufficient for algorithm selection and architectural planning.
