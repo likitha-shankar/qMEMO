@@ -1,0 +1,18 @@
+{
+  "test_name": "falcon512_concurrent_verify",
+  "timestamp": "2026-03-01T21:08:34Z",
+  "algorithm": "Falcon-512",
+  "concurrent": {
+    "signatures": 100,
+    "worker_threads": 4,
+    "total_time_ms": 3.9036,
+    "avg_latency_ms": 0.0390,
+    "throughput": 25617
+  },
+  "sequential": {
+    "total_time_ms": 4.7552,
+    "avg_latency_ms": 0.0476,
+    "throughput": 21030
+  },
+  "analysis": "Concurrent yields 17.9% lower latency (better parallelism)"
+}

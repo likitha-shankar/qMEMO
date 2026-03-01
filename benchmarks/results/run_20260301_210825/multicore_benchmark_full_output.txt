@@ -1,0 +1,31 @@
+
+================================================================
+  Falcon-512 Multithreaded Verification Benchmark  (qMEMO / IIT Chicago)
+================================================================
+
+Generating keypair and signing message ...
+OK. Signature length: 656 bytes.
+
+Threads |  Throughput (ops/sec)  |  Speedup  |  Efficiency
+--------|------------------------|-----------|------------
+   1   |               20169     |    1.00   |  100.0%
+   2   |               38399     |    1.90   |   95.2%
+   4   |               74909     |    3.71   |   92.9%
+   6   |              108256     |    5.37   |   89.5%
+   8   |              149046     |    7.39   |   92.4%
+  10   |              184467     |    9.15   |   91.5%
+
+--- JSON ---
+{
+  "test_name": "falcon512_multithreaded_verify",
+  "timestamp": "2026-03-01T21:08:33Z",
+  "algorithm": "Falcon-512",
+  "verif_per_thread": 1000,
+  "warmup_per_thread": 100,
+  "threads": [1, 2, 4, 6, 8, 10],
+  "ops_per_sec": [20169, 38399, 74909, 108256, 149046, 184467],
+  "speedup": [1.00, 1.90, 3.71, 5.37, 7.39, 9.15],
+  "efficiency_pct": [100.0, 95.2, 92.9, 89.5, 92.4, 91.5]
+}
+
+Multithreaded benchmark complete.

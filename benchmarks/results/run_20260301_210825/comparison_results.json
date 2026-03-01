@@ -1,0 +1,46 @@
+{
+  "test_name": "falcon512_vs_mldsa44",
+  "timestamp": "2026-03-01T21:08:31Z",
+  "config": {
+    "keygen_trials": 100,
+    "sign_trials": 1000,
+    "verify_trials": 10000,
+    "message_len": 256
+  },
+  "algorithms": {
+    "Falcon-512": {
+      "keygen_ops_sec": 153.30,
+      "keygen_us_op": 6522.98,
+      "sign_ops_sec": 4312.16,
+      "sign_us_op": 231.90,
+      "verify_ops_sec": 23876.84,
+      "verify_us_op": 41.88,
+      "pubkey_bytes": 897,
+      "privkey_bytes": 1281,
+      "signature_bytes": 657,
+      "total_tx_overhead": 1554
+    },
+    "ML-DSA-44": {
+      "keygen_ops_sec": 51916.71,
+      "keygen_us_op": 19.26,
+      "sign_ops_sec": 15974.81,
+      "sign_us_op": 62.60,
+      "verify_ops_sec": 49060.13,
+      "verify_us_op": 20.38,
+      "pubkey_bytes": 1312,
+      "privkey_bytes": 2560,
+      "signature_bytes": 2420,
+      "total_tx_overhead": 3732
+    }
+  },
+  "comparison": {
+    "verify_speedup_falcon": 0.4867,
+    "sign_speedup_falcon": 0.2699,
+    "keygen_speedup_falcon": 0.0030,
+    "signature_size_ratio": 0.2715,
+    "pubkey_size_ratio": 0.6837,
+    "total_tx_overhead_falcon": 1554,
+    "total_tx_overhead_dilithium": 3732,
+    "tx_overhead_ratio": 0.4164
+  }
+}

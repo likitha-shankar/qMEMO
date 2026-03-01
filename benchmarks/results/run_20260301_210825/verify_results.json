@@ -1,0 +1,15 @@
+{
+  "test_name": "falcon512_verify",
+  "timestamp": "2026-03-01T21:08:27Z",
+  "algorithm": "Falcon-512",
+  "iterations": 10000,
+  "warmup": 100,
+  "total_time_sec": 0.420395,
+  "ops_per_sec": 23787.14,
+  "ms_per_op": 0.042,
+  "us_per_op": 42.04,
+  "cycles_per_op": 147138.34,
+  "signature_bytes": 655,
+  "pubkey_bytes": 897,
+  "seckey_bytes": 1281
+}

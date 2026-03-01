@@ -1,0 +1,11 @@
+{
+  "test_name": "falcon512_multithreaded_verify",
+  "timestamp": "2026-03-01T21:08:33Z",
+  "algorithm": "Falcon-512",
+  "verif_per_thread": 1000,
+  "warmup_per_thread": 100,
+  "threads": [1, 2, 4, 6, 8, 10],
+  "ops_per_sec": [20169, 38399, 74909, 108256, 149046, 184467],
+  "speedup": [1.00, 1.90, 3.71, 5.37, 7.39, 9.15],
+  "efficiency_pct": [100.0, 95.2, 92.9, 89.5, 92.4, 91.5]
+}
