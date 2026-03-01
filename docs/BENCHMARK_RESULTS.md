@@ -211,7 +211,7 @@ provide an advantage for Falcon's FFT-based operations. Cascade Lake's edge is i
 
 Falcon-512 signature verification is **NOT** a performance bottleneck at any tested configuration.
 A single CPU core achieves 23,885-31,133 verifications/sec depending on architecture. With
-multicore scaling (10 cores), throughput reaches 176K-239K ops/sec.
+multithreaded scaling (10 threads), throughput reaches 176K-239K ops/sec.
 
 Optimized AVX-512 or NEON implementations of Falcon could provide an additional 2-3x improvement
 if needed, but current headroom is ample for any realistic blockchain deployment scenario.

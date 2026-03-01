@@ -1,5 +1,5 @@
 /*
- * multicore_benchmark.c -- Falcon-512 Verification Across Multiple Cores
+ * multicore_benchmark.c -- Falcon-512 Multithreaded Verification
  *
  * Part of the qMEMO project (IIT Chicago): benchmarks post-quantum
  * signature verification for MEMO blockchain.
@@ -42,12 +42,12 @@
 #define VERIF_PER_THREAD  1000
 
 /*
- * NUM_CORE_CONFIGS is an enum constant so it can be used as a C array size
+ * NUM_THREAD_CONFIGS is an enum constant so it can be used as a C array size
  * without triggering variable-length-array warnings.  Keep it in sync with
- * the CORE_COUNTS initialiser below.
+ * the THREAD_COUNTS initialiser below.
  */
-enum { NUM_CORE_CONFIGS = 6 };
-static const int CORE_COUNTS[NUM_CORE_CONFIGS] = { 1, 2, 4, 6, 8, 10 };
+enum { NUM_THREAD_CONFIGS = 6 };
+static const int THREAD_COUNTS[NUM_THREAD_CONFIGS] = { 1, 2, 4, 6, 8, 10 };
 
 /* ── Per-thread argument ──────────────────────────────────────────────────── */
 
@@ -96,7 +96,7 @@ static void *worker(void *arg)
 }
 
 /*
- * Run benchmark for one core count.
+ * Run benchmark for one thread count.
  *
  * Returns total ops/sec (all threads combined), or -1.0 on error.
  *
@@ -104,29 +104,29 @@ static void *worker(void *arg)
  *   spawn threads → threads do warm-up → barrier_wait (main joins last)
  *   → t_start recorded → threads do timed verifications → join all → t_end
  */
-static double run_for_cores(OQS_SIG *sig,
+static double run_for_threads(OQS_SIG *sig,
                             const uint8_t *public_key,
                             const uint8_t *message,
                             const uint8_t *signature,
                             size_t sig_len,
-                            int ncores)
+                            int nthreads)
 {
-    pthread_t    *threads = malloc((size_t)ncores * sizeof(pthread_t));
-    thread_arg_t *args    = malloc((size_t)ncores * sizeof(thread_arg_t));
+    pthread_t    *threads = malloc((size_t)nthreads * sizeof(pthread_t));
+    thread_arg_t *args    = malloc((size_t)nthreads * sizeof(thread_arg_t));
     barrier_t     barrier;
 
     if (!threads || !args) {
-        fprintf(stderr, "ERROR: malloc failed for %d threads\n", ncores);
+        fprintf(stderr, "ERROR: malloc failed for %d threads\n", nthreads);
         free(threads);
         free(args);
         return -1.0;
     }
 
-    /* Barrier has ncores workers + 1 main thread. */
-    barrier_init(&barrier, (unsigned)(ncores + 1));
+    /* Barrier has nthreads workers + 1 main thread. */
+    barrier_init(&barrier, (unsigned)(nthreads + 1));
 
     /* Per-thread private buffers to avoid false sharing */
-    for (int i = 0; i < ncores; i++) {
+    for (int i = 0; i < nthreads; i++) {
         args[i].id         = i;
         args[i].sig        = sig;
         args[i].public_key = malloc(sig->length_public_key);
@@ -152,7 +152,7 @@ static double run_for_cores(OQS_SIG *sig,
         memcpy(args[i].signature,  signature,  sig_len);
     }
 
-    for (int i = 0; i < ncores; i++) {
+    for (int i = 0; i < nthreads; i++) {
         if (pthread_create(&threads[i], NULL, worker, &args[i]) != 0) {
             fprintf(stderr, "FATAL: pthread_create failed for thread %d.\n", i);
             exit(EXIT_FAILURE);
@@ -167,12 +167,12 @@ static double run_for_cores(OQS_SIG *sig,
     barrier_wait(&barrier);
     double t_start = get_time();
 
-    for (int i = 0; i < ncores; i++)
+    for (int i = 0; i < nthreads; i++)
         pthread_join(threads[i], NULL);
 
     double t_end = get_time();
 
-    for (int i = 0; i < ncores; i++) {
+    for (int i = 0; i < nthreads; i++) {
         free(args[i].public_key);
         free(args[i].message);
         free(args[i].signature);
@@ -181,7 +181,7 @@ static double run_for_cores(OQS_SIG *sig,
     free(args);
     barrier_destroy(&barrier);
 
-    double total_verifications = (double)ncores * (double)VERIF_PER_THREAD;
+    double total_verifications = (double)nthreads * (double)VERIF_PER_THREAD;
     return total_verifications / (t_end - t_start);
 }
 
@@ -192,16 +192,16 @@ int main(void)
     OQS_STATUS rc;
     char timestamp[64];
 
-    /* Sized to NUM_CORE_CONFIGS -- update the enum above if CORE_COUNTS changes. */
-    double ops_per_sec[NUM_CORE_CONFIGS];
-    double speedup[NUM_CORE_CONFIGS];
-    double efficiency[NUM_CORE_CONFIGS];
+    /* Sized to NUM_THREAD_CONFIGS -- update the enum above if THREAD_COUNTS changes. */
+    double ops_per_sec[NUM_THREAD_CONFIGS];
+    double speedup[NUM_THREAD_CONFIGS];
+    double efficiency[NUM_THREAD_CONFIGS];
 
     get_timestamp(timestamp, sizeof(timestamp));
 
     printf("\n");
     printf("================================================================\n");
-    printf("  Falcon-512 Multicore Verification Benchmark  (qMEMO / IIT Chicago)\n");
+    printf("  Falcon-512 Multithreaded Verification Benchmark  (qMEMO / IIT Chicago)\n");
     printf("================================================================\n\n");
 
     OQS_init();
@@ -249,14 +249,14 @@ int main(void)
     }
     printf("OK. Signature length: %zu bytes.\n\n", sig_len);
 
-    printf("Cores  |  Throughput (ops/sec)  |  Speedup  |  Efficiency\n");
-    printf("-------|------------------------|-----------|------------\n");
+    printf("Threads |  Throughput (ops/sec)  |  Speedup  |  Efficiency\n");
+    printf("--------|------------------------|-----------|------------\n");
 
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++) {
-        int n = CORE_COUNTS[c];
-        double ops = run_for_cores(sig, public_key, message, signature, sig_len, n);
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++) {
+        int n = THREAD_COUNTS[c];
+        double ops = run_for_threads(sig, public_key, message, signature, sig_len, n);
         if (ops < 0.0) {
-            fprintf(stderr, "ERROR: Benchmark failed for %d cores.\n", n);
+            fprintf(stderr, "ERROR: Benchmark failed for %d threads.\n", n);
             goto cleanup;
         }
         ops_per_sec[c] = ops;
@@ -270,34 +270,34 @@ int main(void)
     /* ── JSON output ──────────────────────────────────────────────────────
      *
      * Arrays are printed via loops so the output adapts automatically
-     * when CORE_COUNTS is extended -- no hardcoded index literals.
+     * when THREAD_COUNTS is extended -- no hardcoded index literals.
      */
     printf("\n--- JSON ---\n");
     printf("{\n");
-    printf("  \"test_name\": \"falcon512_multicore_verify\",\n");
+    printf("  \"test_name\": \"falcon512_multithreaded_verify\",\n");
     printf("  \"timestamp\": \"%s\",\n", timestamp);
     printf("  \"algorithm\": \"Falcon-512\",\n");
     printf("  \"verif_per_thread\": %d,\n", VERIF_PER_THREAD);
     printf("  \"warmup_per_thread\": %d,\n", WARMUP_PER_THREAD);
 
-    printf("  \"cores\": [");
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++)
-        printf("%d%s", CORE_COUNTS[c], (c < NUM_CORE_CONFIGS - 1) ? ", " : "");
+    printf("  \"threads\": [");
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++)
+        printf("%d%s", THREAD_COUNTS[c], (c < NUM_THREAD_CONFIGS - 1) ? ", " : "");
     printf("],\n");
 
     printf("  \"ops_per_sec\": [");
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++)
-        printf("%.0f%s", ops_per_sec[c], (c < NUM_CORE_CONFIGS - 1) ? ", " : "");
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++)
+        printf("%.0f%s", ops_per_sec[c], (c < NUM_THREAD_CONFIGS - 1) ? ", " : "");
     printf("],\n");
 
     printf("  \"speedup\": [");
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++)
-        printf("%.2f%s", speedup[c], (c < NUM_CORE_CONFIGS - 1) ? ", " : "");
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++)
+        printf("%.2f%s", speedup[c], (c < NUM_THREAD_CONFIGS - 1) ? ", " : "");
     printf("],\n");
 
     printf("  \"efficiency_pct\": [");
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++)
-        printf("%.1f%s", efficiency[c], (c < NUM_CORE_CONFIGS - 1) ? ", " : "");
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++)
+        printf("%.1f%s", efficiency[c], (c < NUM_THREAD_CONFIGS - 1) ? ", " : "");
     printf("]\n");
 
     printf("}\n");
@@ -309,7 +309,7 @@ int main(void)
     OQS_SIG_free(sig);
     OQS_destroy();
 
-    printf("\nMulticore benchmark complete.\n");
+    printf("\nMultithreaded benchmark complete.\n");
     return EXIT_SUCCESS;
 
 cleanup:

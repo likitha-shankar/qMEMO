@@ -74,11 +74,11 @@ Falcon-512 is 18% faster on ARM. Algorithm selection should depend on deployment
 
 ### Multi-core Results -- Resolved
 
-**Status: Resolved.** Multicore scaling is now measured and documented.
+**Status: Resolved.** Multithreaded scaling is now measured and documented.
 
-**Measured scaling (1/2/4/6/8/10 cores):**
+**Measured scaling (1/2/4/6/8/10 threads):**
 
-| Cores | M2 Pro | Cascade Lake |
+| Threads | M2 Pro | Cascade Lake |
 |------:|-------:|-------------:|
 | 1 | 27,022 | 20,013 |
 | 10 | 239,297 (8.86x) | 176,714 (8.83x) |
@@ -336,7 +336,7 @@ Key limitations resolved in current work:
 - [x] Multi-platform (ARM + x86 now measured)
 - [x] Classical baselines (ECDSA + Ed25519 included)
 - [x] SLH-DSA comparison (comprehensive_comparison covers all 7 algorithms)
-- [x] Multicore scaling (measured on both platforms)
+- [x] Multithreaded scaling (measured on both platforms)
 - [x] Hardware cycle counters (RDTSC on x86)
 
 Remaining limitations for future work:
