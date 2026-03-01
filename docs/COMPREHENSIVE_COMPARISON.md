@@ -60,24 +60,24 @@
 
 ## Table 3: Throughput -- Intel Xeon Gold 6242 (Cascade Lake, x86-64)
 
-> Measured results from `benchmarks/bin/comprehensive_comparison`, run 2026-02-28.
+> Measured results from `benchmarks/bin/comprehensive_comparison`, run 2026-03-01.
 > Hardware: Intel Xeon Gold 6242 @ 2.80 GHz, 64 logical cores, 187 GB RAM.
 > Chameleon Cloud compute_cascadelake_r650, Ubuntu 22.04, GCC 11.4.
 > Compiler flags: `-O3 -march=native -ffast-math`. 1,000 iters/phase.
 
 | Algorithm | Keygen (ops/s) | Sign (ops/s) | Verify (ops/s) |
 |-----------|---------------:|-------------:|---------------:|
-| Falcon-512 | 154 | 4,306 | 23,906 |
+| Falcon-512 | 153 | 4,312 | 23,877 |
 | Falcon-1024 | 52 | 2,133 | 11,794 |
-| ML-DSA-44 | 51,466 | 15,299 | 48,627 |
+| ML-DSA-44 | 51,917 | 15,975 | 49,060 |
 | ML-DSA-65 | 29,832 | 9,971 | 30,287 |
 | SLH-DSA-SHA2-128f | 1,062 | 45 | 734 |
 | ECDSA secp256k1 | 2,655 | 2,638 | 2,963 |
 | Ed25519 | 23,062 | 23,184 | 9,013 |
 
-> Statistical validation (1,000 trials x 100 ops): Falcon-512 verify median 23,885 ops/sec, CV 0.67%.
+> Statistical validation (1,000 trials x 100 ops): Falcon-512 verify median 24,016 ops/sec, CV 0.66%.
 > RDTSC hardware cycle counter used -- exact cycle counts (not estimated from wall clock).
-> Falcon-512 verify: 146,778 cycles per operation @ 2.80 GHz.
+> Falcon-512 verify: 147,138 cycles per operation @ 2.80 GHz.
 
 ---
 
@@ -85,9 +85,9 @@
 
 | Algorithm | M2 Pro (ARM64) | Cascade Lake (x86) | x86 / ARM ratio |
 |-----------|---------------:|-------------------:|:---------------:|
-| Falcon-512 | 30,569 | 23,906 | 0.78x |
+| Falcon-512 | 30,569 | 23,877 | 0.78x |
 | Falcon-1024 | 15,618 | 11,794 | 0.76x |
-| ML-DSA-44 | 25,904 | 48,627 | **1.88x** |
+| ML-DSA-44 | 25,904 | 49,060 | **1.89x** |
 | ML-DSA-65 | 15,369 | 30,287 | **1.97x** |
 | SLH-DSA-SHA2-128f | 599 | 734 | 1.23x |
 | ECDSA secp256k1 | 4,026 | 2,963 | 0.74x |
@@ -123,7 +123,7 @@ Falcon is ~18% faster on ARM. Signing is the opposite: ML-DSA-44 signs 2.1x fast
 4,805 ops/sec). For verify-heavy workloads (blockchains), Falcon holds the edge on ARM.
 
 **Speed (x86 -- Cascade Lake):** The picture reverses dramatically. ML-DSA-44 verifies at
-48,627 ops/sec vs Falcon-512's 23,906 -- ML-DSA is **2.03x faster**. This is explained by
+49,060 ops/sec vs Falcon-512's 23,877 -- ML-DSA is **2.05x faster**. This is explained by
 liboqs AVX-512 SIMD optimizations for ML-DSA's NTT operations, which are well-suited to
 256-bit wide vector registers. Falcon's FFT-based Gaussian sampler is harder to vectorize.
 
@@ -190,17 +190,17 @@ Measured on both platforms (1/2/4/6/8/10 threads, `benchmarks/bin/multicore_benc
 
 | Threads | M2 Pro (ops/sec) | M2 Speedup | Cascade Lake (ops/sec) | CL Speedup |
 |--------:|-----------------:|-----------:|-----------------------:|-----------:|
-| 1 | 27,022 | 1.00x | 20,013 | 1.00x |
-| 2 | 62,203 | 2.30x | 38,771 | 1.94x |
-| 4 | 119,900 | 4.44x | 67,317 | 3.36x |
-| 6 | 186,463 | 6.90x | 107,917 | 5.39x |
-| 8 | 195,757 | 7.24x | 151,546 | 7.57x |
-| 10 | 239,297 | 8.86x | 176,714 | 8.83x |
+| 1 | 27,022 | 1.00x | 20,169 | 1.00x |
+| 2 | 62,203 | 2.30x | 38,399 | 1.90x |
+| 4 | 119,900 | 4.44x | 74,909 | 3.71x |
+| 6 | 186,463 | 6.90x | 108,256 | 5.37x |
+| 8 | 195,757 | 7.24x | 149,046 | 7.39x |
+| 10 | 239,297 | 8.86x | 184,467 | 9.15x |
 
 Falcon-512 verification scales near-linearly to 4 threads on both platforms. M2 Pro shows
 super-linear scaling to 6 threads (6.90x at 6 threads) due to its higher-bandwidth L2/L3
-cache hierarchy accommodating the working set. At 10 threads, both platforms achieve ~8.8x
-speedup. A 10-thread Cascade Lake deployment reaches 176K verifications/sec.
+cache hierarchy accommodating the working set. At 10 threads, Cascade Lake achieves 9.15x
+speedup. A 10-thread Cascade Lake deployment reaches 184K verifications/sec.
 
 ## Multithreaded Signing Throughput
 

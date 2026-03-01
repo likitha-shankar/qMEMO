@@ -15,8 +15,8 @@ This document honestly acknowledges the limitations of this benchmarking study.
 **Platforms measured:**
 
 - Apple M2 Pro (ARM64, macOS) -- single-core median 31,133 ops/sec, CV 3.92%
-- Intel Xeon Gold 6242 (x86-64, Cascade Lake, Ubuntu 22.04) -- median 23,885 ops/sec,
-  CV 0.67%, 146,778 RDTSC exact cycles
+- Intel Xeon Gold 6242 (x86-64, Cascade Lake, Ubuntu 22.04) -- median 24,016 ops/sec,
+  CV 0.66%, 147,138 RDTSC exact cycles
 
 **Key cross-architecture finding:** ML-DSA-44 is 2x faster than Falcon-512 on x86 (AVX-512);
 Falcon-512 is 18% faster on ARM. Algorithm selection should depend on deployment architecture.
@@ -80,8 +80,8 @@ Falcon-512 is 18% faster on ARM. Algorithm selection should depend on deployment
 
 | Threads | M2 Pro | Cascade Lake |
 |------:|-------:|-------------:|
-| 1 | 27,022 | 20,013 |
-| 10 | 239,297 (8.86x) | 176,714 (8.83x) |
+| 1 | 27,022 | 20,169 |
+| 10 | 239,297 (8.86x) | 184,467 (9.15x) |
 
 Both platforms show near-linear scaling to 4 cores and approximately 8.8x at 10 cores.
 Results are in `docs/COMPREHENSIVE_COMPARISON.md` and `benchmarks/results/`.
@@ -259,7 +259,7 @@ ops/sec, but has 32-byte public keys and purely hash-based security assumptions.
 **Status: Partially resolved.** RDTSC exact cycle counting is now implemented for x86-64.
 
 - **x86-64 (Cascade Lake):** `get_cycles()` uses RDTSC -- exact hardware cycle counts,
-  zero OS overhead. Result: 146,778 cycles/verify (gold standard for comparison).
+  zero OS overhead. Result: 147,138 cycles/verify (gold standard for comparison).
 - **ARM (M2 Pro):** `get_cycles()` estimates from wall clock at BENCH_FREQ_GHZ (3.504 GHz).
   ARM PMU cycle counter (PMCCNTR_EL0) requires kernel privilege on macOS -- not available
   without a custom kernel extension.
