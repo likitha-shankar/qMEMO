@@ -1,0 +1,12 @@
+{
+  "hostname": "qmemo-cascade-bench",
+  "os": "Linux 5.15.0-144-generic",
+  "arch": "x86_64",
+  "cpu_model": "Intel(R) Xeon(R) Gold 6242 CPU @ 2.80GHz",
+  "cpu_cores": 64,
+  "ram_gb": 187,
+  "compiler": "cc (Ubuntu 11.4.0-1ubuntu1~22.04.2) 11.4.0",
+  "liboqs_version": "d1d8447",
+  "timestamp": "2026-03-01T21:08:27Z",
+  "run_tag": "20260301_210825"
+}
