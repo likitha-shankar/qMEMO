@@ -184,12 +184,12 @@ more expensive.
 
 ---
 
-## Multicore Verification Scaling
+## Multithreaded Verification Scaling
 
-Measured on both platforms (1/2/4/6/8/10 cores, `benchmarks/bin/multicore_benchmark`):
+Measured on both platforms (1/2/4/6/8/10 threads, `benchmarks/bin/multicore_benchmark`):
 
-| Cores | M2 Pro (ops/sec) | M2 Speedup | Cascade Lake (ops/sec) | CL Speedup |
-|------:|-----------------:|-----------:|-----------------------:|-----------:|
+| Threads | M2 Pro (ops/sec) | M2 Speedup | Cascade Lake (ops/sec) | CL Speedup |
+|--------:|-----------------:|-----------:|-----------------------:|-----------:|
 | 1 | 27,022 | 1.00x | 20,013 | 1.00x |
 | 2 | 62,203 | 2.30x | 38,771 | 1.94x |
 | 4 | 119,900 | 4.44x | 67,317 | 3.36x |
@@ -197,18 +197,18 @@ Measured on both platforms (1/2/4/6/8/10 cores, `benchmarks/bin/multicore_benchm
 | 8 | 195,757 | 7.24x | 151,546 | 7.57x |
 | 10 | 239,297 | 8.86x | 176,714 | 8.83x |
 
-Falcon-512 verification scales near-linearly to 4 cores on both platforms. M2 Pro shows
-super-linear scaling to 6 cores (6.90x at 6 cores) due to its higher-bandwidth L2/L3
-cache hierarchy accommodating the working set. At 10 cores, both platforms achieve ~8.8x
-speedup. A 10-core Cascade Lake deployment reaches 176K verifications/sec.
+Falcon-512 verification scales near-linearly to 4 threads on both platforms. M2 Pro shows
+super-linear scaling to 6 threads (6.90x at 6 threads) due to its higher-bandwidth L2/L3
+cache hierarchy accommodating the working set. At 10 threads, both platforms achieve ~8.8x
+speedup. A 10-thread Cascade Lake deployment reaches 176K verifications/sec.
 
-## Multicore Signing Throughput
+## Multithreaded Signing Throughput
 
 See `benchmarks/src/sign_benchmark.c`. Run `./benchmarks/bin/sign_benchmark` for
-thread-scaling results (1-10 cores). Each thread owns an independent `OQS_SIG` context --
+thread-scaling results (1-10 threads). Each thread owns an independent `OQS_SIG` context --
 required for Falcon's stateful PRNG-based Gaussian sampler.
 
-Key insight: Falcon signing scales near-linearly with core count. At 10 cores on the M2
+Key insight: Falcon signing scales near-linearly with thread count. At 10 threads on the M2
 Pro, aggregate signing throughput exceeds 30K ops/sec -- bringing it within range of
 single-threaded Ed25519 sign throughput.
 

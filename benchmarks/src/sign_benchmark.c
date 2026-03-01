@@ -1,8 +1,8 @@
 /*
- * sign_benchmark.c -- Falcon-512 Multicore Signing Throughput
+ * sign_benchmark.c -- Falcon-512 Multithreaded Signing Throughput
  *
  * Part of the qMEMO project (IIT Chicago): benchmarks post-quantum
- * cryptographic signing performance across multiple cores.
+ * cryptographic signing performance across multiple threads.
  *
  * Measures total signing throughput when running N threads in parallel
  * (N = 1, 2, 4, 6, 8, 10).  Unlike verification, each thread MUST own
@@ -48,11 +48,11 @@
 #define SIGN_PER_THREAD    500
 
 /*
- * NUM_CORE_CONFIGS is an enum constant so it can be used as a C array size
+ * NUM_THREAD_CONFIGS is an enum constant so it can be used as a C array size
  * without triggering variable-length-array warnings.
  */
-enum { NUM_CORE_CONFIGS = 6 };
-static const int CORE_COUNTS[NUM_CORE_CONFIGS] = { 1, 2, 4, 6, 8, 10 };
+enum { NUM_THREAD_CONFIGS = 6 };
+static const int THREAD_COUNTS[NUM_THREAD_CONFIGS] = { 1, 2, 4, 6, 8, 10 };
 
 /* ── Per-thread argument ──────────────────────────────────────────────────── */
 
@@ -116,7 +116,7 @@ static void *worker(void *arg)
 }
 
 /*
- * Run benchmark for one core count.
+ * Run benchmark for one thread count.
  *
  * Returns total ops/sec (all threads combined), or -1.0 on error.
  *
@@ -124,23 +124,23 @@ static void *worker(void *arg)
  *   spawn threads → threads do warm-up → barrier_wait (main joins last)
  *   → t_start recorded → threads do timed signs → join all → t_end
  */
-static double run_for_cores(const uint8_t *secret_key, size_t sk_len, int ncores)
+static double run_for_threads(const uint8_t *secret_key, size_t sk_len, int nthreads)
 {
-    pthread_t    *threads = malloc((size_t)ncores * sizeof(pthread_t));
-    thread_arg_t *args    = malloc((size_t)ncores * sizeof(thread_arg_t));
+    pthread_t    *threads = malloc((size_t)nthreads * sizeof(pthread_t));
+    thread_arg_t *args    = malloc((size_t)nthreads * sizeof(thread_arg_t));
     barrier_t     barrier;
 
     if (!threads || !args) {
-        fprintf(stderr, "ERROR: malloc failed for %d threads\n", ncores);
+        fprintf(stderr, "ERROR: malloc failed for %d threads\n", nthreads);
         free(threads);
         free(args);
         return -1.0;
     }
 
-    /* Barrier has ncores workers + 1 main thread. */
-    barrier_init(&barrier, (unsigned)(ncores + 1));
+    /* Barrier has nthreads workers + 1 main thread. */
+    barrier_init(&barrier, (unsigned)(nthreads + 1));
 
-    for (int i = 0; i < ncores; i++) {
+    for (int i = 0; i < nthreads; i++) {
         args[i].id         = i;
         args[i].secret_key = malloc(sk_len);
         args[i].sk_len     = sk_len;
@@ -162,7 +162,7 @@ static double run_for_cores(const uint8_t *secret_key, size_t sk_len, int ncores
         memset(args[i].message,    MSG_FILL_BYTE, MSG_LEN);
     }
 
-    for (int i = 0; i < ncores; i++) {
+    for (int i = 0; i < nthreads; i++) {
         if (pthread_create(&threads[i], NULL, worker, &args[i]) != 0) {
             fprintf(stderr, "FATAL: pthread_create failed for thread %d.\n", i);
             exit(EXIT_FAILURE);
@@ -176,12 +176,12 @@ static double run_for_cores(const uint8_t *secret_key, size_t sk_len, int ncores
     barrier_wait(&barrier);
     double t_start = get_time();
 
-    for (int i = 0; i < ncores; i++)
+    for (int i = 0; i < nthreads; i++)
         pthread_join(threads[i], NULL);
 
     double t_end = get_time();
 
-    for (int i = 0; i < ncores; i++) {
+    for (int i = 0; i < nthreads; i++) {
         OQS_MEM_secure_free(args[i].secret_key, sk_len);
         free(args[i].message);
     }
@@ -189,7 +189,7 @@ static double run_for_cores(const uint8_t *secret_key, size_t sk_len, int ncores
     free(args);
     barrier_destroy(&barrier);
 
-    double total_signs = (double)ncores * (double)SIGN_PER_THREAD;
+    double total_signs = (double)nthreads * (double)SIGN_PER_THREAD;
     return total_signs / (t_end - t_start);
 }
 
@@ -200,15 +200,15 @@ int main(void)
     OQS_STATUS rc;
     char timestamp[64];
 
-    double ops_per_sec[NUM_CORE_CONFIGS];
-    double speedup[NUM_CORE_CONFIGS];
-    double efficiency[NUM_CORE_CONFIGS];
+    double ops_per_sec[NUM_THREAD_CONFIGS];
+    double speedup[NUM_THREAD_CONFIGS];
+    double efficiency[NUM_THREAD_CONFIGS];
 
     get_timestamp(timestamp, sizeof(timestamp));
 
     printf("\n");
     printf("================================================================\n");
-    printf("  Falcon-512 Multicore Signing Benchmark  (qMEMO / IIT Chicago)\n");
+    printf("  Falcon-512 Multithreaded Signing Benchmark  (qMEMO / IIT Chicago)\n");
     printf("================================================================\n\n");
 
     OQS_init();
@@ -244,14 +244,14 @@ int main(void)
 
     printf("Config:  %d warm-up signs, %d timed signs per thread\n\n",
            WARMUP_PER_THREAD, SIGN_PER_THREAD);
-    printf("Cores  |  Throughput (ops/sec)  |  Per-thread (ops/sec)  |  Speedup  |  Efficiency\n");
-    printf("-------|------------------------|------------------------|-----------|------------\n");
+    printf("Threads |  Throughput (ops/sec)  |  Per-thread (ops/sec)  |  Speedup  |  Efficiency\n");
+    printf("--------|------------------------|------------------------|-----------|------------\n");
 
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++) {
-        int n = CORE_COUNTS[c];
-        double ops = run_for_cores(secret_key, sig->length_secret_key, n);
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++) {
+        int n = THREAD_COUNTS[c];
+        double ops = run_for_threads(secret_key, sig->length_secret_key, n);
         if (ops < 0.0) {
-            fprintf(stderr, "ERROR: Benchmark failed for %d cores.\n", n);
+            fprintf(stderr, "ERROR: Benchmark failed for %d threads.\n", n);
             goto cleanup;
         }
         ops_per_sec[c] = ops;
@@ -266,30 +266,30 @@ int main(void)
     /* ── JSON output ────────────────────────────────────────────────────── */
     printf("\n--- JSON ---\n");
     printf("{\n");
-    printf("  \"test_name\": \"falcon512_multicore_sign\",\n");
+    printf("  \"test_name\": \"falcon512_multithreaded_sign\",\n");
     printf("  \"timestamp\": \"%s\",\n", timestamp);
     printf("  \"algorithm\": \"Falcon-512\",\n");
     printf("  \"sign_per_thread\": %d,\n", SIGN_PER_THREAD);
     printf("  \"warmup_per_thread\": %d,\n", WARMUP_PER_THREAD);
 
-    printf("  \"cores\": [");
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++)
-        printf("%d%s", CORE_COUNTS[c], (c < NUM_CORE_CONFIGS - 1) ? ", " : "");
+    printf("  \"threads\": [");
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++)
+        printf("%d%s", THREAD_COUNTS[c], (c < NUM_THREAD_CONFIGS - 1) ? ", " : "");
     printf("],\n");
 
     printf("  \"ops_per_sec\": [");
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++)
-        printf("%.0f%s", ops_per_sec[c], (c < NUM_CORE_CONFIGS - 1) ? ", " : "");
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++)
+        printf("%.0f%s", ops_per_sec[c], (c < NUM_THREAD_CONFIGS - 1) ? ", " : "");
     printf("],\n");
 
     printf("  \"speedup\": [");
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++)
-        printf("%.2f%s", speedup[c], (c < NUM_CORE_CONFIGS - 1) ? ", " : "");
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++)
+        printf("%.2f%s", speedup[c], (c < NUM_THREAD_CONFIGS - 1) ? ", " : "");
     printf("],\n");
 
     printf("  \"efficiency_pct\": [");
-    for (int c = 0; c < NUM_CORE_CONFIGS; c++)
-        printf("%.1f%s", efficiency[c], (c < NUM_CORE_CONFIGS - 1) ? ", " : "");
+    for (int c = 0; c < NUM_THREAD_CONFIGS; c++)
+        printf("%.1f%s", efficiency[c], (c < NUM_THREAD_CONFIGS - 1) ? ", " : "");
     printf("]\n");
 
     printf("}\n");
@@ -299,7 +299,7 @@ int main(void)
     OQS_SIG_free(sig);
     OQS_destroy();
 
-    printf("\nMulticore signing benchmark complete.\n");
+    printf("\nMultithreaded signing benchmark complete.\n");
     return EXIT_SUCCESS;
 
 cleanup:

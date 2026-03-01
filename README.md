@@ -33,7 +33,7 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 | **Falcon-512 vs ECDSA verify** | Falcon 7.6x faster (ARM), 8.1x faster (x86) |
 | **Falcon-512 signature size** | Max 752 bytes vs ML-DSA-44's 2,420 bytes (3.2x smaller) |
 | **SLH-DSA-SHA2-128f sign rate** | 36-45 ops/sec -- unsuitable for high-TPS |
-| **10-core Falcon-512 verify** | 239K ops/sec (ARM), 177K ops/sec (x86) -- ~8.8x speedup |
+| **10-thread Falcon-512 verify** | 239K ops/sec (ARM), 177K ops/sec (x86) -- ~8.8x speedup |
 | **Cycle count (RDTSC, x86)** | 146,778 cycles/verify @ 2.80 GHz |
 
 ---
@@ -45,7 +45,7 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 | `verify_benchmark` | `verify_benchmark.c` | Single-pass Falcon-512 verify throughput, 10K iterations |
 | `statistical_benchmark` | `statistical_benchmark.c` | 1,000 trials x 100 ops; median, IQR, CV, Jarque-Bera |
 | `comparison_benchmark` | `comparison_benchmark.c` | Falcon-512 vs ML-DSA-44 side-by-side |
-| `multicore_benchmark` | `multicore_benchmark.c` | Falcon-512 verify throughput: 1/2/4/6/8/10 cores |
+| `multicore_benchmark` | `multicore_benchmark.c` | Falcon-512 verify throughput: 1/2/4/6/8/10 threads |
 | `concurrent_benchmark` | `concurrent_benchmark.c` | Thread-pool concurrent verification |
 | `concurrent_signing_benchmark` | `concurrent_signing_benchmark.c` | Thread-pool concurrent signing |
 | `sign_benchmark` | `sign_benchmark.c` | Falcon-512 **signing** throughput: 1/2/4/6/8/10 cores |
