@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-**Can Falcon-512 meet performance requirements?** Yes. A single CPU core achieves **31,133 verifications per second** (M2 Pro ARM, median over 1,000 trials, CV = 3.92%) or **23,885 verifications/sec** (Cascade Lake x86, CV = 0.67%). With 10-core parallel scaling, throughput reaches 239K ops/sec (ARM) or 176K ops/sec (x86). MEMO's conservative scenario (10,000 TPS across 4 shards) requires 2,500 verif/sec per shard, yielding **9.5x headroom** even on the slower x86 node. Falcon-512 verification is not a performance bottleneck at any tested configuration.
+**Can Falcon-512 meet performance requirements?** Yes. A single CPU core achieves **31,133 verifications per second** (M2 Pro ARM, median over 1,000 trials, CV = 3.92%) or **24,016 verifications/sec** (Cascade Lake x86, CV = 0.66%). With 10-thread parallel scaling, throughput reaches 239K ops/sec (ARM) or 184K ops/sec (x86). MEMO's conservative scenario (10,000 TPS across 4 shards) requires 2,500 verif/sec per shard, yielding **9.6x headroom** even on the slower x86 node. Falcon-512 verification is not a performance bottleneck at any tested configuration.
 
 ---
 
@@ -112,14 +112,14 @@ cross-architecture comparison.
 - **Target:** 10,000 TPS across 4 shards
 - **Per-shard requirement:** 2,500 verif/sec
 - **Performance (M2 Pro single-core median):** 31,133 verif/sec -- **12.5x headroom**
-- **Performance (Cascade Lake single-core median):** 23,885 verif/sec -- **9.5x headroom**
-- **Performance (Cascade Lake 10-core):** 176,714 verif/sec -- **70.7x headroom**
+- **Performance (Cascade Lake single-core median):** 24,016 verif/sec -- **9.6x headroom**
+- **Performance (Cascade Lake 10-thread):** 184,467 verif/sec -- **73.8x headroom**
 
 ### Target Scenario
 
 - **Target:** 50,700 TPS across 256 shards
 - **Per-shard requirement:** 198 verif/sec
-- **Performance (Cascade Lake single-core):** 23,885 verif/sec -- **120x headroom**
+- **Performance (Cascade Lake single-core):** 24,016 verif/sec -- **121x headroom**
 
 ### With Cross-Shard Overhead
 
@@ -127,7 +127,7 @@ Assuming 20% cross-shard transactions requiring dual verification:
 
 - **Effective multiplier:** 1.2x
 - **Adjusted requirement (4 shards):** 3,000 verif/sec
-- **Cascade Lake single-core headroom:** 7.9x (still ample)
+- **Cascade Lake single-core headroom:** 8.0x (still ample)
 
 ---
 
@@ -135,7 +135,7 @@ Assuming 20% cross-shard transactions requiring dual verification:
 
 ## Cascade Lake Results (Intel Xeon Gold 6242, x86-64)
 
-**Run:** 2026-02-28 (run_20260228_223247) -- Chameleon Cloud compute_cascadelake_r650
+**Run:** 2026-03-01 (run_20260301_210825) -- Chameleon Cloud compute_cascadelake_r650
 
 ### Hardware
 
@@ -153,28 +153,28 @@ Assuming 20% cross-shard transactions requiring dual verification:
 | Metric | Value |
 |--------|-------|
 | Iterations | 10,000 |
-| Total time | 0.419 sec |
-| Throughput | 23,846 ops/sec |
-| Latency (mean) | 41.94 us |
-| CPU cycles (RDTSC) | 146,778 |
-| Signature size | 653 bytes |
+| Total time | 0.420 sec |
+| Throughput | 23,787 ops/sec |
+| Latency (mean) | 42.04 us |
+| CPU cycles (RDTSC) | 147,138 |
+| Signature size | 655 bytes |
 
 ### Statistical Analysis (1,000 trials x 100 ops)
 
 | Statistic | Value |
 |-----------|-------|
-| Mean | 23,862 ops/sec |
-| Median (P50) | 23,885 ops/sec |
-| Std Dev | 161 ops/sec |
-| CV | 0.67% |
-| Min | 20,240 ops/sec |
-| P5 | 23,798 ops/sec |
-| P95 | 23,929 ops/sec |
-| Max | 23,937 ops/sec |
-| IQR | 7.3 ops/sec |
-| Outliers (>3s) | 16/1000 (1.6%) |
+| Mean | 23,988 ops/sec |
+| Median (P50) | 24,016 ops/sec |
+| Std Dev | 157 ops/sec |
+| CV | 0.66% |
+| Min | 20,215 ops/sec |
+| P5 | 23,973 ops/sec |
+| P95 | 24,029 ops/sec |
+| Max | 24,036 ops/sec |
+| IQR | 34.64 ops/sec |
+| Outliers (>3s) | 20/1000 (2.0%) |
 
-The CV of **0.67%** is exceptional -- over 5x more stable than the M2 Pro result (3.92%).
+The CV of **0.66%** is exceptional -- over 5x more stable than the M2 Pro result (3.92%).
 This reflects the Cascade Lake's dedicated server-class memory controller and the absence
 of efficiency-core scheduling interference.
 
@@ -198,20 +198,20 @@ AVX-512 capabilities are not leveraged by Falcon in liboqs 0.15.0.
 | Platform | Falcon-512 Verify (median) | CV | Cycles/op |
 |----------|:--------------------------:|:--:|:---------:|
 | Apple M2 Pro (ARM64) | 31,133 ops/sec | 3.92% | ~79,200 est. |
-| Intel Xeon Gold 6242 (x86) | 23,885 ops/sec | 0.67% | 146,778 (RDTSC) |
+| Intel Xeon Gold 6242 (x86) | 24,016 ops/sec | 0.66% | 147,138 (RDTSC) |
 
-M2 Pro verifies Falcon-512 **30% faster** than Cascade Lake in throughput terms, despite a lower
+M2 Pro verifies Falcon-512 **29% faster** than Cascade Lake in throughput terms, despite a lower
 clock frequency. The M2 Pro's out-of-order pipeline, unified memory bandwidth, and NEON SIMD
 provide an advantage for Falcon's FFT-based operations. Cascade Lake's edge is in ML-DSA-44
-(2x faster via AVX-512), not Falcon.
+(2.05x faster via AVX-512), not Falcon.
 
 ---
 
 ## Conclusion
 
 Falcon-512 signature verification is **NOT** a performance bottleneck at any tested configuration.
-A single CPU core achieves 23,885-31,133 verifications/sec depending on architecture. With
-multithreaded scaling (10 threads), throughput reaches 176K-239K ops/sec.
+A single CPU core achieves 24,016-31,133 verifications/sec (median) depending on architecture. With
+multithreaded scaling (10 threads), throughput reaches 184K-239K ops/sec.
 
 Optimized AVX-512 or NEON implementations of Falcon could provide an additional 2-3x improvement
 if needed, but current headroom is ample for any realistic blockchain deployment scenario.

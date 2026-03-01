@@ -14,11 +14,11 @@ and official specifications, using two independent hardware platforms.
 | Hardware | 3.504 GHz P-cores | 2.80 GHz Cascade Lake |
 | Implementation | liboqs 0.15.0 reference | liboqs 0.15.0 reference |
 | Cycle counter | Estimated (wall clock) | RDTSC (exact hardware) |
-| Single-pass verify | 30,757 ops/sec | 23,846 ops/sec |
-| Statistical median | 31,133 ops/sec | 23,885 ops/sec |
-| CV (stability) | 3.92% | 0.67% |
-| Cycles/verify | ~113,900 (estimated) | 146,778 (exact RDTSC) |
-| Run date | 2026-02-28 | 2026-02-28 |
+| Single-pass verify | 30,757 ops/sec | 23,787 ops/sec |
+| Statistical median | 31,133 ops/sec | 24,016 ops/sec |
+| CV (stability) | 3.92% | 0.66% |
+| Cycles/verify | ~113,900 (estimated) | 147,138 (exact RDTSC) |
+| Run date | 2026-02-28 | 2026-03-01 |
 
 ---
 
@@ -37,17 +37,17 @@ and official specifications, using two independent hardware platforms.
 
 | Quantity | Value |
 |----------|-------|
-| RDTSC cycles/verify | 146,778 |
+| RDTSC cycles/verify | 147,138 |
 | Clock frequency | 2.80 GHz |
-| Latency | 52.4 us |
-| Ops/sec (measured) | 23,885 |
+| Latency | 52.5 us |
+| Ops/sec (measured) | 24,016 |
 
 **Cycle comparison:**
 
 | Platform | Cycles | Latency | Ops/sec |
 |----------|-------:|--------:|--------:|
 | i5-8259U (published) | 82,339 | 35.8 us | 27,939 |
-| Xeon Gold 6242 (ours, RDTSC) | 146,778 | 52.4 us | 23,885 |
+| Xeon Gold 6242 (ours, RDTSC) | 147,138 | 52.5 us | 24,016 |
 
 **Why Cascade Lake uses more cycles:**
 
@@ -102,7 +102,7 @@ This is intentional for cross-platform comparability.
 
 **Context:** This figure corresponds to the i5-8259U @ 2.3 GHz reference submission result.
 
-**Our Cascade Lake result at 2.80 GHz:** 23,885 ops/sec
+**Our Cascade Lake result at 2.80 GHz:** 24,016 ops/sec (median)
 
 Cascade Lake runs at a higher frequency but uses more cycles per operation (portable
 vs optimized), resulting in lower throughput than the 28K reference. This is consistent
@@ -118,7 +118,7 @@ with the portable-vs-AVX2 explanation above.
 |----------|----:|-------:|--------:|---------|--------|
 | Intel i5-8259U | 2.3 | 82,339 | 27,939 | RDTSC | NIST submission |
 | AMD Ryzen 7 3700X | 3.6 | ~82,000 | ~39,024 | RDTSC | liboqs CI (2024) |
-| Intel Xeon Gold 6242 (ours) | 2.80 | **146,778** | **23,885** | **RDTSC** | **This work** |
+| Intel Xeon Gold 6242 (ours) | 2.80 | **147,138** | **24,016** | **RDTSC** | **This work** |
 | Apple M2 Pro (ours) | 3.504 | ~113,900 | **31,133** | est. | **This work** |
 | ARM M1 (NEON optimized) | ~3.2 | ~40,000 | ~64,260 | PMC | Published paper |
 
@@ -142,18 +142,19 @@ counts independent of scheduling noise.
 | Cycle counter | RDTSC (`__asm__ __volatile__("rdtsc")`) | Exact hardware |
 | OS overhead | Eliminated (cycles not wall-clock) | Better than published |
 | Warm-up | 100 iterations | Matches spec |
-| Stability (CV) | 0.67% | Excellent |
+| Stability (CV) | 0.66% | Excellent |
 
 **Internal consistency check (Cascade Lake):**
 
 | Quantity | Value |
 |----------|-------|
-| Single-pass ops/sec | 23,846 |
-| Statistical median | 23,885 |
-| Difference | 0.16% |
+| Single-pass ops/sec | 23,787 |
+| Statistical median | 24,016 |
+| Difference | 0.96% |
 
-The 0.16% agreement between single-pass and statistical median is essentially perfect,
-confirming the RDTSC measurement is self-consistent and free of systematic bias.
+The 0.96% difference between single-pass and statistical median is within normal bounds for
+a bare-metal Linux server, confirming the RDTSC measurement is self-consistent and free
+of systematic bias.
 
 ---
 
@@ -162,7 +163,7 @@ confirming the RDTSC measurement is self-consistent and free of systematic bias.
 | Platform | Single-run | Stat. median | Difference | CV |
 |----------|-----------:|-------------:|-----------:|---:|
 | M2 Pro | 30,757 | 31,133 | 1.2% | 3.92% |
-| Cascade Lake | 23,846 | 23,885 | 0.16% | 0.67% |
+| Cascade Lake | 23,787 | 24,016 | 0.96% | 0.66% |
 
 Both platforms show excellent single-run to statistical agreement. The Cascade Lake result
 is tighter due to bare-metal Linux eliminating the macOS background scheduling noise.
@@ -191,7 +192,7 @@ correct, not just fast.
 |----------|-----------|-------:|-------------:|--------|
 | Too fast (compiler bug) | >100K ops/sec | 31K | 24K | OK |
 | Too slow (build problem) | <10K ops/sec | 31K | 24K | OK |
-| High variance | CV >10% | 3.92% | 0.67% | OK |
+| High variance | CV >10% | 3.92% | 0.66% | OK |
 | Wrong cycles (M2 est.) | <50K or >200K | ~114K | -- | OK |
 | Wrong cycles (x86 RDTSC) | <50K or >300K | -- | 147K | OK |
 
@@ -204,9 +205,9 @@ All checks pass on both platforms.
 | Check | M2 Pro | Cascade Lake |
 |-------|--------|-------------|
 | Result in correct order of magnitude | OK | OK |
-| Cycle count plausible for portable liboqs | OK (113,900 est.) | OK (146,778 RDTSC) |
-| Single-run and statistical agree | 1.2% | 0.16% |
-| Low CV (measurement stability) | 3.92% (acceptable) | 0.67% (excellent) |
+| Cycle count plausible for portable liboqs | OK (113,900 est.) | OK (147,138 RDTSC) |
+| Single-run and statistical agree | 1.2% | 0.96% |
+| Low CV (measurement stability) | 3.92% (acceptable) | 0.66% (excellent) |
 | Correctness verified (key_inspection) | PASS | PASS |
 | Conservative (reference impl, not optimized) | Yes | Yes |
 
