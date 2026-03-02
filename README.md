@@ -18,8 +18,8 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 | Algorithm | Apple M2 Pro (ARM64) | Intel Xeon Gold 6242 (x86) |
 |-----------|---------------------:|---------------------------:|
-| Falcon-512 verify | 31,133 ops/sec | 23,885 ops/sec |
-| ML-DSA-44 verify | 25,904 ops/sec | **48,627 ops/sec** |
+| Falcon-512 verify | 31,133 ops/sec | 23,787 ops/sec |
+| ML-DSA-44 verify | 25,904 ops/sec | **49,060 ops/sec** |
 | Ed25519 verify | 8,857 ops/sec | 9,013 ops/sec |
 | ECDSA secp256k1 verify | 4,026 ops/sec | 2,963 ops/sec |
 
@@ -30,10 +30,10 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 | Metric | Value |
 |--------|-------|
-| **Falcon-512 vs ECDSA verify** | Falcon 7.6x faster (ARM), 8.1x faster (x86) |
+| **Falcon-512 vs ECDSA verify** | Falcon 7.7x faster (ARM), 8.0x faster (x86) |
 | **Falcon-512 signature size** | Max 752 bytes vs ML-DSA-44's 2,420 bytes (3.2x smaller) |
 | **SLH-DSA-SHA2-128f sign rate** | 36-45 ops/sec -- unsuitable for high-TPS |
-| **10-thread Falcon-512 verify** | 239K ops/sec (ARM), 177K ops/sec (x86) -- ~8.8x speedup |
+| **10-thread Falcon-512 verify** | 239K ops/sec (ARM, 8.9x), 184K ops/sec (x86, 9.1x) |
 | **Cycle count (RDTSC, x86)** | 146,778 cycles/verify @ 2.80 GHz |
 
 ---
