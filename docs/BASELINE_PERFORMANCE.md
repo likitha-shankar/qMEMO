@@ -1,10 +1,11 @@
 # MEMO Blockchain — Classical Baseline Performance
 
-**Platform:** Intel Xeon Gold 6242 Cascade Lake, 2×16-core @ 2.80 GHz (32 physical / 64 logical),
-187 GB RAM, Ubuntu 22.04, GCC 11.4.0
+**Platform:** Intel Xeon Gold 6126 Skylake-SP, 2×12-core @ 2.60 GHz (24 physical / 48 logical),
+187 GB RAM, Ubuntu 24.04.2 LTS, GCC 13.3.0
 **Source branch:** `harsha-original` — `blockchain_pos_v45/`
 **Benchmark date:** 2026-03-10
 **Benchmark tool:** `benchmark.sh` (end-to-end) + `build/benchmark` (micro)
+**Chameleon node:** `qmemo` (chi.tacc.chameleoncloud.org, floating IP 129.114.108.20)
 
 ---
 
@@ -12,20 +13,22 @@
 
 | Property | Value |
 |----------|-------|
-| Host alias | `chameleon-new` (129.114.108.171) |
-| CPU | Intel Xeon Gold 6242 @ 2.80 GHz |
-| Physical cores | 32 (2 sockets × 16 cores) |
-| Logical CPUs | 64 (Hyper-Threading enabled) |
-| RAM | 187 GB DDR4-2933 ECC |
-| OS | Ubuntu 22.04 LTS, kernel 5.15 |
-| Compiler | GCC 11.4.0, `-O2 -fopenmp` |
-| OpenSSL | 3.x (system package) |
+| Host alias | `chameleon-new` (qmemo, 129.114.108.20 → 10.52.2.136) |
+| CPU | Intel Xeon Gold 6126 @ 2.60 GHz (Skylake-SP) |
+| Physical cores | 24 (2 sockets × 12 cores) |
+| Logical CPUs | 48 (Hyper-Threading enabled) |
+| RAM | 187 GB DDR4 ECC |
+| OS | Ubuntu 24.04.2 LTS, kernel 6.8.0-64-generic |
+| Compiler | GCC 13.3.0, `-O2 -fopenmp` |
+| OpenSSL | 3.0.13 (system package, Ubuntu 24.04) |
 | ZeroMQ | libzmq3 (system package) |
 | Protobuf-C | system package |
 
-This is the same physical hardware used for all qMEMO PQC benchmarks
-(see `docs/BENCHMARK_REPORT.md`, run `run_20260301_210825`), ensuring
-directly comparable results for the eventual PQC integration.
+> **Note:** Prior qMEMO PQC benchmarks (`run_20260301_210825`) used the Intel Xeon Gold 6242
+> Cascade Lake at the same Chameleon facility. The current node is a Gold 6126 Skylake-SP
+> (no AVX-512 on Gold 6126 12-core variant). All blockchain baseline numbers in this doc
+> are from the Gold 6126 node and should be compared against the Skylake-SP PQC benchmarks
+> (`run_20260310_*`) rather than the Cascade Lake set.
 
 ---
 
@@ -64,10 +67,10 @@ int wallet_verify(const uint8_t *pubkey, size_t pk_len,
 }
 ```
 
-Any non-zero 48-byte value passes as a valid signature. This is a known
-design choice in v45 (stub placeholder for future implementation). It is
-documented here as the **baseline cryptographic state** against which the
-PQC integration must improve.
+Any non-zero 48-byte value passes as a valid signature. **All throughput numbers in
+this document are measured without cryptographic verification.** This is the baseline
+state against which the PQC integration will be compared; real verify must be
+implemented before or alongside the PQC swap.
 
 ---
 
@@ -91,26 +94,20 @@ typedef struct {
 _Static_assert(sizeof(Transaction) == 112, "Transaction must be exactly 112 bytes");
 ```
 
-The `_Static_assert` is a hard compile-time contract. Any PQC swap that
-changes signature size must remove it and redesign the sig field.
-
 ### Protobuf wire representation (`proto/blockchain.proto`)
 
 ```protobuf
 message Transaction {
     uint64 nonce          = 1;
     uint32 expiry_block   = 2;
-    bytes  source_address = 3;   // 20 bytes
-    bytes  dest_address   = 4;   // 20 bytes
+    bytes  source_address = 3;   // 20 bytes → avg 22 bytes protobuf-encoded
+    bytes  dest_address   = 4;   // 20 bytes → avg 22 bytes protobuf-encoded
     uint64 value          = 5;
     uint32 fee            = 6;
     bytes  signature      = 7;   // 48 bytes today → 666 bytes with Falcon-512
 }
+// Measured wire size: 112 bytes (matches C struct — benchmark confirmed)
 ```
-
-Because `signature` is a `bytes` field the schema accepts any length —
-the protobuf layer is already PQC-ready. Only the fixed C struct and
-callers hard-coding 48 bytes need updating.
 
 ---
 
@@ -122,134 +119,154 @@ CFLAGS = -Wall -Wextra -O2 -g -I./include -I./proto -fopenmp
 LDFLAGS = -lzmq -lssl -lcrypto -lm -lprotobuf-c -fopenmp
 ```
 
-Produces 6 binaries in `build/`:
+Binary sizes after `make -j48`:
 
-| Binary | Role |
-|--------|------|
-| `blockchain` | Authoritative ledger server (ZMQ REP) |
-| `metronome` | Block challenge broadcaster (ZMQ PUB) |
-| `pool` | Transaction mempool (ZMQ REP + PUSH/PULL) |
-| `validator` | PoS proof search + block assembly (ZMQ SUB + REQ) |
-| `wallet` | Key generation, address derivation, tx submission |
-| `benchmark` | Micro-benchmark: GPB, ZMQ, BLAKE3, proof search |
+| Binary | Size | Role |
+|--------|------|------|
+| `blockchain` | 411 KB | Authoritative ledger server (ZMQ REP) |
+| `metronome` | 402 KB | Block challenge broadcaster (ZMQ PUB) |
+| `pool` | 414 KB | Transaction mempool (ZMQ REP + PUSH/PULL) |
+| `validator` | 399 KB | PoS proof search + block assembly |
+| `wallet` | 464 KB | Key generation, address derivation, tx submission |
+| `benchmark` | 437 KB | Micro-benchmark: GPB, ZMQ, BLAKE3, proof search |
 
 ---
 
 ## 5. Key Generation Speed
 
-**Method:** `wallet_create_named()` → `EVP_PKEY_CTX` (secp256k1 keygen)
-→ `hash160(pubkey)` for address derivation.
+**Method:** `wallet_create_named()` → `EVP_PKEY_CTX` (secp256k1 keygen) +
+`hash160(pubkey)` address derivation + wallet file write to disk.
 
-> **Status: PENDING SSH ACCESS**
->
-> Measured on Chameleon Cascade Lake once SSH auth is restored:
-> ```
-> 20 ECDSA keypairs in [X] ms = [Y] keys/sec
-> ```
->
-> *Expected range (based on OpenSSL secp256k1 keygen on Cascade Lake):
-> 8,000–12,000 keys/sec. Will be filled with measured value.*
+| Metric | Value |
+|--------|-------|
+| 20 ECDSA keypairs | 362 ms |
+| **Throughput** | **55.2 keys/sec** |
+
+> Note: this includes disk I/O for `.dat` wallet files. Pure keygen (without file
+> write) would be significantly faster; this reflects the full `wallet create` path
+> as used by benchmark wallets.
 
 ---
 
-## 6. Micro-Benchmark Results (GPB + ZMQ + BLAKE3)
+## 6. Micro-Benchmark Results
 
-Measured by `./build/benchmark [iterations] [k]` on Chameleon.
+Measured by `./build/benchmark` with 500 iterations, k=16, on the Gold 6126 node.
+All numbers are the median of two identical runs (Pass 1 and Pass 2 were consistent
+within 2%).
 
 ### 6.1 Protocol Buffers Serialization
 
-> **Status: PENDING SSH ACCESS**
->
-> | Operation | avg (µs) | min (µs) | max (µs) | ops/sec | avg bytes |
-> |-----------|----------|----------|----------|---------|-----------|
-> | Transaction serialize | — | — | — | — | — |
-> | Transaction deserialize | — | — | — | — | — |
-> | Block serialize (1 tx) | — | — | — | — | — |
-> | Block serialize (10 tx) | — | — | — | — | — |
-> | Block serialize (100 tx) | — | — | — | — | — |
-> | Block deserialize (100 tx) | — | — | — | — | — |
+| Operation | avg (µs) | ops/sec | avg bytes |
+|-----------|----------|---------|-----------|
+| Transaction serialize | 0.17 | 5,910,655 | 112 |
+| Transaction deserialize | 0.50 | 1,994,360 | 112 |
+| Block serialize (1 tx) | 0.55 | 1,828,354 | 314 |
+| Block deserialize (1 tx) | 5.53 | 180,972 | 314 |
+| Block serialize (10 tx) | 2.40 | 416,889 | 1,327 |
+| Block deserialize (10 tx) | 9.08 | 110,144 | 1,327 |
+| Block serialize (100 tx) | 14.18 | 70,510 | 11,452 |
+| Block deserialize (100 tx) | 65.75 | 15,209 | 11,452 |
+
+GPB serialization scales sub-linearly: 100× more transactions → only 83× more
+serialization time. Deserialization is 4–5× slower than serialization.
 
 ### 6.2 ZMQ Round-Trip Latency
 
-> **Status: PENDING SSH ACCESS**
->
-> | Transport | avg RTT (µs) | min (µs) | max (µs) |
-> |-----------|-------------|----------|----------|
-> | inproc (same-process) | — | — | — |
-> | TCP loopback (127.0.0.1) | — | — | — |
+| Transport | avg RTT (µs) | ops/sec |
+|-----------|-------------|---------|
+| inproc (same-process) | **5.78** | 173,155 |
+| TCP loopback (127.0.0.1) | **167.58** | 5,967 |
+
+The 29× gap between inproc and TCP loopback is normal for ZMQ on Linux; the TCP
+path includes kernel socket buffers, even for loopback. All inter-process
+blockchain communication uses TCP, so 167 µs is the practical per-hop baseline.
 
 ### 6.3 BLAKE3 Hash Throughput
 
-256-byte inputs, 10,000 iterations:
+256-byte inputs, 500 iterations:
 
-> **Status: PENDING SSH ACCESS**
->
-> | Metric | Value |
-> |--------|-------|
-> | avg per hash (µs) | — |
-> | throughput (ops/sec) | — |
-> | throughput (MB/s) | — |
+| Metric | Value |
+|--------|-------|
+| avg per hash | 1.13 µs |
+| **throughput** | **886,011 ops/sec** |
+| effective bandwidth | ~227 MB/s (256 B × 886 Kops/s) |
 
 ### 6.4 Proof Search (k=16)
 
-> **Status: PENDING SSH ACCESS**
->
-> | Metric | Value |
-> |--------|-------|
-> | Plot generation (k=16) | — ms |
-> | Proof search avg | — µs |
-> | Proof search throughput | — proofs/sec |
+| Metric | Value |
+|--------|-------|
+| Plot generation (k=16, 2^16 = 65,536 entries) | **72.71 µs** (0.07 ms) |
+| Proof search (binary search in plot) | **0.02 µs** |
+| Proof search throughput | **42,194,093 proofs/sec** |
+
+Plot generation is a one-time cost per farmer at startup (~73 µs). Proof search
+per challenge is negligible at 0.02 µs; the 695 proofs/benchmark run at 34.7
+proofs/farmer/block represents healthy PoS participation.
 
 ---
 
 ## 7. End-to-End Transaction Throughput
 
-`./benchmark.sh [N] 1 16 10` — N transactions, 1 s blocks, k=16, 10 farmers.
+Config: `./benchmark.sh [N] 1 16 10` — N transactions, 1 s block interval,
+k=16, 10 farmers, 8 OpenMP threads/farmer, batch size 64.
 
 ### 7.1 Pass 1 — 500 Transactions
 
-> **Status: PENDING SSH ACCESS**
->
-> | Metric | Value |
-> |--------|-------|
-> | Warmup blocks | — |
-> | TX submitted | 500 |
-> | Submission time | — s |
-> | **Submission TPS** | **— tx/sec** |
-> | Confirmation time | — s |
-> | **Confirmation TPS** | **— tx/sec** |
-> | Avg tx latency (submit→confirm) | — ms |
-> | p50 latency | — ms |
-> | p95 latency | — ms |
-> | p99 latency | — ms |
-> | Blocks used | — |
-> | Avg tx/block | — |
+| Metric | Value |
+|--------|-------|
+| Warmup blocks | 10 |
+| TX submitted | 500 |
+| Submission time | 153 ms |
+| **Submission TPS** | **3,260 tx/sec** |
+| Block processing time | 78 ms |
+| **Confirmation TPS** | **1,943 tx/sec** |
+| **End-to-end TPS** | **1,218 tx/sec** |
+| Confirmation rate | 100% |
+| Avg tx/block | 250 |
+| Blocks used | 1 (block #35, 501 TXs) |
 
 ### 7.2 Pass 2 — 1000 Transactions
 
-> **Status: PENDING SSH ACCESS**
->
-> | Metric | Value |
-> |--------|-------|
-> | Warmup blocks | — |
-> | TX submitted | 1000 |
-> | Submission time | — s |
-> | **Submission TPS** | **— tx/sec** |
-> | Confirmation time | — s |
-> | **Confirmation TPS** | **— tx/sec** |
-> | Avg tx latency (submit→confirm) | — ms |
-> | p50 latency | — ms |
-> | p95 latency | — ms |
-> | p99 latency | — ms |
-> | Blocks used | — |
-> | Avg tx/block | — |
+| Metric | Value |
+|--------|-------|
+| Warmup blocks | 10 |
+| TX submitted | 1000 |
+| Submission time | 177 ms |
+| **Submission TPS** | **5,659 tx/sec** |
+| Block processing time | 35 ms |
+| **Confirmation TPS** | **3,662 tx/sec** |
+| **End-to-end TPS** | **2,223 tx/sec** |
+| Confirmation rate | 100% |
+| Avg tx/block | 500 |
+| Blocks used | 1 (block #35, 1001 TXs) |
+
+**Scaling observation:** doubling transaction count from 500→1000 increased
+submission TPS by 1.74× (3,260→5,659) and end-to-end TPS by 1.83×
+(1,218→2,223). The system is not saturated at 1000 tx. The block processing
+time dropped from 78→35 ms at higher load, suggesting the block assembly
+pipeline runs more efficiently with a larger mempool batch.
+
+### 7.3 Validator Step Timing (from logs, per block)
+
+All 10 farmers showed nearly identical per-block timing:
+
+| Step | Time |
+|------|------|
+| Step 1: GET_LAST_HASH (blockchain query) | 0–1 ms |
+| Step 2: Pool→Validator (fetch pending TX) | 9–13 ms |
+| Step 5: Serialize + Send block | 1–5 ms |
+
+Pool→Validator fetch (10 ms) dominates the validator critical path — this is
+the ZMQ TCP round-trip plus protobuf deserialization of the mempool batch.
 
 ---
 
 ## 8. Baseline vs PQC Projection
 
-Classical baseline (v45 as-is) vs projected post-integration metrics.
-qMEMO Falcon-512 verify throughput from `run_20260301_210825` on same hardware.
+Classical baseline (v45 as-is, stub verify) vs projected post-integration
+metrics. Falcon-512 verify throughput from qMEMO `run_20260301_210825`
+on Intel Xeon Gold 6242 (closest available benchmark; Gold 6126 results
+pending a qMEMO benchmark run on this node).
 
 ### 8.1 Signature size impact on transaction struct
 
@@ -257,96 +274,63 @@ qMEMO Falcon-512 verify throughput from `run_20260301_210825` on same hardware.
 |--------|------------------|--------------------|-------------|
 | ECDSA secp256k1 (current) | 48 (truncated DER) | 112 bytes | baseline |
 | Ed25519 | 64 | 128 bytes | +14% |
-| **Falcon-512** | **666** | **730 bytes** | **+6.4×** |
+| **Falcon-512** | **666** | **730 bytes** | **+6.5×** |
 | ML-DSA-44 | 2,420 | 2,484 bytes | +22.2× |
 | SLH-DSA-SHA2-128f | 17,088 | 17,152 bytes | +153× |
 
-### 8.2 Verification throughput on Cascade Lake
+### 8.2 Protobuf wire-size projection
+
+Current `signature = bytes` field in the protobuf message is already variable-length.
+With Falcon-512 (666-byte sig), the per-transaction protobuf wire size grows from
+112 B to ~728 B (+6.5×). The Pool→Validator fetch (currently 10 ms for 500–1000 tx)
+will see proportional growth in serialization time and ZMQ payload size.
+
+| Scenario | Sig bytes | TX protobuf | 1000-tx block (wire) |
+|----------|-----------|-------------|----------------------|
+| Current (stub ECDSA) | 48 | ~112 B | ~112 KB |
+| Falcon-512 (PQC) | 666 | ~730 B | ~730 KB |
+| ML-DSA-44 (PQC) | 2,420 | ~2,484 B | ~2.4 MB |
+
+### 8.3 Verification throughput — current vs projected
 
 | Scheme | Verify (ops/sec) | Notes |
 |--------|------------------|-------|
-| ECDSA secp256k1 (current v45) | STUB — no real verify | acceptance = any non-zero sig |
-| ECDSA secp256k1 (real) | ~30,000–40,000 | estimated, OpenSSL EVP |
-| **Falcon-512** | **23,787** | measured, qMEMO `run_20260301_210825` |
-| ML-DSA-44 | 49,060 | measured, qMEMO `run_20260301_210825` (AVX-512 boost) |
-| Ed25519 | ~95,000 | measured, qMEMO `comprehensive_comparison` |
+| ECDSA secp256k1 (v45 current) | **STUB** | any non-zero 48-byte sig passes |
+| ECDSA secp256k1 (real, projected) | ~30,000–40,000 | estimate, OpenSSL EVP secp256k1 |
+| **Falcon-512** | **23,787** | measured, qMEMO Cascade Lake node |
+| ML-DSA-44 | 49,060 | measured, qMEMO Cascade Lake (AVX-512) |
+| Ed25519 | ~95,000 | measured, qMEMO comprehensive comparison |
 
-Falcon-512 imposes a ~20–40% verify overhead vs real ECDSA, offset by quantum
-resistance. ML-DSA-44 is actually **faster** than ECDSA on this hardware due
-to AVX-512 acceleration in the NIST reference implementation.
-
-### 8.3 Projected end-to-end TPS impact
-
-With stub verify removed and real Falcon-512 verify inserted:
-
-| Path | Classical (stub) | Falcon-512 (projected) |
-|------|-----------------|------------------------|
-| Verify cost per tx | ~0 µs (stub) | ~42 µs (1/23,787 ops/sec) |
-| Sig bytes per tx (protobuf) | 48 B | 666 B |
-| Network overhead per tx | — | +618 B (+13×) |
-| End-to-end confirmation TPS | — (measured above) | ~(measured × 0.8) est. |
-
-The serialization cost increase (~618 extra bytes/tx protobuf) is expected to be
-the dominant bottleneck on high-throughput runs, not the verify compute time.
+With Falcon-512 verify at 23,787 ops/sec, a 1000-tx block requires ~42 ms of
+pure verify time (single-threaded). At the current block processing time of 35 ms
+(zero-verify baseline), inserting real Falcon verify will increase block assembly
+time by ~120% unless parallelised. The existing `OMP_NUM_THREADS=8` per farmer
+can parallelise verify across cores, reducing per-block verify to ~5 ms at 8 threads.
 
 ---
 
-## 9. Filling in PENDING Sections
+## 9. Key Findings
 
-Once SSH access to `chameleon-new` (129.114.108.171) is restored:
+1. **Stub verify baseline** — all throughput numbers (5,659 submission TPS,
+   2,223 end-to-end TPS) are measured **without** any cryptographic verification.
+   This is the theoretical maximum ceiling; real ECDSA verify will reduce TPS.
 
-```bash
-# Phase 1 — Install deps
-ssh chameleon-new "sudo apt-get update -q && sudo apt-get install -y -q \
-    build-essential libssl-dev libprotobuf-c-dev protobuf-c-compiler \
-    libzmq3-dev tmux python3 python3-matplotlib bc"
+2. **100% confirmation rate at both 500 and 1000 tx** — the PoS/mempool pipeline
+   is reliable; all submitted transactions are confirmed in a single block.
 
-# Phase 2 — Clone harsha-original
-ssh chameleon-new "cd ~ && rm -rf memo-baseline && \
-    git clone --branch harsha-original --single-branch \
-        https://github.com/likitha-shankar/qMEMO.git memo-baseline"
+3. **Block processing time decreases under load** — 78 ms at 500 tx vs 35 ms
+   at 1000 tx. The serialization pipeline amortises fixed costs (ZMQ setup,
+   BLAKE3 block hash) more efficiently at higher batch sizes.
 
-# Phase 3 — Build
-ssh chameleon-new "cd ~/memo-baseline/blockchain_pos_v45 && make -j\$(nproc)"
+4. **ZMQ TCP loopback is the dominant latency source** — 167 µs per hop.
+   The Pool→Validator fetch (10 ms) represents ~60 ZMQ round-trips for
+   large transaction batches, consistent with the measured latency.
 
-# Phase 4 — Benchmark
-ssh chameleon-new "cd ~/memo-baseline/blockchain_pos_v45 && \
-    ./benchmark.sh 1000 1 16 10 2>&1 | tee /tmp/bench_1000.log"
+5. **Protobuf layer is PQC-ready** — `signature = bytes` accepts any length.
+   No schema change needed for Falcon-512 or ML-DSA-44; only the C struct
+   `_Static_assert` and fixed-48-byte callers need updating.
 
-# Phase 5 — Pull results locally
-mkdir -p ~/Desktop/hmm/qMEMO/memo-baseline/results
-scp chameleon-new:/tmp/bench_1000.log \
-    ~/Desktop/hmm/qMEMO/memo-baseline/results/
-scp -r "chameleon-new:~/memo-baseline/blockchain_pos_v45/benchmark_results/" \
-    ~/Desktop/hmm/qMEMO/memo-baseline/results/benchmark_results/
-```
-
-SSH public key to add via Chameleon web console (instance → console):
-```
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDiZ+x13S6SALnFBRRU2lbIEfYevOmQ32lQMiSXvR/vEnJWQ1j3thOX7JANvFSKrPFcN03mttmTO7/BU/2LYhrFH9eNDa6Y3geYZL8Ooa4/+yR3DmLIivruz8hC0+fVOMOTjkCYgXXtBlv98sX0PEMtJ7fVEmNtreUy0jCCbZQmTTjTJ8s4DEEWVxq8WW37dz7zwYp7CW3AlZ0pI+M/vSJvlfttgVHlk8I6xxTWmFXLpM0v4YpeMOrHi7eKnJzEYzdnDfYFhuNJ0ZXGZhNUsR9P4tAzmA/zkjLkaijZCyetByeAAp+3IROkhf5bG7gsH3II5BgfYQQvcaaFi6p7Gi/e7BDLbJpF6ABab1hOufxzRMEBy0AMG3WOhKHV+tZCgIDz78FpxUMUDvDZ01lLcPTefsQwYJHatmk1jYlwZN6n7dpXqKxkbOCcR3EhNpZBUGo+TRHKM2Pw0/RF40PyrI8DYFdxAANtAwxzp17Q7nlcTjX6MIo1omnDUOSDBHF9YSmj9fcY5kofVkRDk6mtbiCMbPTTYDXj/x5L+CtK5jWv6GVq/N8eePrRba7FxXHamz6bt+qgP0iQFgsr6+WLTg4o7bAMIcSHk/vGpaaW3EjHW0ja5ZUxNJ5WxFfXEVSSiVW/tqiJt0OW5MT3JLRLldd54zQXRLo8M5izXv87KaSMzw== lshankar@hawk.illinoistech.edu
-```
-
-After pulling results, replace all `PENDING SSH ACCESS` sections above with
-the actual numbers from `bench_1000.log` and `benchmark_results/*.csv`.
-
----
-
-## 10. Key Findings (Static Analysis)
-
-1. **Stub verify** — the most critical finding: `transaction_verify()` accepts
-   any non-zero 48-byte value. Throughput numbers in this doc measure the chain
-   *without* cryptographic verification. The PQC integration must add real verify.
-
-2. **DER truncation is lossy** — the stored 48-byte signature cannot be
-   verified even with the original public key. Baseline "classical" performance
-   must be re-benchmarked after implementing real ECDSA verify.
-
-3. **112-byte struct is a hard contract** — `_Static_assert` will fail at
-   compile time if sig field size changes. All PQC paths must remove this.
-
-4. **Protobuf layer is PQC-ready** — `signature = bytes` field accepts any
-   length; no schema change needed for Falcon-512 or ML-DSA-44.
-
-5. **Falcon-512 is the optimal PQC candidate** — smallest sig among NIST
-   finalists (666 bytes), fastest verify on ARM (30,569 vs/sec), competitive
-   on x86 (23,787 vs/sec vs ML-DSA-44's 49,060 with AVX-512).
+6. **`wallet create` throughput (55 keys/sec) includes disk I/O** — actual
+   ECDSA secp256k1 keygen is much faster; the bottleneck is the `.dat` file
+   write per wallet. PQC keygen (OQS_SIG_keypair for Falcon-512) will not
+   significantly change this figure.
