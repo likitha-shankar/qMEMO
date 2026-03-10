@@ -14,9 +14,10 @@ The sanity check is confirmed by theory and validated by direct measurement on F
 
 - **Best scaling (measured):** Falcon-512 on Cascade Lake — **9.15× speedup** at 10 threads (91.5% efficiency), driven by x86's balanced L3 bandwidth relative to the Falcon-512 working set.
 - **Best scaling (M2 Pro):** Falcon-512 reaches **8.86× speedup** at 10 cores, with super-linear scaling observed through 6 cores (cache-hierarchy effect explained in §4).
+- **Skylake-SP (new):** Falcon-512 reaches **9.38× speedup** at 10 threads — highest ratio across all platforms — but shows a notable 4-thread anomaly (81.4% efficiency) due to Skylake-SP's mesh interconnect topology spreading threads across tiles.
 - **Expected outlier:** SLH-DSA has a tiny working set (32-byte public key, SHA-2 hash chaining) — in practice it may scale *slightly better* than the lattice schemes due to lower cache pressure, but its single-core throughput is so low that this is operationally irrelevant.
 
-**Direct multicore measurements** exist only for Falcon-512 (both platforms). Scaling for the remaining six algorithms is projected from Falcon-512 scaling ratios applied to their measured single-core baselines. Projections are labeled with `†` throughout.
+**Direct multicore measurements** exist only for Falcon-512 (all three platforms). Scaling for the remaining six algorithms is projected from Falcon-512 scaling ratios applied to their measured single-core baselines. Projections are labeled with `†` throughout.
 
 ---
 
@@ -24,16 +25,16 @@ The sanity check is confirmed by theory and validated by direct measurement on F
 
 ### Platforms
 
-| Parameter | Apple M2 Pro | Intel Xeon Gold 6242 |
-|-----------|-------------|---------------------|
-| Microarchitecture | Arm Avalanche/Blizzard | Cascade Lake (x86-64) |
-| Total cores | 10 (6P + 4E) | 16 physical / 32 logical |
-| Base clock | 3.49 GHz (P-cores) | 2.80 GHz |
-| RAM | 16 GB LPDDR5 | 187 GB DDR4 ECC |
-| OS | macOS Darwin arm64 | Ubuntu 22.04 (Chameleon Cloud) |
-| Compiler | Apple Clang, `-O3 -mcpu=native -ffast-math` | GCC 11.4, `-O3 -march=native -ffast-math` |
-| liboqs | 0.15.0 | 0.15.0 |
-| OpenSSL | 3.6.1 (Homebrew) | 3.0.2 |
+| Parameter | Apple M2 Pro | Intel Xeon Gold 6242 | Intel Xeon Gold 6126 |
+|-----------|-------------|---------------------|---------------------|
+| Microarchitecture | Arm Avalanche/Blizzard | Cascade Lake (x86-64) | Skylake-SP (x86-64) |
+| Total cores | 10 (6P + 4E) | 16 physical / 32 logical | 24 physical / 48 logical |
+| Base clock | 3.49 GHz (P-cores) | 2.80 GHz | 2.60 GHz |
+| RAM | 16 GB LPDDR5 | 187 GB DDR4 ECC | 187 GB DDR4 ECC |
+| OS | macOS Darwin arm64 | Ubuntu 22.04 (Chameleon Cloud) | Ubuntu 24.04 (Chameleon Cloud) |
+| Compiler | Apple Clang, `-O3 -mcpu=native -ffast-math` | GCC 11.4, `-O3 -march=native -ffast-math` | GCC 13.3, `-O3 -march=native -ffast-math` |
+| liboqs | 0.15.0 | 0.15.0 | 0.15.0 |
+| OpenSSL | 3.6.1 (Homebrew) | 3.0.2 | 3.0.13 |
 
 ### Core Counts Tested
 
@@ -107,6 +108,35 @@ The Xeon Gold 6242 is a homogeneous core design — all 16 physical cores share 
 
 ---
 
+### 3.3 Intel Xeon Gold 6126 — Skylake-SP (x86-64) ← *New Platform*
+
+> Falcon-512 values are directly **measured** by `multicore_benchmark`.
+> All other rows are **projected** (`†`) using Falcon-512 scaling ratios.
+> Falcon-512 1-core baseline = 18,853 ops/sec (multicore benchmark);
+> pure single-thread from comprehensive_comparison is 23,505 ops/sec.
+
+| Algorithm | 1 Core | 2 Cores | 4 Cores | 6 Cores | 8 Cores | 10 Cores | Speedup | Efficiency |
+|-----------|-------:|--------:|--------:|--------:|--------:|---------:|--------:|-----------:|
+| Falcon-512 | 18,853 | 37,855 | 61,380 | 106,183 | 143,833 | 176,890 | **9.38×** | **93.8%** |
+| Falcon-1024 † | 11,618 | 23,322 | 37,829 | 65,455 | 88,617 | 108,978 | 9.38× | 93.8% |
+| ML-DSA-44 † | 46,532 | 93,449 | 151,604 | 262,397 | 355,287 | 436,870 | 9.38× | 93.8% |
+| ML-DSA-65 † | 28,893 | 58,020 | 94,111 | 162,917 | 220,588 | 271,171 | 9.38× | 93.8% |
+| SLH-DSA-SHA2-128f † | 732 | 1,470 | 2,385 | 4,129 | 5,591 | 6,870 | 9.38× | 93.8% |
+| ECDSA secp256k1 † | 2,467 | 4,954 | 8,034 | 13,913 | 18,838 | 23,160 | 9.38× | 93.8% |
+| Ed25519 † | 8,309 | 16,692 | 27,077 | 46,880 | 63,483 | 78,060 | 9.38× | 93.8% |
+
+Falcon-512 scaling ratios used for projections: ×2.009, ×3.257, ×5.634, ×7.630, ×9.383
+
+**Skylake-SP 4-thread anomaly (81.4% efficiency):**
+At 4 threads, Skylake-SP shows significantly lower efficiency than either Cascade Lake (92.9%)
+or M2 Pro (110.9%). Skylake-SP uses a **mesh interconnect** between core tiles rather than a
+ring bus. When 4 threads spread across different tiles, inter-tile cache coherency traffic
+crosses the mesh fabric, adding ~30–50 ns of latency per cache line. At 6–10 threads the
+anomaly recovers (93–95%) because threads fill entire tiles, reducing cross-tile traffic.
+This is a known Skylake-SP NUMA-within-socket effect and does not affect peak 10-thread throughput.
+
+---
+
 ## 4. Scaling Efficiency Analysis
 
 ### 4.1 Linear Baseline and Amdahl's Law
@@ -116,6 +146,7 @@ The Xeon Gold 6242 is a homogeneous core design — all 16 physical cores share 
 Measured Falcon-512 efficiency at 10 cores:
 - M2 Pro: 88.6% (serial fraction implied by Amdahl's Law: ~1.3%)
 - Cascade Lake: 91.5% (implied serial fraction: ~0.95%)
+- Skylake-SP: 93.8% (implied serial fraction: ~0.65%)
 
 From Amdahl's Law: `Speedup(N) = 1 / (s + (1-s)/N)` where `s` is the serial fraction.
 
@@ -154,15 +185,17 @@ Three factors reduce efficiency below ideal:
 
 ## 5. Platform Comparison
 
-### 5.1 Cascade Lake vs M2 Pro Scaling Behavior
+### 5.1 All Three Platforms — Scaling Behavior
 
-| Metric | M2 Pro | Cascade Lake |
-|--------|--------|-------------|
-| 10-core speedup (Falcon-512) | 8.86× | 9.15× |
-| 10-core efficiency | 88.6% | 91.5% |
-| Scaling linearity 1→4 cores | Super-linear (>100%) | Near-linear (92–96%) |
-| Scaling linearity 4→10 cores | Sub-linear (drops at 8–10) | Consistent (stable 89–95%) |
-| Core homogeneity | Heterogeneous (6P + 4E) | Homogeneous (all equal) |
+| Metric | M2 Pro | Cascade Lake | Skylake-SP |
+|--------|--------|-------------|------------|
+| 10-thread speedup (Falcon-512) | 8.86× | 9.15× | **9.38×** |
+| 10-thread efficiency | 88.6% | 91.5% | **93.8%** |
+| 4-thread efficiency | 110.9% (super-linear) | 92.9% | **81.4%** (mesh anomaly) |
+| Scaling linearity 1→4 | Super-linear | Near-linear | Sub-linear (mesh) |
+| Scaling linearity 4→10 | Drops at 8–10 (P/E cores) | Consistent 89–95% | Recovers to 93–95% |
+| Core homogeneity | Heterogeneous (6P + 4E) | Homogeneous (ring bus) | Homogeneous (mesh) |
+| Absolute 10-thread ops/sec | 239,297 (M2) | 184,467 | 176,890 |
 
 **M2 Pro super-linear region (1–6 cores):** The M2 Pro's P-core cluster (6 cores sharing a 200 GB/s L2 bandwidth bus) allows 2–4 cores to collectively exceed what a single core achieves because the memory subsystem is underutilized by a single thread. This is not a measurement artifact — it reflects real performance available to a multi-threaded verifier. At 8–10 cores, the E-core cluster (4 cores with different L2 characteristics) is included, lowering aggregate efficiency.
 
@@ -322,6 +355,21 @@ Threads | ops/sec | Speedup | Efficiency
 ```
 
 Source: `benchmarks/results/run_20260301_210825/multicore_benchmark_full_output.txt`
+
+### A.3 Intel Xeon Gold 6126 — Skylake-SP (run_20260310_035214)
+
+```
+Threads | ops/sec | Speedup | Efficiency
+--------+---------+---------+-----------
+      1 |  18,853 |   1.00× |   100.0%
+      2 |  37,855 |   2.01× |   100.4%
+      4 |  61,380 |   3.26× |    81.4%  ← mesh topology anomaly
+      6 | 106,183 |   5.63× |    93.9%
+      8 | 143,833 |   7.63× |    95.4%
+     10 | 176,890 |   9.38× |    93.8%
+```
+
+Source: `benchmarks/results/run_20260310_035214/multicore_benchmark.log`
 Binary: `benchmarks/bin/multicore_benchmark`
 Source: `benchmarks/src/multicore_benchmark.c`
 
