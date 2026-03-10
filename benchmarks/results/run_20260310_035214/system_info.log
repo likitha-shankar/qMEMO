@@ -1,0 +1,26 @@
+================================================================
+  qMEMO System Information
+  Generated: 2026-03-10T03:52:14Z
+================================================================
+
+--- OS / Kernel ---
+Linux qmemo 6.8.0-64-generic #67-Ubuntu SMP PREEMPT_DYNAMIC Sun Jun 15 20:23:31 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
+
+--- CPU ---
+model name	: Intel(R) Xeon(R) Gold 6126 CPU @ 2.60GHz
+Logical cores: 48
+MemTotal:       196563876 kB
+
+--- Compiler ---
+cc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+Copyright (C) 2023 Free Software Foundation, Inc.
+
+--- liboqs ---
+#define OQS_VERSION_TEXT "0.15.0"
+
+--- OpenSSL ---
+OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)
+
+--- Build flags ---
+OQS_ROOT     := ../liboqs_install
+CFLAGS := -O3 $(ARCH_FLAG) -ffast-math -Wall -Wextra

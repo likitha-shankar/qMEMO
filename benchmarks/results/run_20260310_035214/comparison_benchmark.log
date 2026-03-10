@@ -1,0 +1,109 @@
+================================================================
+  Comparison Benchmark (Falcon-512 vs ML-DSA-44)
+  Run: 20260310_035214
+================================================================
+
+
+================================================================
+  Falcon-512 vs ML-DSA-44 Comparison  (qMEMO / IIT Chicago)
+================================================================
+
+─── Falcon-512 ───
+  [keygen] warm-up ... benchmarking 100 trials ... 146.6 ops/sec
+  [sign]   warm-up ... benchmarking 1000 trials ... 4234.3 ops/sec
+  [verify] warm-up ... benchmarking 10000 trials ... 23699.8 ops/sec
+
+─── ML-DSA-44 ───
+  [keygen] warm-up ... benchmarking 100 trials ... 46717.8 ops/sec
+  [sign]   warm-up ... benchmarking 1000 trials ... 14092.6 ops/sec
+  [verify] warm-up ... benchmarking 10000 trials ... 47165.8 ops/sec
+
+================================================================
+  HEAD-TO-HEAD COMPARISON
+================================================================
+
+  Metric                      Falcon-512       ML-DSA-44  Winner
+  ──────────────────────  ──────────────  ──────────────  ──────────
+  Keygen throughput             146.6 /s      46717.8 /s    faster ►
+  Sign throughput              4234.3 /s      14092.6 /s    faster ►
+  Verify throughput           23699.8 /s      47165.8 /s    faster ►
+
+  Keygen latency              6821.6 µs         21.4 µs     faster ►
+  Sign latency                 236.2 µs         71.0 µs     faster ►
+  Verify latency                42.2 µs         21.2 µs     faster ►
+
+  Public key size                897 B           1312 B     ◄ smaller
+  Secret key size               1281 B           2560 B     ◄ smaller
+  Signature size                 658 B           2420 B     ◄ smaller
+  On-chain tx overhead          1555 B           3732 B     ◄ smaller
+
+================================================================
+  BLOCKCHAIN IMPACT ANALYSIS
+================================================================
+
+  Scenario: 4000 transactions per block (single-threaded verification)
+
+  Falcon-512 block verify time :    168.8 ms
+  ML-DSA-44  block verify time :     84.8 ms
+  Speedup (Falcon / ML-DSA)    :     0.50x
+
+  Falcon-512 block sig data    :   6074.2 KB  (1555 B/tx)
+  ML-DSA-44  block sig data    :  14578.1 KB  (3732 B/tx)
+  Size ratio (Falcon / ML-DSA) :     0.42x
+
+  ► Recommendation: ML-DSA-44
+    Simpler constant-time implementation and faster signing
+    may outweigh the larger signature size depending on the
+    target blockchain's block size limits.
+
+--- JSON ---
+{
+  "test_name": "falcon512_vs_mldsa44",
+  "timestamp": "2026-03-10T03:52:21Z",
+  "config": {
+    "keygen_trials": 100,
+    "sign_trials": 1000,
+    "verify_trials": 10000,
+    "message_len": 256
+  },
+  "algorithms": {
+    "Falcon-512": {
+      "keygen_ops_sec": 146.59,
+      "keygen_us_op": 6821.63,
+      "sign_ops_sec": 4234.28,
+      "sign_us_op": 236.17,
+      "verify_ops_sec": 23699.76,
+      "verify_us_op": 42.19,
+      "pubkey_bytes": 897,
+      "privkey_bytes": 1281,
+      "signature_bytes": 658,
+      "total_tx_overhead": 1555
+    },
+    "ML-DSA-44": {
+      "keygen_ops_sec": 46717.82,
+      "keygen_us_op": 21.41,
+      "sign_ops_sec": 14092.64,
+      "sign_us_op": 70.96,
+      "verify_ops_sec": 47165.80,
+      "verify_us_op": 21.20,
+      "pubkey_bytes": 1312,
+      "privkey_bytes": 2560,
+      "signature_bytes": 2420,
+      "total_tx_overhead": 3732
+    }
+  },
+  "comparison": {
+    "verify_speedup_falcon": 0.5025,
+    "sign_speedup_falcon": 0.3005,
+    "keygen_speedup_falcon": 0.0031,
+    "signature_size_ratio": 0.2719,
+    "pubkey_size_ratio": 0.6837,
+    "total_tx_overhead_falcon": 1555,
+    "total_tx_overhead_dilithium": 3732,
+    "tx_overhead_ratio": 0.4167
+  }
+}
+
+Comparison benchmark complete.
+
+  [Elapsed: 1810 ms]

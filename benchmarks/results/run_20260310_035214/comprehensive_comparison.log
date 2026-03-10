@@ -1,0 +1,113 @@
+================================================================
+  Comprehensive Comparison (all 7 algorithms)
+  Run: 20260310_035214
+================================================================
+
+
+================================================================
+  Comprehensive Signature Comparison  (qMEMO / IIT Chicago)
+  7 algorithms: 5 PQC (liboqs) + 2 classical (OpenSSL 3.x)
+================================================================
+  1000 iterations per phase  |  message: 256 bytes 0x42
+
+  [1/7] Falcon-512 ... done.
+  [2/7] Falcon-1024 ... done.
+  [3/7] ML-DSA-44 ... done.
+  [4/7] ML-DSA-65 ... done.
+  [5/7] SLH-DSA-SHA2-128f ... done.
+  [6/7] ECDSA secp256k1 ... done.
+  [7/7] Ed25519 ... done.
+
+Algorithm           NIST  PubKey  SecKey  SigBytes  Keygen/s    Sign/s    Verify/s
+------------------  ----  ------  ------  --------  --------  --------  --------
+Falcon-512           L1      897    1281       752       147      4207     23505
+Falcon-1024          L5     1793    2305      1462        51      2130     11618
+ML-DSA-44            L2     1312    2560      2420     47476     14271     46532
+ML-DSA-65            L3     1952    4032      3309     27961      8696     28893
+SLH-DSA-SHA2-128f    L1       32      64     17088      1001        43       732
+ECDSA secp256k1       -       65      32        71      2189      2181      2467
+Ed25519               -       32      32        64     21138     21481      8309
+
+--- JSON ---
+{
+  "test_name": "comprehensive_signature_comparison",
+  "timestamp": "2026-03-10T03:52:55Z",
+  "bench_iters": 1000,
+  "message_len": 256,
+  "algorithms": [
+    {
+      "name": "Falcon-512",
+      "nist_level": 1,
+      "pubkey_bytes": 897,
+      "seckey_bytes": 1281,
+      "sig_bytes": 752,
+      "keygen_ops_per_sec": 147,
+      "sign_ops_per_sec": 4207,
+      "verify_ops_per_sec": 23505
+    },
+    {
+      "name": "Falcon-1024",
+      "nist_level": 5,
+      "pubkey_bytes": 1793,
+      "seckey_bytes": 2305,
+      "sig_bytes": 1462,
+      "keygen_ops_per_sec": 51,
+      "sign_ops_per_sec": 2130,
+      "verify_ops_per_sec": 11618
+    },
+    {
+      "name": "ML-DSA-44",
+      "nist_level": 2,
+      "pubkey_bytes": 1312,
+      "seckey_bytes": 2560,
+      "sig_bytes": 2420,
+      "keygen_ops_per_sec": 47476,
+      "sign_ops_per_sec": 14271,
+      "verify_ops_per_sec": 46532
+    },
+    {
+      "name": "ML-DSA-65",
+      "nist_level": 3,
+      "pubkey_bytes": 1952,
+      "seckey_bytes": 4032,
+      "sig_bytes": 3309,
+      "keygen_ops_per_sec": 27961,
+      "sign_ops_per_sec": 8696,
+      "verify_ops_per_sec": 28893
+    },
+    {
+      "name": "SLH-DSA-SHA2-128f",
+      "nist_level": 1,
+      "pubkey_bytes": 32,
+      "seckey_bytes": 64,
+      "sig_bytes": 17088,
+      "keygen_ops_per_sec": 1001,
+      "sign_ops_per_sec": 43,
+      "verify_ops_per_sec": 732
+    },
+    {
+      "name": "ECDSA secp256k1",
+      "nist_level": 0,
+      "pubkey_bytes": 65,
+      "seckey_bytes": 32,
+      "sig_bytes": 71,
+      "keygen_ops_per_sec": 2189,
+      "sign_ops_per_sec": 2181,
+      "verify_ops_per_sec": 2467
+    },
+    {
+      "name": "Ed25519",
+      "nist_level": 0,
+      "pubkey_bytes": 32,
+      "seckey_bytes": 32,
+      "sig_bytes": 64,
+      "keygen_ops_per_sec": 21138,
+      "sign_ops_per_sec": 21481,
+      "verify_ops_per_sec": 8309
+    }
+  ]
+}
+
+Comprehensive comparison complete.
+
+  [Elapsed: 58246 ms]

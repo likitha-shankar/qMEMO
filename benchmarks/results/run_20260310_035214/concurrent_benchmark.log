@@ -1,0 +1,41 @@
+================================================================
+  Concurrent Verification (thread pool)
+  Run: 20260310_035214
+================================================================
+
+
+================================================================
+  Falcon-512 Concurrent Verification Benchmark  (qMEMO / IIT Chicago)
+================================================================
+
+Generating 100 keypairs and signatures ...
+OK.
+
+Concurrent (4 workers): 4.599 ms total, 0.0460 ms avg, 21743 ops/sec
+Sequential (baseline):   5.257 ms total, 0.0526 ms avg, 19021 ops/sec
+
+Concurrent yields 12.5% lower latency (better parallelism)
+
+--- JSON ---
+{
+  "test_name": "falcon512_concurrent_verify",
+  "timestamp": "2026-03-10T03:52:23Z",
+  "algorithm": "Falcon-512",
+  "concurrent": {
+    "signatures": 100,
+    "worker_threads": 4,
+    "total_time_ms": 4.5992,
+    "avg_latency_ms": 0.0460,
+    "throughput": 21743
+  },
+  "sequential": {
+    "total_time_ms": 5.2574,
+    "avg_latency_ms": 0.0526,
+    "throughput": 19021
+  },
+  "analysis": "Concurrent yields 12.5% lower latency (better parallelism)"
+}
+
+Concurrent benchmark complete.
+
+  [Elapsed: 730 ms]
