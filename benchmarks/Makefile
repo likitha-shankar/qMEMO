@@ -91,6 +91,7 @@ SIGSIZE_SRC         := $(SRCDIR)/signature_size_analysis.c
 CLASSICAL_SRC       := $(SRCDIR)/classical_benchmark.c
 COMPREHENSIVE_SRC   := $(SRCDIR)/comprehensive_comparison.c
 KEY_INSPECT_SRC     := $(SRCDIR)/key_inspection.c
+MULTICORE_ALL_SRC   := $(SRCDIR)/multicore_all_benchmark.c
 
 VERIFY_BIN          := $(BINDIR)/verify_benchmark
 STATS_BIN           := $(BINDIR)/statistical_benchmark
@@ -103,17 +104,18 @@ SIGSIZE_BIN         := $(BINDIR)/signature_size_analysis
 CLASSICAL_BIN       := $(BINDIR)/classical_benchmark
 COMPREHENSIVE_BIN   := $(BINDIR)/comprehensive_comparison
 KEY_INSPECT_BIN     := $(BINDIR)/key_inspection
+MULTICORE_ALL_BIN   := $(BINDIR)/multicore_all_benchmark
 
 ALL_BINS := $(VERIFY_BIN) $(STATS_BIN) $(COMPARE_BIN) $(MULTICORE_BIN) \
             $(CONCURRENT_BIN) $(CONCURRENT_SIGN_BIN) \
             $(SIGN_BIN) $(SIGSIZE_BIN) $(CLASSICAL_BIN) $(COMPREHENSIVE_BIN) \
-            $(KEY_INSPECT_BIN)
+            $(KEY_INSPECT_BIN) $(MULTICORE_ALL_BIN)
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  Targets
 # ══════════════════════════════════════════════════════════════════════════════
 
-.PHONY: all verify stats compare multicore concurrent concurrent_sign \
+.PHONY: all verify stats compare multicore multicore_all concurrent concurrent_sign \
         sign sigsize classical comprehensive key_inspection clean run help
 
 all: $(ALL_BINS) ## Build all benchmarks
@@ -143,6 +145,8 @@ classical: $(CLASSICAL_BIN) ## Build the ECDSA/Ed25519 classical baseline benchm
 comprehensive: $(COMPREHENSIVE_BIN) ## Build the 7-algorithm comprehensive comparison
 
 key_inspection: $(KEY_INSPECT_BIN) ## Build the key material inspection and correctness audit
+
+multicore_all: $(MULTICORE_ALL_BIN) ## Build the all-algorithm multicore verification benchmark
 
 # ── Compilation rules ──────────────────────────────────────────────────────
 
@@ -210,6 +214,12 @@ $(KEY_INSPECT_BIN): $(KEY_INSPECT_SRC) | $(BINDIR)
 	$(CC) $(CFLAGS) $(LDFLAGS) $< $(LDLIBS) -lcrypto -o $@
 	@echo "      done."
 
+# multicore_all_benchmark: liboqs + OpenSSL + pthreads (all 7 algos multicore verify)
+$(MULTICORE_ALL_BIN): $(MULTICORE_ALL_SRC) | $(BINDIR)
+	@echo "[CC]  $< → $@"
+	$(CC) $(CFLAGS) $(LDFLAGS) $< $(LDLIBS) -lcrypto -lpthread -o $@
+	@echo "      done."
+
 # ── Run ────────────────────────────────────────────────────────────────────
 
 run: all ## Build and run all benchmarks sequentially
@@ -268,6 +278,11 @@ run: all ## Build and run all benchmarks sequentially
 	@echo "  Running: key_inspection"
 	@echo "════════════════════════════════════════════════════════════"
 	$(KEY_INSPECT_BIN)
+	@echo ""
+	@echo "════════════════════════════════════════════════════════════"
+	@echo "  Running: multicore_all_benchmark"
+	@echo "════════════════════════════════════════════════════════════"
+	$(MULTICORE_ALL_BIN)
 	@echo ""
 	@echo "All benchmarks finished."
 
