@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package blockchain;
+
+// =============================================================================
+// TRANSACTION MESSAGE - New Structure without ID, with nonce and expiry_block
+// =============================================================================
+// Layout:
+//   nonce              = 8 bytes  - Unique nonce per sender (like Ethereum)
+//   expiry_block       = 4 bytes  - Block height after which tx expires (0 = no expiry)
+//   source_address     = 20 bytes - Sender address
+//   dest_address       = 20 bytes - Recipient address  
+//   value              = 8 bytes  - Amount in smallest units
+//   fee                = 4 bytes  - Fee in smallest units
+//   signature          = 48 bytes - BLS signature
+//   TOTAL              = 112 bytes binary
+// =============================================================================
+
+message Transaction {
+    uint64 nonce = 1;               // Unique nonce per sender
+    uint32 expiry_block = 2;        // Block height for tx expiry (0 = no expiry)
+    bytes source_address = 3;       // 20-byte sender address
+    bytes dest_address = 4;         // 20-byte recipient address
+    uint64 value = 5;               // Transaction amount
+    uint32 fee = 6;                 // Transaction fee
+    bytes signature = 7;            // Variable-length signature (ECDSA or Falcon-512)
+    bytes public_key = 8;           // Signer's public key (65B ECDSA or 897B Falcon)
+}
+
+// =============================================================================
+// BLOCK HEADER - Proof of Space fields
+// =============================================================================
+
+message BlockHeader {
+    bytes previous_hash = 1;        // 32-byte previous block hash
+    bytes hash = 2;                 // 32-byte current block hash
+    uint32 height = 3;              // Block height/number
+    uint64 timestamp = 4;           // Block creation timestamp
+    bytes farmer_address = 5;       // 20-byte farmer address
+    uint32 difficulty = 6;          // Difficulty level (1-256)
+    bytes challenge_hash = 7;       // 32-byte challenge hash
+    bytes proof_hash = 8;           // 28-byte winning proof hash
+    uint32 proof_nonce = 9;         // Winning proof nonce
+    bytes quality = 10;             // 32-byte proof quality
+    uint32 transaction_count = 11;  // Number of transactions
+}
+
+// =============================================================================
+// BLOCK MESSAGE
+// =============================================================================
+
+message Block {
+    BlockHeader header = 1;
+    repeated Transaction transactions = 2;
+    uint64 total_fees = 3;          // Sum of all transaction fees
+}
+
+// =============================================================================
+// SPACE PROOF MESSAGE
+// =============================================================================
+
+message SpaceProof {
+    bytes plot_id = 1;              // 32-byte plot identifier
+    uint32 nonce = 2;               // Plot entry nonce
+    bytes proof_hash = 3;           // 28-byte proof hash
+    bytes quality = 4;              // 32-byte quality (distance to target)
+}
+
+// =============================================================================
+// CHALLENGE MESSAGE
+// =============================================================================
+
+message Challenge {
+    bytes challenge_hash = 1;       // 32-byte challenge hash (derived from prev_block_hash)
+    bytes prev_block_hash = 2;      // 32-byte hash of the previous block
+    uint64 challenge_id = 3;        // Challenge sequence number
+    uint32 target_block_height = 4; // Target block height
+    uint64 issued_at = 5;           // Timestamp when issued
+    uint32 current_difficulty = 6;  // Current difficulty (1-256)
+}
+
+// =============================================================================
+// NETWORK MESSAGES
+// =============================================================================
+
+message TransactionBatch {
+    repeated Transaction transactions = 1;
+    uint32 count = 2;
+}
+
+message BlockList {
+    repeated Block blocks = 1;
+    uint32 count = 2;
+}
+
+message PoolStatus {
+    uint32 pending_count = 1;
+    uint32 confirmed_count = 2;
+}
+
+// Generic network message wrapper
+message NetworkMessage {
+    enum MessageType {
+        UNKNOWN = 0;
+        TRANSACTION_SUBMIT = 1;
+        BLOCK_SUBMIT = 2;
+        CHALLENGE_BROADCAST = 3;
+        PROOF_SUBMIT = 4;
+        BALANCE_REQUEST = 5;
+        BALANCE_RESPONSE = 6;
+        SYNC_REQUEST = 7;
+        SYNC_RESPONSE = 8;
+        ERROR = 9;
+        SUCCESS = 10;
+    }
+    
+    MessageType type = 1;
+    bytes payload = 2;              // Serialized inner message
+    string error_message = 3;       // Error details if type == ERROR
+}
+
+// =============================================================================
+// WALLET MESSAGE
+// =============================================================================
+
+message Wallet {
+    string name = 1;                // Wallet name
+    bytes address = 2;              // 20-byte address
+    bytes public_key = 3;           // Public key
+    uint64 nonce = 4;               // Current transaction nonce
+    uint64 balance = 5;             // Cached balance
+}
+
+// =============================================================================
+// DIFFICULTY STATE
+// =============================================================================
+
+message DifficultyState {
+    uint32 current_difficulty = 1;      // Current difficulty (1-256)
+    uint32 adjustment_interval = 2;     // Blocks between adjustments
+    uint32 min_valid_proofs = 3;        // Min proofs threshold
+    uint32 max_valid_proofs = 4;        // Max proofs threshold
+    uint32 blocks_since_adjust = 5;     // Counter
+    uint32 valid_proofs_count = 6;      // Proofs this round
+}
