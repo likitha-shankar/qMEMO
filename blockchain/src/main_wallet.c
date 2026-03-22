@@ -137,8 +137,8 @@ int cmd_info(const char* filepath) {
     printf("║  Name:        %-46s║\n", wallet->name);
     printf("║  Address:     %-46s║\n", wallet->address_hex);
     printf("║  Nonce:       %-46lu║\n", wallet->nonce);
-    printf("║  Private Key: %-46s║\n", 
-           strlen(wallet->private_key_pem) > 0 ? "Present (can sign TXs)" : "MISSING (read-only)");
+    printf("║  Private Key: %-46s║\n",
+           wallet->seckey_len > 0 ? "Present (can sign TXs)" : "MISSING (read-only)");
     printf("╚══════════════════════════════════════════════════════════════╝\n");
     
     wallet_destroy(wallet);
