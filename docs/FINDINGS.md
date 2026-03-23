@@ -11,7 +11,7 @@
 
 ## 1. Single-Core Verification Throughput (ops/sec)
 
-| Algorithm           | M2 Pro (ARM64) | Skylake-SP (x86-64) | Cascade Lake (x86-64) | Sig Size (B) | PubKey Size (B) |
+| Algorithm           | M2 Pro (ARM64) | Skylake-SP (x86-64) | Cascade Lake (x86-64) | Sig Size (B)  | PubKey Size (B) |
 |---------------------|---------------:|--------------------:|----------------------:|--------------:|----------------:|
 | ML-DSA-44           |         25,904 |          **46,532** |            **49,060** |         2,420 |           1,312 |
 | Falcon-512          |     **30,569** |              23,505 |                23,877 |    ~655 (avg) |             897 |
@@ -31,7 +31,7 @@
 |---------------------|-------:|-------:|--------:|--------:|--------:|---------:|:----------:|:----------:|
 | Falcon-512          | 18,731 | 39,458 |  67,038 | 111,247 | 150,568 |  184,167 | **9.83x**  | **98.3%**  |
 | Falcon-1024         | 11,152 | 21,962 |  42,854 |  60,525 |  83,466 |  102,034 | 9.15x      | 91.5%      |
-| ML-DSA-44           | **44,801** | **63,885** | **112,769** | **150,747** | **215,650** | **271,606** | 6.06x | 60.6% |
+| ML-DSA-44           | 44,801 | 63,885 | 112,769 | 150,747 | 215,650 | 271,606  | 6.06x      | 60.6%      |
 | ML-DSA-65           | 25,204 | 43,094 |  74,367 | 122,835 | 149,129 |  210,655 | 8.36x      | 83.6%      |
 | SLH-DSA-SHA2-128f   |    705 |  1,389 |   2,645 |   3,542 |   5,173 |    6,140 | 8.71x      | 87.1%      |
 | ECDSA secp256k1     |  2,478 |  4,920 |   9,242 |  13,308 |  17,794 |   21,847 | 8.82x      | 88.2%      |
@@ -113,11 +113,11 @@ This mirrors Polkadot (dual-algorithm) and Algorand (phased Falcon rollout). No 
 
 | Blockchain            | Algorithm                          | Status                    |
 |-----------------------|------------------------------------|---------------------------|
-| QRL                   | XMSS (hash-based, stateful)       | Production since 2018     |
-| Algorand              | Falcon-512                         | State proofs in production |
+| QRL                   | XMSS (hash-based, stateful)        | Production since 2018     |
+| Algorand              | Falcon-512                         | State proofs in production|
 | Polkadot              | Bandersnatch + Falcon (planned)    | Research phase            |
 | Ethereum              | Researching (no commitment)        | EIP discussions only      |
-| **MEMO (this work)**  | **Falcon-512 / ML-DSA-44 / Hybrid** | **Measured, integrated**  |
+| **MEMO (this work)**  | **Falcon-512 / ML-DSA-44 / Hybrid**| **Measured, integrated** |
 
 MEMO is ahead of most projects — we have measured end-to-end TPS with real PQC verification, not just micro-benchmarks.
 

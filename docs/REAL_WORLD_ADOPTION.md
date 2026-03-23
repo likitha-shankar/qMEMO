@@ -10,15 +10,15 @@
 
 ## 1. Executive Summary
 
-| Metric | Value |
-|--------|-------|
-| Projects surveyed | 11 |
-| Production PQC deployments | 2 (QRL, Algorand state proofs) |
-| Active testnets | 2 (Algorand user txns, Solana) |
-| Published roadmap / proposal | 5 (Ethereum, Polkadot, Cardano, Aptos, Hedera) |
-| Research / exploratory | 2 (Bitcoin, Avalanche) |
-| Most popular algorithm | ML-DSA / CRYSTALS-Dilithium (4 projects) |
-| Second most popular | Falcon / FN-DSA (3 projects) |
+| Metric                         | Value                                              |
+|--------------------------------|----------------------------------------------------|
+| Projects surveyed              | 11                                                 |
+| Production PQC deployments     | 2 (QRL, Algorand state proofs)                     |
+| Active testnets                | 2 (Algorand user txns, Solana)                     |
+| Published roadmap / proposal   | 5 (Ethereum, Polkadot, Cardano, Aptos, Hedera)    |
+| Research / exploratory         | 2 (Bitcoin, Avalanche)                             |
+| Most popular algorithm         | ML-DSA / CRYSTALS-Dilithium (4 projects)           |
+| Second most popular            | Falcon / FN-DSA (3 projects)                       |
 
 **Key findings:**
 
@@ -377,20 +377,20 @@
 
 ## 3. Comparison Table
 
-| Blockchain | Algorithm | Status | Year | Primary Reason | Sig Size vs ECDSA |
-|------------|-----------|:------:|:----:|----------------|:-----------------:|
-| **QRL** | XMSS | **Production** | 2018 | Only NIST-approved scheme available; conservative | ~44× |
-| **Algorand** | Falcon-1024 | **Production** | 2022 | Compact certs for cross-chain relay | ~20× |
-| **Algorand** | Falcon-1024 | **Mainnet txns** | 2025 | Full user transaction support | ~20× |
-| **Solana** | ML-DSA | **Testnet** | 2025 | High sign throughput; no float dependency | ~38× |
-| **IOTA** | WOTS+ | **(Deprecated)** | 2016 | IoT longevity requirement | ~20× |
-| **Aptos** | SLH-DSA-SHA2-128s | **Proposed** | 2026 | Minimal assumptions (hash-only); no lattice risk | ~122× |
-| **Polkadot** | ML-DSA + Falcon | **Planned** | 2026 | ML-DSA for consensus; Falcon for user accounts | Dual-scheme |
-| **Ethereum** | Falcon or STARK | **Roadmap** | 2026+ | Account abstraction pathway | TBD |
-| **Cardano** | ML-DSA | **Research** | TBD | Simpler constant-time impl; NIST-approved | ~38× |
-| **Hedera** | (SHA-384 hashes only) | **Partial** | Genesis | Post-quantum hash security, not sig security | N/A |
-| **Bitcoin** | None / ML-DSA demo | **Exploratory** | TBD | Governance deadlock; size/throughput tradeoffs | 38–59× |
-| **Avalanche** | TBD (lattice) | **Exploratory** | TBD | Subnet architecture may allow gradual migration | TBD |
+| Blockchain      | Algorithm              | Status            | Year   | Primary Reason                                     | Sig Size vs ECDSA |
+|-----------------|------------------------|:-----------------:|:------:|----------------------------------------------------|-----------------:|
+| **QRL**         | XMSS                   | **Production**    | 2018   | Only NIST-approved scheme available; conservative  |            ~44×  |
+| **Algorand**    | Falcon-1024            | **Production**    | 2022   | Compact certs for cross-chain relay                |            ~20×  |
+| **Algorand**    | Falcon-1024            | **Mainnet txns**  | 2025   | Full user transaction support                      |            ~20×  |
+| **Solana**      | ML-DSA                 | **Testnet**       | 2025   | High sign throughput; no float dependency          |            ~38×  |
+| **IOTA**        | WOTS+                  | **(Deprecated)**  | 2016   | IoT longevity requirement                          |            ~20×  |
+| **Aptos**       | SLH-DSA-SHA2-128s      | **Proposed**      | 2026   | Minimal assumptions (hash-only); no lattice risk   |           ~122×  |
+| **Polkadot**    | ML-DSA + Falcon        | **Planned**       | 2026   | ML-DSA for consensus; Falcon for user accounts     |     Dual-scheme  |
+| **Ethereum**    | Falcon or STARK        | **Roadmap**       | 2026+  | Account abstraction pathway                        |             TBD  |
+| **Cardano**     | ML-DSA                 | **Research**       | TBD    | Simpler constant-time impl; NIST-approved          |            ~38×  |
+| **Hedera**      | (SHA-384 hashes only)  | **Partial**       | Genesis| Post-quantum hash security, not sig security       |             N/A  |
+| **Bitcoin**     | None / ML-DSA demo     | **Exploratory**   | TBD    | Governance deadlock; size/throughput tradeoffs      |          38–59×  |
+| **Avalanche**   | TBD (lattice)          | **Exploratory**   | TBD    | Subnet architecture may allow gradual migration    |             TBD  |
 
 ---
 
@@ -398,13 +398,13 @@
 
 ### 4.1 Adoption Count by Algorithm
 
-| Algorithm | Standard | Projects | Notes |
-|-----------|----------|:--------:|-------|
-| **ML-DSA** (CRYSTALS-Dilithium) | FIPS 204 | **4** | Solana, Polkadot (consensus), Cardano, QRL 2.0 |
-| **Falcon** (FN-DSA) | FIPS 206 | **3** | Algorand, Polkadot (accounts), Ethereum (candidate) |
-| **SLH-DSA** (SPHINCS+) | FIPS 205 | **1** | Aptos |
-| **XMSS** | NIST SP 800-208 | **1** | QRL (original, now transitioning) |
-| **WOTS+** | Hash-based | **1** | IOTA (deprecated) |
+| Algorithm                        | Standard        | Projects | Notes                                                  |
+|----------------------------------|-----------------|:--------:|--------------------------------------------------------|
+| **ML-DSA** (CRYSTALS-Dilithium)  | FIPS 204        |    **4** | Solana, Polkadot (consensus), Cardano, QRL 2.0        |
+| **Falcon** (FN-DSA)              | FIPS 206        |    **3** | Algorand, Polkadot (accounts), Ethereum (candidate)   |
+| **SLH-DSA** (SPHINCS+)           | FIPS 205        |    **1** | Aptos                                                  |
+| **XMSS**                         | NIST SP 800-208 |    **1** | QRL (original, now transitioning)                      |
+| **WOTS+**                        | Hash-based      |    **1** | IOTA (deprecated)                                      |
 
 **ML-DSA is the leading choice** for new adoptions. Its advantages for blockchain:
 - No floating-point hardware requirement (Falcon requires IEEE 754 floats in signing)
@@ -533,14 +533,14 @@ No proof-of-work chain has a concrete PQC migration plan. This reflects:
 Data drawn from academic benchmarks, project announcements, and our measured results
 (see `COMPREHENSIVE_COMPARISON.md`).
 
-| Metric | ECDSA / Ed25519 (baseline) | Falcon-512 | ML-DSA-44 | SLH-DSA-SHA2-128f |
-|--------|:--------------------------:|:----------:|:---------:|:-----------------:|
-| Verify throughput (single core) | 4,026–8,857 ops/sec | 23,877–30,569 ops/sec | 25,904–49,060 ops/sec | 599–734 ops/sec |
-| Sign throughput (single core) | 2,638–24,276 ops/sec | 4,312–4,805 ops/sec | 10,273–15,975 ops/sec | 36–45 ops/sec |
-| Signature size | 64–72 bytes | 666 bytes | 2,420 bytes | 17,088 bytes |
-| Public key size | 32–65 bytes | 897 bytes | 1,312 bytes | 32 bytes |
-| Tx size overhead (vs Ed25519) | 1× | ~11× | ~38× | ~267× |
-| Key management | Stateless | Stateless | Stateless | Stateless |
+| Metric                          | ECDSA / Ed25519 (baseline) | Falcon-512            | ML-DSA-44             | SLH-DSA-SHA2-128f  |
+|---------------------------------|:--------------------------:|:---------------------:|:---------------------:|:-------------------:|
+| Verify throughput (single core) | 4,026–8,857 ops/sec        | 23,877–30,569 ops/sec | 25,904–49,060 ops/sec | 599–734 ops/sec    |
+| Sign throughput (single core)   | 2,638–24,276 ops/sec       | 4,312–4,805 ops/sec   | 10,273–15,975 ops/sec | 36–45 ops/sec      |
+| Signature size                  | 64–72 bytes                | 666 bytes             | 2,420 bytes           | 17,088 bytes       |
+| Public key size                 | 32–65 bytes                | 897 bytes             | 1,312 bytes           | 32 bytes           |
+| Tx size overhead (vs Ed25519)   | 1×                         | ~11×                  | ~38×                  | ~267×              |
+| Key management                  | Stateless                  | Stateless             | Stateless             | Stateless          |
 
 > **Counterintuitive finding:** Falcon-512 and ML-DSA-44 verify **faster** than ECDSA
 > secp256k1 on both tested platforms (7.6–10.7× faster). The performance penalty for PQC
@@ -556,12 +556,12 @@ Data drawn from academic benchmarks, project announcements, and our measured res
 
 Based on real-world deployments:
 
-| Algorithm | Track Record | Recommendation |
-|-----------|-------------|----------------|
-| Falcon-512/1024 | 3+ years production (Algorand); NIST FIPS 206 final Aug 2025 | **Best-validated for verify-heavy workloads** |
-| ML-DSA-44/65 | FIPS 204 final Aug 2024; Solana testnet Dec 2025 | **Best for sign-heavy or consensus workloads** |
-| SLH-DSA | FIPS 205 final Aug 2024; Aptos proposed | Conservative; use only if lattice assumptions unacceptable |
-| XMSS | Production since 2018 (QRL); being superseded | Legacy; avoid for new deployments |
+| Algorithm        | Track Record                                           | Recommendation                                            |
+|------------------|--------------------------------------------------------|-----------------------------------------------------------|
+| Falcon-512/1024  | 3+ years production (Algorand); NIST FIPS 206 Aug 2025| **Best-validated for verify-heavy workloads**              |
+| ML-DSA-44/65     | FIPS 204 final Aug 2024; Solana testnet Dec 2025       | **Best for sign-heavy or consensus workloads**             |
+| SLH-DSA          | FIPS 205 final Aug 2024; Aptos proposed                | Conservative; use only if lattice assumptions unacceptable |
+| XMSS             | Production since 2018 (QRL); being superseded          | Legacy; avoid for new deployments                          |
 
 ### 8.2 Performance Patterns from Early Adopters
 
@@ -604,14 +604,14 @@ Based on real-world deployments:
 
 MEMO is among the first projects to publish **measured end-to-end blockchain TPS** with real PQC signature verification, not just micro-benchmarks. Here is how our results compare:
 
-| Project | Algorithm | TPS Reported | Verify Type | Notes |
-|---------|-----------|:------------:|:-----------:|-------|
-| **Algorand** | Falcon-1024 | 6,000 | Real (production) | Unchanged from pre-PQC baseline |
-| **Solana** | ML-DSA | "Compatible" | Real (testnet) | No public regression data |
-| **QRL** | XMSS | ~3–5 | Real (production) | Inherently limited by stateful scheme |
-| **MEMO (this work)** | Falcon-512 | **2,572** | Real (Chameleon) | 1000 TX, no TPS penalty vs ECDSA |
-| **MEMO (this work)** | ML-DSA-44 | **1,533** | Real (Chameleon) | 1000 TX, ~40% below Falcon-512 |
-| **MEMO (this work)** | ECDSA (real) | **1,403** | Real (Chameleon) | 1000 TX, baseline with real OpenSSL verify |
+| Project                | Algorithm    | TPS Reported | Verify Type       | Notes                                      |
+|------------------------|--------------|:------------:|-------------------|--------------------------------------------|
+| **Algorand**           | Falcon-1024  |        6,000 | Real (production) | Unchanged from pre-PQC baseline            |
+| **Solana**             | ML-DSA       | "Compatible" | Real (testnet)    | No public regression data                  |
+| **QRL**                | XMSS         |         ~3–5 | Real (production) | Inherently limited by stateful scheme      |
+| **MEMO (this work)**   | Falcon-512   |    **2,572** | Real (Chameleon)  | 1000 TX, no TPS penalty vs ECDSA           |
+| **MEMO (this work)**   | ML-DSA-44    |    **1,533** | Real (Chameleon)  | 1000 TX, ~40% below Falcon-512             |
+| **MEMO (this work)**   | ECDSA (real) |    **1,403** | Real (Chameleon)  | 1000 TX, baseline with real OpenSSL verify |
 
 **Key takeaways:**
 
@@ -627,14 +627,14 @@ MEMO is among the first projects to publish **measured end-to-end blockchain TPS
 
 Based on both our measurements and the industry survey:
 
-| Criterion | Recommendation | Rationale |
-|-----------|---------------|-----------|
-| Minimum TPS impact | **Falcon-512** | 3.5x smaller sigs than ML-DSA → lower serialization/I/O cost |
-| Fastest single-core verify | **ML-DSA-44** | 2x faster on x86 (AVX-512 NTT) |
-| Smallest state growth | **Falcon-512** | ~1,611B/TX vs ~3,791B/TX (ML-DSA) |
-| Simplest implementation | **ML-DSA-44** | No floating-point, constant-time by design |
-| Most conservative security | **SLH-DSA** | Hash-only, but 17KB sigs make it impractical for high-TPS |
-| Cryptographic agility | **Hybrid mode** | Support all three; let wallet owners choose risk/value tradeoff |
+| Criterion                  | Recommendation   | Rationale                                                       |
+|----------------------------|------------------|-----------------------------------------------------------------|
+| Minimum TPS impact         | **Falcon-512**   | 3.5x smaller sigs than ML-DSA → lower serialization/I/O cost   |
+| Fastest single-core verify | **ML-DSA-44**    | 2x faster on x86 (AVX-512 NTT)                                 |
+| Smallest state growth      | **Falcon-512**   | ~1,611B/TX vs ~3,791B/TX (ML-DSA)                              |
+| Simplest implementation    | **ML-DSA-44**    | No floating-point, constant-time by design                      |
+| Most conservative security | **SLH-DSA**      | Hash-only, but 17KB sigs make it impractical for high-TPS       |
+| Cryptographic agility      | **Hybrid mode**  | Support all three; let wallet owners choose risk/value tradeoff |
 
 **MEMO's recommendation: Deploy Falcon-512 as default with hybrid mode support for ML-DSA-44.** This aligns with Polkadot's dual-algorithm approach and provides a migration path without protocol changes.
 
@@ -679,33 +679,33 @@ Phase 3 — Classical Sunset
 
 Following the professor's suggestion, the hybrid mode lets wallet owners choose their own risk/value tradeoff:
 
-| User Profile | Recommended Scheme | Rationale |
-|-------------|-------------------|-----------|
-| High-value, infrequent tx | **Falcon-512** | Smallest PQC sigs; best verified in production (Algorand) |
-| High-frequency trading | **ECDSA** (Phase 1) | Smallest sigs; fastest serialization; acceptable until quantum threat materializes |
-| Maximum security | **ML-DSA-44** | NIST FIPS 204 first-finalized; simpler implementation; no FFT side-channel |
-| Long-term cold storage | **Falcon-512** | Best size/security balance for dormant accounts |
+| User Profile              | Recommended Scheme  | Rationale                                                                          |
+|---------------------------|---------------------|------------------------------------------------------------------------------------|
+| High-value, infrequent tx | **Falcon-512**      | Smallest PQC sigs; best verified in production (Algorand)                          |
+| High-frequency trading    | **ECDSA** (Phase 1) | Smallest sigs; fastest serialization; acceptable until quantum threat materializes |
+| Maximum security          | **ML-DSA-44**       | NIST FIPS 204 first-finalized; simpler implementation; no FFT side-channel         |
+| Long-term cold storage    | **Falcon-512**      | Best size/security balance for dormant accounts                                    |
 
 The system does not force a one-size-fits-all choice. Users who believe the quantum threat is imminent can opt into PQC immediately; users who prioritize throughput can remain on ECDSA until Phase 2.
 
 ### 10.4 Implementation Status
 
-| Component | Status | Notes |
-|-----------|:------:|-------|
-| `sig_type` in TX protobuf | Done | Serialized/deserialized through full pipeline |
-| `crypto_verify_typed()` runtime dispatch | Done | Creates temp context per sig_type |
-| `SIG_SCHEME=3` hybrid build | Done | Compiles ECDSA + Falcon-512 + ML-DSA-44 |
-| Wallet CLI `--scheme` flag | Done | `ecdsa`, `falcon`, `mldsa` |
-| `benchmark_hybrid.sh` | Done | Mixed-scheme benchmark script |
-| Universal buffer sizes (ML-DSA-44 max) | Done | All nodes can deserialize any TX |
-| Hybrid end-to-end benchmarks | Pending | Run on Chameleon with `benchmark_hybrid.sh` |
+| Component                                 | Status  | Notes                                          |
+|-------------------------------------------|:-------:|------------------------------------------------|
+| `sig_type` in TX protobuf                 |    Done | Serialized/deserialized through full pipeline  |
+| `crypto_verify_typed()` runtime dispatch  |    Done | Creates temp context per sig_type              |
+| `SIG_SCHEME=3` hybrid build               |    Done | Compiles ECDSA + Falcon-512 + ML-DSA-44       |
+| Wallet CLI `--scheme` flag                |    Done | `ecdsa`, `falcon`, `mldsa`                    |
+| `benchmark_hybrid.sh`                     |    Done | Mixed-scheme benchmark script                  |
+| Universal buffer sizes (ML-DSA-44 max)    |    Done | All nodes can deserialize any TX               |
+| Hybrid end-to-end benchmarks              | Pending | Run on Chameleon with `benchmark_hybrid.sh`   |
 
 ---
 
 ## 11. References
 
-| Source | Citation |
-|--------|---------|
+| Source                           | Citation                                                                                                |
+|----------------------------------|---------------------------------------------------------------------------------------------------------|
 | Algorand state proofs | [Algorand Foundation — Technical Brief: Falcon](https://algorand.co/blog/technical-brief-quantum-resistant-transactions-on-algorand-with-falcon-signatures) |
 | Algorand post-quantum page | [algorand.co/technology/post-quantum](https://algorand.co/technology/post-quantum) |
 | Algorand developer docs | [State Proofs Overview](https://developer.algorand.org/docs/get-details/stateproofs/) |

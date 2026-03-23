@@ -14,16 +14,16 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 ## Key Results
 
-| Metric | Value |
-|--------|-------|
-| Falcon-512 verify (single core) | 18,731–30,569 ops/sec across platforms |
-| ML-DSA-44 verify (x86, AVX-512) | 44,801 ops/sec (2.4x faster than Falcon on x86) |
-| Falcon-512 vs ECDSA verify | **7.6–8.1x faster**, with quantum resistance |
-| Falcon-512 signature size | 666 B max (3.7x smaller than ML-DSA-44) |
-| 10-thread Falcon-512 scaling | 184K ops/sec, **98.3% efficiency** (Skylake-SP) |
-| Blockchain e2e TPS (Falcon-512) | **2,572 TPS** — no penalty vs classical ECDSA |
-| Blockchain e2e TPS (ML-DSA-44) | 1,533 TPS — 40% below Falcon (larger sigs bottleneck I/O) |
-| Hybrid mode | ECDSA + Falcon + ML-DSA coexist on same chain, no hard fork |
+| Metric                              | Value                                                       |
+|--------------------------------------|-------------------------------------------------------------|
+| Falcon-512 verify (single core)      | 18,731–30,569 ops/sec across platforms                      |
+| ML-DSA-44 verify (x86, AVX-512)      | 44,801 ops/sec (2.4x faster than Falcon on x86)            |
+| Falcon-512 vs ECDSA verify           | **7.6–8.1x faster**, with quantum resistance                |
+| Falcon-512 signature size            | 666 B max (3.7x smaller than ML-DSA-44)                    |
+| 10-thread Falcon-512 scaling         | 184K ops/sec, **98.3% efficiency** (Skylake-SP)             |
+| Blockchain e2e TPS (Falcon-512)      | **2,572 TPS** — no penalty vs classical ECDSA               |
+| Blockchain e2e TPS (ML-DSA-44)       | 1,533 TPS — 40% below Falcon (larger sigs bottleneck I/O)  |
+| Hybrid mode                          | ECDSA + Falcon + ML-DSA coexist on same chain, no hard fork |
 
 **Start here:** [docs/FINDINGS.md](docs/FINDINGS.md) — consolidated research findings
 **Full numerical data:** [docs/RESULTS.md](docs/RESULTS.md)
@@ -32,12 +32,12 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 ## Architecture
 
-| Component | Description |
-|-----------|-------------|
-| `benchmarks/` | 11 standalone C benchmark programs (Falcon, ML-DSA, SLH-DSA, ECDSA, Ed25519) |
-| `blockchain/` | Fork of blockchain_pos_v45 with hybrid PQC signature support (ECDSA / Falcon-512 / Hybrid) |
-| `docs/` | Research documentation, analysis, and consolidated results |
-| `scripts/` | Automation, Chameleon Cloud setup, analysis scripts |
+| Component       | Description                                                                           |
+|-----------------|---------------------------------------------------------------------------------------|
+| `benchmarks/`   | 11 standalone C benchmark programs (Falcon, ML-DSA, SLH-DSA, ECDSA, Ed25519)         |
+| `blockchain/`   | Fork of blockchain_pos_v45 with hybrid PQC signature support (ECDSA / Falcon / Hybrid)|
+| `docs/`         | Research documentation, analysis, and consolidated results                            |
+| `scripts/`      | Automation, Chameleon Cloud setup, analysis scripts                                   |
 
 ---
 
@@ -98,46 +98,46 @@ python3 scripts/generate_report.py
 
 ## Repository Structure
 
-| Path | Description |
-|------|-------------|
-| `benchmarks/src/` | C benchmark sources (11 programs + `bench_common.h`) |
-| `benchmarks/bin/` | Compiled binaries (after `make all`) |
-| `benchmarks/results/` | Timestamped per-run output logs |
-| `blockchain/src/` | Blockchain PoS with pluggable crypto backend |
-| `blockchain/include/` | Headers: `crypto_backend.h`, `transaction.h`, `wallet.h` |
-| `blockchain/proto/` | Protobuf schema for wire format |
-| `docs/` | Research documentation and analysis |
-| `scripts/` | `run_logged.sh`, `chameleon_setup.sh`, analysis scripts |
-| `liboqs_install/` | Local liboqs 0.15.0 install |
-| `install_liboqs.sh` | Builds and installs liboqs locally |
+| Path                  | Description                                                    |
+|-----------------------|----------------------------------------------------------------|
+| `benchmarks/src/`     | C benchmark sources (11 programs + `bench_common.h`)           |
+| `benchmarks/bin/`     | Compiled binaries (after `make all`)                           |
+| `benchmarks/results/` | Timestamped per-run output logs                                |
+| `blockchain/src/`     | Blockchain PoS with pluggable crypto backend                   |
+| `blockchain/include/` | Headers: `crypto_backend.h`, `transaction.h`, `wallet.h`       |
+| `blockchain/proto/`   | Protobuf schema for wire format                                |
+| `docs/`               | Research documentation and analysis                            |
+| `scripts/`            | `run_logged.sh`, `chameleon_setup.sh`, analysis scripts        |
+| `liboqs_install/`     | Local liboqs 0.15.0 install                                   |
+| `install_liboqs.sh`   | Builds and installs liboqs locally                             |
 
 ---
 
 ## Hardware Platforms
 
-| Platform | CPU | Cores | Location |
-|----------|-----|------:|----------|
-| Apple M2 Pro | ARM64, ~3.5 GHz (P-cores) | 10 (6P + 4E) | Local |
-| Xeon Gold 6242 | Cascade Lake @ 2.80 GHz | 64 logical | Chameleon Cloud |
-| Xeon Gold 6126 | Skylake-SP @ 2.60 GHz | 48 logical | Chameleon Cloud |
+| Platform        | CPU                          | Cores          | Location         |
+|-----------------|------------------------------|---------------:|------------------|
+| Apple M2 Pro    | ARM64, ~3.5 GHz (P-cores)   | 10 (6P + 4E)  | Local            |
+| Xeon Gold 6242  | Cascade Lake @ 2.80 GHz     | 64 logical     | Chameleon Cloud  |
+| Xeon Gold 6126  | Skylake-SP @ 2.60 GHz       | 48 logical     | Chameleon Cloud  |
 
 ---
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [docs/FINDINGS.md](docs/FINDINGS.md) | **Key research findings** — single-table comparisons, conclusions, recommendations |
-| [docs/RESULTS.md](docs/RESULTS.md) | **All numerical results** — throughput, scaling, sizes, blockchain baseline |
-| [docs/COMPREHENSIVE_COMPARISON.md](docs/COMPREHENSIVE_COMPARISON.md) | 7-algorithm trade-off analysis |
-| [docs/QUANTUM_THREAT_ANALYSIS.md](docs/QUANTUM_THREAT_ANALYSIS.md) | Post-quantum threat landscape |
-| [docs/REAL_WORLD_ADOPTION.md](docs/REAL_WORLD_ADOPTION.md) | PQC adoption in production systems |
-| [docs/LIBRARY_SURVEY.md](docs/LIBRARY_SURVEY.md) | Survey of PQC libraries |
-| [docs/BUILD_CONFIG.md](docs/BUILD_CONFIG.md) | liboqs build flags and version details |
-| [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md) | System architecture diagrams |
-| [docs/MEMO_CODE_ANALYSIS.md](docs/MEMO_CODE_ANALYSIS.md) | Pre-integration code audit |
-| [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Known limitations and caveats |
-| [blockchain/README.md](blockchain/README.md) | Blockchain-specific documentation |
+| Document                                                             | Description                                                           |
+|----------------------------------------------------------------------|-----------------------------------------------------------------------|
+| [docs/FINDINGS.md](docs/FINDINGS.md)                                 | **Key research findings** — single-table comparisons, recommendations |
+| [docs/RESULTS.md](docs/RESULTS.md)                                   | **All numerical results** — throughput, scaling, sizes, blockchain     |
+| [docs/COMPREHENSIVE_COMPARISON.md](docs/COMPREHENSIVE_COMPARISON.md) | 7-algorithm trade-off analysis                                        |
+| [docs/QUANTUM_THREAT_ANALYSIS.md](docs/QUANTUM_THREAT_ANALYSIS.md)   | Post-quantum threat landscape                                         |
+| [docs/REAL_WORLD_ADOPTION.md](docs/REAL_WORLD_ADOPTION.md)           | PQC adoption in production systems                                    |
+| [docs/LIBRARY_SURVEY.md](docs/LIBRARY_SURVEY.md)                     | Survey of PQC libraries                                               |
+| [docs/BUILD_CONFIG.md](docs/BUILD_CONFIG.md)                         | liboqs build flags and version details                                |
+| [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md)         | System architecture diagrams                                          |
+| [docs/MEMO_CODE_ANALYSIS.md](docs/MEMO_CODE_ANALYSIS.md)             | Pre-integration code audit                                            |
+| [docs/LIMITATIONS.md](docs/LIMITATIONS.md)                           | Known limitations and caveats                                         |
+| [blockchain/README.md](blockchain/README.md)                         | Blockchain-specific documentation                                     |
 
 ---
 
