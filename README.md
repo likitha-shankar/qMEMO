@@ -16,14 +16,17 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 | Metric | Value |
 |--------|-------|
-| Falcon-512 verify (single core) | 23,877-31,133 ops/sec across platforms |
-| ML-DSA-44 verify (x86, AVX-512) | 49,060 ops/sec (2x faster than Falcon on x86) |
-| Falcon-512 vs ECDSA verify | **7.6-8.1x faster**, with quantum resistance |
-| Falcon-512 signature size | 666 B max (3.2x smaller than ML-DSA-44) |
-| 10-thread Falcon-512 scaling | 184K-299K ops/sec (91-94% efficiency) |
-| Blockchain e2e TPS (baseline) | 2,223 TPS (stub verify), ~1,500-1,800 projected with Falcon |
+| Falcon-512 verify (single core) | 18,731–30,569 ops/sec across platforms |
+| ML-DSA-44 verify (x86, AVX-512) | 44,801 ops/sec (2.4x faster than Falcon on x86) |
+| Falcon-512 vs ECDSA verify | **7.6–8.1x faster**, with quantum resistance |
+| Falcon-512 signature size | 666 B max (3.7x smaller than ML-DSA-44) |
+| 10-thread Falcon-512 scaling | 184K ops/sec, **98.3% efficiency** (Skylake-SP) |
+| Blockchain e2e TPS (Falcon-512) | **2,572 TPS** — no penalty vs classical ECDSA |
+| Blockchain e2e TPS (ML-DSA-44) | 1,533 TPS — 40% below Falcon (larger sigs bottleneck I/O) |
+| Hybrid mode | ECDSA + Falcon + ML-DSA coexist on same chain, no hard fork |
 
-Full numerical data: **[docs/RESULTS.md](docs/RESULTS.md)**
+**Start here:** [docs/FINDINGS.md](docs/FINDINGS.md) — consolidated research findings
+**Full numerical data:** [docs/RESULTS.md](docs/RESULTS.md)
 
 ---
 
@@ -63,7 +66,7 @@ make run
 
 ### Build Blockchain
 
-The blockchain supports three signature schemes via compile-time selection:
+The blockchain supports four signature configurations via compile-time selection:
 
 ```bash
 cd blockchain
@@ -74,8 +77,11 @@ make
 # Falcon-512 (requires liboqs)
 make SIG_SCHEME=2
 
-# Hybrid ECDSA + Falcon-512 (requires liboqs)
+# Hybrid — ECDSA + Falcon-512 + ML-DSA-44 (requires liboqs)
 make SIG_SCHEME=3
+
+# ML-DSA-44 (requires liboqs)
+make SIG_SCHEME=4
 ```
 
 See [blockchain/README.md](blockchain/README.md) for full blockchain documentation.
@@ -121,6 +127,7 @@ python3 scripts/generate_report.py
 
 | Document | Description |
 |----------|-------------|
+| [docs/FINDINGS.md](docs/FINDINGS.md) | **Key research findings** — single-table comparisons, conclusions, recommendations |
 | [docs/RESULTS.md](docs/RESULTS.md) | **All numerical results** — throughput, scaling, sizes, blockchain baseline |
 | [docs/COMPREHENSIVE_COMPARISON.md](docs/COMPREHENSIVE_COMPARISON.md) | 7-algorithm trade-off analysis |
 | [docs/QUANTUM_THREAT_ANALYSIS.md](docs/QUANTUM_THREAT_ANALYSIS.md) | Post-quantum threat landscape |
