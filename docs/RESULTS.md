@@ -141,19 +141,19 @@ Homogeneous core design produces clean, predictable linear scaling.
 
 ### 5.3.1 Intel Xeon Gold 6126 — Skylake-SP — All 7 Algorithms (Measured, Core-Pinned)
 
-> Source: `multicore_all_benchmark`, run 2026-03-23. 1,000 verify iterations/thread (100 for SLH-DSA), barrier-synchronized. Each thread pinned to a distinct physical core via `sched_setaffinity`.
+> Source: `multicore_all_benchmark`, run 2026-03-23T20:52:17Z. 1,000 verify iterations/thread (100 for SLH-DSA), barrier-synchronized. Each thread pinned to a distinct physical core via `sched_setaffinity`.
 
 | Algorithm           | 1 Core  | 2 Cores | 4 Cores | 6 Cores | 8 Cores | 10 Cores | Speedup    | Efficiency |
 |---------------------|--------:|--------:|--------:|--------:|--------:|---------:|:----------:|:----------:|
-| ML-DSA-44           |  26,559 |  56,351 | 108,252 | 163,285 | 211,010 |  276,453 | **10.41x** | **104.1%** |
-| Falcon-512          |  19,405 |  32,374 |  74,905 | 110,921 | 147,537 |  185,305 | 9.55x      | 95.5%      |
-| ML-DSA-65           |  28,098 |  36,547 |  87,784 | 128,205 | 170,237 |  211,597 | 7.53x      | 75.3%      |
-| Falcon-1024         |  11,216 |  18,661 |  42,159 |  55,218 |  80,206 |   90,291 | 8.05x      | 80.5%      |
-| ECDSA secp256k1     |   2,465 |   4,715 |   9,239 |  13,623 |  17,750 |   21,934 | 8.90x      | 89.0%      |
-| SLH-DSA-SHA2-128f   |     681 |   1,203 |   2,498 |   3,718 |   4,836 |    6,031 | 8.86x      | 88.6%      |
-| Ed25519             |   8,346 |  14,317 |  30,013 |  44,011 |  56,932 |   65,412 | 7.84x      | 78.4%      |
+| ML-DSA-44           |  42,935 |  56,428 | 105,975 | 162,719 | 207,663 |  277,987 | 6.47x      | 64.7%      |
+| ML-DSA-65           |  27,900 |  37,803 |  88,961 | 126,921 | 166,740 |  211,604 | 7.58x      | 75.8%      |
+| Falcon-512          |  19,022 |  32,375 |  74,960 | 111,099 | 147,920 |  183,292 | **9.64x**  | **96.4%**  |
+| Falcon-1024         |  11,157 |  18,617 |  42,106 |  58,957 |  79,554 |   98,467 | 8.83x      | 88.3%      |
+| Ed25519             |   8,249 |  14,134 |  29,587 |  43,357 |  56,367 |   69,420 | 8.42x      | 84.2%      |
+| ECDSA secp256k1     |   2,445 |   4,698 |   9,244 |  13,551 |  17,302 |   21,342 | 8.73x      | 87.3%      |
+| SLH-DSA-SHA2-128f   |     691 |   1,207 |   2,365 |   3,741 |   4,648 |    6,101 | 8.83x      | 88.3%      |
 
-All values in ops/sec, sorted by 10-core throughput. ML-DSA-44 achieves superlinear scaling (104.1%) due to improved cache utilization with core pinning. Falcon-512 scales cleanly at 95.5%. Both PQC schemes outscale classical ECDSA (89.0%) and Ed25519 (78.4%).
+All values in ops/sec, sorted by 10-core throughput. Falcon-512 achieves the best scaling efficiency (96.4%) — its compact FFT working set fits cleanly in per-core L2 cache. ML-DSA-44 has the highest absolute throughput (278K ops/sec at 10 cores) but lower scaling efficiency (64.7%) because its high single-core throughput (43K) leaves less headroom for parallel speedup. Classical algorithms (ECDSA 87.3%, Ed25519 84.2%) scale well but trail Falcon-512.
 
 ### 5.4 Cross-Platform Summary (Falcon-512, 10 Threads)
 
@@ -161,28 +161,28 @@ All values in ops/sec, sorted by 10-core throughput. ML-DSA-44 achieves superlin
 |----------------|------------------:|:----------:|:----------:|
 | M2 Pro         |           298,837 | 9.27x      | 92.7%      |
 | Cascade Lake   |           184,467 | 9.15x      | 91.5%      |
-| Skylake-SP     |           185,305 | 9.55x      | 95.5%      |
+| Skylake-SP     |           183,292 | 9.64x      | 96.4%      |
 
-Implied serial fraction (Amdahl's Law): ~0.5% on Skylake-SP. Verification is embarrassingly parallel.
-Skylake-SP value from core-pinned all-algorithm run (2026-03-23, sched_setaffinity); prior non-pinned run measured 184,167.
+Implied serial fraction (Amdahl's Law): ~0.4% on Skylake-SP. Verification is embarrassingly parallel.
+Skylake-SP value from core-pinned run (2026-03-23T20:52:17Z, sched_setaffinity); prior non-pinned run measured 176,890.
 
 ### 5.5 Scaling Analysis — Cross-Algorithm and Cross-Platform
 
-**Key finding: All 7 algorithms scale comparably. PQC schemes are not scaling-limited.**
+**Key finding: All 7 algorithms scale well under core pinning. PQC schemes are not scaling-limited.**
 
-The Skylake-SP dataset (Section 5.3.1) is the canonical cross-algorithm comparison on server hardware, covering all 7 algorithms at 6 thread counts on homogeneous Xeon cores. The M2 Pro dataset (Section 5.1) provides a complementary ARM64 comparison. Key observations:
+The Skylake-SP dataset (Section 5.3.1) is the canonical cross-algorithm comparison on server hardware, covering all 7 algorithms at 6 thread counts on homogeneous Xeon cores with `sched_setaffinity` pinning. The M2 Pro dataset (Section 5.1) provides a complementary ARM64 comparison. Key observations:
 
-1. **All algorithms achieve 7.5x–10.4x speedup at 10 cores on Skylake-SP.** ML-DSA-44 leads at 10.41x (104.1% efficiency, superlinear), followed by Falcon-512 (9.55x), ECDSA (8.90x), SLH-DSA (8.86x), Falcon-1024 (8.05x), Ed25519 (7.84x), and ML-DSA-65 (7.53x). On M2 Pro, the range is 6.3x–9.3x with lower efficiency due to heterogeneous cores.
+1. **Falcon-512 achieves the best scaling efficiency at 96.4%.** With 9.64x speedup at 10 cores, Falcon-512's compact FFT working set fits in per-core L2 cache, minimizing cross-core contention. The implied serial fraction is ~0.4% (Amdahl's Law). Other algorithms range from 6.5x to 8.8x speedup, with Falcon-1024 and SLH-DSA tied at 8.83x (88.3%), followed by ECDSA (8.73x, 87.3%), Ed25519 (8.42x, 84.2%), ML-DSA-65 (7.58x, 75.8%), and ML-DSA-44 (6.47x, 64.7%).
 
-2. **PQC algorithms scale at least as well as classical baselines.** On Skylake-SP, ML-DSA-44 (10.41x) and Falcon-512 (9.55x) outscale ECDSA (8.90x) and Ed25519 (7.84x). ML-DSA-44's superlinear scaling is due to improved cache utilization under core pinning — its absolute throughput (276K ops/sec) dominates all other algorithms.
+2. **ML-DSA-44 has the highest absolute throughput but lowest scaling efficiency.** At 278K ops/sec (10 cores), ML-DSA-44 dominates all other algorithms in raw throughput. However, its 64.7% efficiency is the lowest of the group because its high single-core throughput (43K ops/sec) saturates memory bandwidth at higher core counts, limiting the parallel speedup ratio. The absolute throughput still increases monotonically with cores.
 
-3. **ML-DSA-44 achieves superlinear scaling with core pinning.** With `sched_setaffinity` pinning each thread to a dedicated core, ML-DSA-44 reaches 104.1% efficiency on Skylake-SP. This is attributed to reduced cache thrashing: pinned threads avoid cross-core L2 migration, and the NTT-heavy workload fits well in per-core L2 cache. Prior non-pinned runs showed only 60.6% efficiency due to OS scheduler migration overhead.
+3. **Classical algorithms scale respectably but trail PQC leaders.** ECDSA secp256k1 (8.73x, 87.3%) and Ed25519 (8.42x, 84.2%) both scale well under core pinning. Falcon-512 outscales both, while Falcon-1024 and SLH-DSA match them. The scaling difference is not a barrier to PQC adoption.
 
-4. **The efficiency drop at 8+ threads on M2 Pro is architectural, not algorithmic.** The M2 Pro has 6 performance cores and 4 efficiency cores (heterogeneous big.LITTLE). At 8+ threads, work spills onto E-cores (~60% the throughput of P-cores), reducing efficiency uniformly across all algorithms. The Skylake-SP results (Section 5.3.1) confirm that homogeneous cores with pinning maintain 75–104% efficiency at 10 cores.
+4. **The efficiency drop at 8+ threads on M2 Pro is architectural, not algorithmic.** The M2 Pro has 6 performance cores and 4 efficiency cores (heterogeneous big.LITTLE). At 8+ threads, work spills onto E-cores (~60% the throughput of P-cores), reducing efficiency uniformly across all algorithms. The Skylake-SP results (Section 5.3.1) confirm that homogeneous cores with pinning maintain 65–96% efficiency at 10 cores.
 
-5. **Falcon-512 has the best scaling profile for server deployment.** At 95.5% efficiency on Skylake-SP, Falcon-512 is near-perfectly parallel. The implied serial fraction is ~0.5% (Amdahl's Law). A 10-core Falcon-512 validator achieves 185K verify/sec on Skylake-SP — 74x above the 2,500 ops/sec per-shard requirement.
+5. **Falcon-512 has the best scaling profile for server deployment.** At 96.4% efficiency on Skylake-SP, Falcon-512 is near-perfectly parallel. A 10-core Falcon-512 validator achieves 183K verify/sec on Skylake-SP — 73x above the 2,500 ops/sec per-shard requirement.
 
-6. **Practical implication for MEMO:** The choice of PQC algorithm should be driven by signature size and single-core throughput, not scaling characteristics. All algorithms parallelize effectively with core pinning. For maximum throughput per core, use ML-DSA-44 (27K single-core on Skylake-SP). For best scaling efficiency and smallest signatures, use Falcon-512.
+6. **Practical implication for MEMO:** The choice of PQC algorithm involves a throughput-vs-scaling tradeoff. ML-DSA-44 delivers the highest absolute throughput (43K single-core, 278K at 10 cores) but scales at only 64.7%. Falcon-512 scales near-perfectly (96.4%) with the smallest PQC signatures (~655 B). For maximum throughput, use ML-DSA-44. For best scaling efficiency and smallest on-chain footprint, use Falcon-512.
 
 ---
 

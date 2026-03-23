@@ -27,17 +27,19 @@
 
 ## 2. Multicore Scaling — Chameleon Skylake-SP (Xeon Gold 6126, ops/sec, core-pinned)
 
+> Run 2026-03-23T20:52:17Z. `sched_setaffinity` pinning each thread to a distinct physical core.
+
 | Algorithm           | 1 Core | 2 Cores | 4 Cores | 6 Cores | 8 Cores | 10 Cores | Speedup    | Eff%       |
 |---------------------|-------:|--------:|--------:|--------:|--------:|---------:|:----------:|:----------:|
-| ML-DSA-44           | 26,559 |  56,351 | 108,252 | 163,285 | 211,010 |  276,453 | **10.41x** | **104.1%** |
-| Falcon-512          | 19,405 |  32,374 |  74,905 | 110,921 | 147,537 |  185,305 | 9.55x      | 95.5%      |
-| ML-DSA-65           | 28,098 |  36,547 |  87,784 | 128,205 | 170,237 |  211,597 | 7.53x      | 75.3%      |
-| Falcon-1024         | 11,216 |  18,661 |  42,159 |  55,218 |  80,206 |   90,291 | 8.05x      | 80.5%      |
-| ECDSA secp256k1     |  2,465 |   4,715 |   9,239 |  13,623 |  17,750 |   21,934 | 8.90x      | 89.0%      |
-| SLH-DSA-SHA2-128f   |    681 |   1,203 |   2,498 |   3,718 |   4,836 |    6,031 | 8.86x      | 88.6%      |
-| Ed25519             |  8,346 |  14,317 |  30,013 |  44,011 |  56,932 |   65,412 | 7.84x      | 78.4%      |
+| ML-DSA-44           | 42,935 |  56,428 | 105,975 | 162,719 | 207,663 |  277,987 | 6.47x      | 64.7%      |
+| ML-DSA-65           | 27,900 |  37,803 |  88,961 | 126,921 | 166,740 |  211,604 | 7.58x      | 75.8%      |
+| Falcon-512          | 19,022 |  32,375 |  74,960 | 111,099 | 147,920 |  183,292 | **9.64x**  | **96.4%**  |
+| Falcon-1024         | 11,157 |  18,617 |  42,106 |  58,957 |  79,554 |   98,467 | 8.83x      | 88.3%      |
+| Ed25519             |  8,249 |  14,134 |  29,587 |  43,357 |  56,367 |   69,420 | 8.42x      | 84.2%      |
+| ECDSA secp256k1     |  2,445 |   4,698 |   9,244 |  13,551 |  17,302 |   21,342 | 8.73x      | 87.3%      |
+| SLH-DSA-SHA2-128f   |    691 |   1,207 |   2,365 |   3,741 |   4,648 |    6,101 | 8.83x      | 88.3%      |
 
-**Takeaway:** With `sched_setaffinity` core pinning, ML-DSA-44 achieves superlinear scaling (104.1%) due to improved cache utilization. Falcon-512 scales at 95.5% efficiency. All PQC schemes scale as well or better than classical ECDSA (89.0%) and Ed25519 (78.4%). Sorted by 10-core throughput.
+**Takeaway:** Falcon-512 achieves the best scaling efficiency (96.4%) — its compact FFT working set fits cleanly in per-core L2 cache. ML-DSA-44 has the highest absolute throughput (278K at 10 cores) but lower scaling efficiency (64.7%) because its high single-core throughput saturates memory bandwidth at higher core counts. All algorithms scale monotonically. Sorted by 10-core throughput.
 
 ---
 
