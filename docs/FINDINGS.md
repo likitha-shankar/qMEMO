@@ -25,19 +25,19 @@
 
 ---
 
-## 2. Multicore Scaling — Chameleon Skylake-SP (Xeon Gold 6126, ops/sec)
+## 2. Multicore Scaling — Chameleon Skylake-SP (Xeon Gold 6126, ops/sec, core-pinned)
 
-| Algorithm           |     1T |     2T |      4T |      6T |      8T |      10T | Speedup    | Eff%       |
-|---------------------|-------:|-------:|--------:|--------:|--------:|---------:|:----------:|:----------:|
-| Falcon-512          | 18,731 | 39,458 |  67,038 | 111,247 | 150,568 |  184,167 | **9.83x**  | **98.3%**  |
-| Falcon-1024         | 11,152 | 21,962 |  42,854 |  60,525 |  83,466 |  102,034 | 9.15x      | 91.5%      |
-| ML-DSA-44           | 44,801 | 63,885 | 112,769 | 150,747 | 215,650 | 271,606  | 6.06x      | 60.6%      |
-| ML-DSA-65           | 25,204 | 43,094 |  74,367 | 122,835 | 149,129 |  210,655 | 8.36x      | 83.6%      |
-| SLH-DSA-SHA2-128f   |    705 |  1,389 |   2,645 |   3,542 |   5,173 |    6,140 | 8.71x      | 87.1%      |
-| ECDSA secp256k1     |  2,478 |  4,920 |   9,242 |  13,308 |  17,794 |   21,847 | 8.82x      | 88.2%      |
-| Ed25519             |  8,343 | 16,531 |  30,121 |  42,365 |  52,170 |   67,603 | 8.10x      | 81.0%      |
+| Algorithm           | 1 Core | 2 Cores | 4 Cores | 6 Cores | 8 Cores | 10 Cores | Speedup    | Eff%       |
+|---------------------|-------:|--------:|--------:|--------:|--------:|---------:|:----------:|:----------:|
+| ML-DSA-44           | 26,559 |  56,351 | 108,252 | 163,285 | 211,010 |  276,453 | **10.41x** | **104.1%** |
+| Falcon-512          | 19,405 |  32,374 |  74,905 | 110,921 | 147,537 |  185,305 | 9.55x      | 95.5%      |
+| ML-DSA-65           | 28,098 |  36,547 |  87,784 | 128,205 | 170,237 |  211,597 | 7.53x      | 75.3%      |
+| Falcon-1024         | 11,216 |  18,661 |  42,159 |  55,218 |  80,206 |   90,291 | 8.05x      | 80.5%      |
+| ECDSA secp256k1     |  2,465 |   4,715 |   9,239 |  13,623 |  17,750 |   21,934 | 8.90x      | 89.0%      |
+| SLH-DSA-SHA2-128f   |    681 |   1,203 |   2,498 |   3,718 |   4,836 |    6,031 | 8.86x      | 88.6%      |
+| Ed25519             |  8,346 |  14,317 |  30,013 |  44,011 |  56,932 |   65,412 | 7.84x      | 78.4%      |
 
-**Takeaway:** Falcon-512 scales near-perfectly (98.3% efficiency at 10 threads). ML-DSA-44 has the highest absolute throughput (272K ops/sec) but only 60.6% efficiency due to AVX-512 memory bandwidth saturation. All PQC schemes scale as well or better than classical ECDSA (88.2%) and Ed25519 (81.0%).
+**Takeaway:** With `sched_setaffinity` core pinning, ML-DSA-44 achieves superlinear scaling (104.1%) due to improved cache utilization. Falcon-512 scales at 95.5% efficiency. All PQC schemes scale as well or better than classical ECDSA (89.0%) and Ed25519 (78.4%). Sorted by 10-core throughput.
 
 ---
 
@@ -73,10 +73,10 @@ All runs on Xeon Gold 6126, k=16, 10 farmers, 15 warmup blocks, 8 threads/farmer
 
 | Finding                                    | Detail                                                                                                         |
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| **Signature verification was stubbed out**  | `crypto_verify()` returned `true` without checking — baseline TPS measured everything except real crypto       |
-| **Hardcoded to ECDSA**                      | No way to swap signature algorithms; buffer sizes fixed to ECDSA dimensions (32B pubkey, 72B sig)              |
-| **No sig_type in wire format**              | Couldn't mix signature schemes on the same chain                                                               |
-| **Single-scheme compile only**              | No runtime dispatch — couldn't run hybrid mode                                                                 |
+| **Signature verification was stubbed out** | `crypto_verify()` returned `true` without checking — baseline TPS measured everything except real crypto       |
+| **Hardcoded to ECDSA**                     | No way to swap signature algorithms; buffer sizes fixed to ECDSA dimensions (32B pubkey, 72B sig)              |
+| **No sig_type in wire format**             | Couldn't mix signature schemes on the same chain                                                               |
+| **Single-scheme compile only**             | No runtime dispatch — couldn't run hybrid mode                                                                 |
 
 ---
 
@@ -84,14 +84,14 @@ All runs on Xeon Gold 6126, k=16, 10 farmers, 15 warmup blocks, 8 threads/farmer
 
 | Change                                | Detail                                                                                     |
 |---------------------------------------|--------------------------------------------------------------------------------------------|
-| **Real signature verification**        | Replaced stub with actual OpenSSL ECDSA verify + liboqs Falcon/ML-DSA verify              |
-| **`SIG_SCHEME` build flag**            | `1`=ECDSA, `2`=Falcon-512, `3`=Hybrid (all three), `4`=ML-DSA-44                         |
-| **`sig_type` field in TX/block**       | Added to serialize/deserialize so validators know which algorithm per TX                   |
-| **Universal buffer sizes**             | Bumped to ML-DSA maximums (pubkey=1312B, seckey=2560B, sig=2420B)                         |
-| **`crypto_verify_typed()` dispatch**   | Hybrid mode reads sig_type per-TX and dispatches to correct backend                       |
-| **Wallet CLI `--scheme` flag**         | Wallets pick their algorithm at creation time                                              |
-| **`benchmark_hybrid.sh`**              | Mixed-scheme benchmark with configurable farmer ratios                                     |
-| **Bug fixes**                          | `sig_type` missing in block.c/validator.c deserialize; hardcoded SIG_ECDSA in batch_send  |
+| **Real signature verification**       | Replaced stub with actual OpenSSL ECDSA verify + liboqs Falcon/ML-DSA verify               |
+| **`SIG_SCHEME` build flag**           | `1`=ECDSA, `2`=Falcon-512, `3`=Hybrid (all three), `4`=ML-DSA-44                           |
+| **`sig_type` field in TX/block**      | Added to serialize/deserialize so validators know which algorithm per TX                   |
+| **Universal buffer sizes**            | Bumped to ML-DSA maximums (pubkey=1312B, seckey=2560B, sig=2420B)                          |
+| **`crypto_verify_typed()` dispatch**  | Hybrid mode reads sig_type per-TX and dispatches to correct backend                        |
+| **Wallet CLI `--scheme` flag**        | Wallets pick their algorithm at creation time                                              |
+| **`benchmark_hybrid.sh`**             | Mixed-scheme benchmark with configurable farmer ratios                                     |
+| **Bug fixes**                         | `sig_type` missing in block.c/validator.c deserialize; hardcoded SIG_ECDSA in batch_send   |
 
 ---
 
@@ -102,8 +102,8 @@ The blockchain now supports a hybrid mode (`SIG_SCHEME=3`) where ECDSA, Falcon-5
 | Phase     | Default     | Allowed Schemes                            | Timeline         |
 |-----------|-------------|--------------------------------------------|------------------|
 | Phase 1   | ECDSA       | ECDSA + Falcon-512 + ML-DSA-44             | Now              |
-| Phase 2   | Falcon-512  | ECDSA (deprecated) + Falcon-512 + ML-DSA-44 | After validation |
-| Phase 3   | Falcon-512  | Falcon-512 + ML-DSA-44 only               | ECDSA sunset     |
+| Phase 2   | Falcon-512  | ECDSA (deprecated) + Falcon-512 + ML-DSA-44| After validation |
+| Phase 3   | Falcon-512  | Falcon-512 + ML-DSA-44 only                | ECDSA sunset     |
 
 This mirrors Polkadot (dual-algorithm) and Algorand (phased Falcon rollout). No hard fork needed.
 
@@ -117,7 +117,7 @@ This mirrors Polkadot (dual-algorithm) and Algorand (phased Falcon rollout). No 
 | Algorand              | Falcon-512                         | State proofs in production|
 | Polkadot              | Bandersnatch + Falcon (planned)    | Research phase            |
 | Ethereum              | Researching (no commitment)        | EIP discussions only      |
-| **MEMO (this work)**  | **Falcon-512 / ML-DSA-44 / Hybrid**| **Measured, integrated** |
+| **MEMO (this work)**  | **Falcon-512 / ML-DSA-44 / Hybrid**| **Measured, integrated**  |
 
 MEMO is ahead of most projects — we have measured end-to-end TPS with real PQC verification, not just micro-benchmarks.
 
