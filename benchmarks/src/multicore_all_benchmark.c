@@ -27,6 +27,11 @@
  *   ./benchmarks/bin/multicore_all_benchmark
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#include <sched.h>
+#endif
+
 #include "bench_common.h"
 
 #include <oqs/oqs.h>
@@ -331,8 +336,16 @@ int main(void)
                 }
             }
 
-            for (int t = 0; t < nthreads; t++)
+            for (int t = 0; t < nthreads; t++) {
                 pthread_create(&threads[t], NULL, verify_thread, &args[t]);
+#ifdef __linux__
+                /* Pin each thread to a distinct physical core */
+                cpu_set_t cpuset;
+                CPU_ZERO(&cpuset);
+                CPU_SET(t, &cpuset);
+                pthread_setaffinity_np(threads[t], sizeof(cpu_set_t), &cpuset);
+#endif
+            }
 
             /* Main thread waits at barrier so all threads start simultaneously */
             barrier_wait(&barrier);

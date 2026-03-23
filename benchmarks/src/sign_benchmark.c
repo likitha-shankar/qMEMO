@@ -32,6 +32,11 @@
  *   ./benchmarks/bin/sign_benchmark
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#include <sched.h>
+#endif
+
 #include "bench_common.h"   /* get_time, get_timestamp, barrier_t -- must be first */
 
 #include <oqs/oqs.h>
@@ -167,6 +172,12 @@ static double run_for_threads(const uint8_t *secret_key, size_t sk_len, int nthr
             fprintf(stderr, "FATAL: pthread_create failed for thread %d.\n", i);
             exit(EXIT_FAILURE);
         }
+#ifdef __linux__
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_SET(i, &cpuset);
+        pthread_setaffinity_np(threads[i], sizeof(cpu_set_t), &cpuset);
+#endif
     }
 
     /*

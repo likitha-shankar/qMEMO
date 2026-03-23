@@ -32,6 +32,11 @@
  *   ./benchmarks/bin/concurrent_benchmark
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE
+#include <sched.h>
+#endif
+
 #include "bench_common.h"   /* get_time, get_timestamp, barrier_t -- must be first */
 
 #include <oqs/oqs.h>
@@ -127,6 +132,12 @@ static double run_concurrent(pool_t *pool)
             /* Workers 0..i-1 are stuck at the barrier -- unrecoverable. */
             exit(EXIT_FAILURE);
         }
+#ifdef __linux__
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_SET(i, &cpuset);
+        pthread_setaffinity_np(threads[i], sizeof(cpu_set_t), &cpuset);
+#endif
     }
 
     /*
