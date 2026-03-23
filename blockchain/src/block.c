@@ -259,7 +259,8 @@ uint8_t* block_serialize_pb(const Block* block, size_t* out_len) {
                 pb_tx->public_key.len = tx->pubkey_len;
                 pb_tx->public_key.data = tx->public_key;
             }
-            
+            pb_tx->sig_type = tx->sig_type;
+
             pb_txs[i] = pb_tx;
         }
     }
@@ -345,7 +346,8 @@ Block* block_deserialize_pb(const uint8_t* data, size_t len) {
             memcpy(tx->public_key, pb_tx->public_key.data, pklen);
             tx->pubkey_len = pklen;
         }
-        
+        tx->sig_type = pb_tx->sig_type ? pb_tx->sig_type : SIG_ECDSA;
+
         block->transactions[i] = tx;
     }
     

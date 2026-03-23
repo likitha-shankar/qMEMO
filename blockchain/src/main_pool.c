@@ -84,7 +84,9 @@ static Transaction* pb_to_transaction(const Blockchain__Transaction* pt) {
         memcpy(tx->public_key, pt->public_key.data, pklen);
         tx->pubkey_len = pklen;
     }
-    
+
+    tx->sig_type = pt->sig_type ? pt->sig_type : SIG_ECDSA;
+
     return tx;
 }
 
@@ -348,6 +350,7 @@ int main(int argc, char* argv[]) {
                                 pt->public_key.data = txs[i]->public_key;
                                 pt->public_key.len = txs[i]->pubkey_len;
                             }
+                            pt->sig_type = txs[i]->sig_type;
                             pb_ptrs[i] = pt;
                             total_fees += txs[i]->fee;
                         }

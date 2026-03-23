@@ -1,6 +1,6 @@
-# Post-Quantum Cryptographic Signature Benchmarking Suite
+# qMEMO — Post-Quantum Cryptographic Signatures for Blockchain
 
-**Graduate Research Project -- Illinois Institute of Technology, Chicago**
+**Graduate Research, Illinois Institute of Technology, Chicago**
 
 ---
 
@@ -12,90 +12,73 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 ---
 
-## Key Findings
-
-### Throughput -- single core
-
-| Algorithm | Apple M2 Pro (ARM64) | Intel Xeon Gold 6242 (x86) |
-|-----------|---------------------:|---------------------------:|
-| Falcon-512 verify | 31,133 ops/sec | 23,787 ops/sec |
-| ML-DSA-44 verify | 25,904 ops/sec | **49,060 ops/sec** |
-| Ed25519 verify | 8,857 ops/sec | 9,013 ops/sec |
-| ECDSA secp256k1 verify | 4,026 ops/sec | 2,963 ops/sec |
-
-> ML-DSA-44 is 2x faster than Falcon-512 on x86 due to liboqs AVX-512 optimizations.
-> Falcon-512 leads on ARM. Measurement stability: CV 3.92% (ARM) vs 0.67% (x86 bare-metal).
-
-### Other findings
+## Key Results
 
 | Metric | Value |
 |--------|-------|
-| **Falcon-512 vs ECDSA verify** | Falcon 7.7x faster (ARM), 8.0x faster (x86) |
-| **Falcon-512 signature size** | Max 752 bytes vs ML-DSA-44's 2,420 bytes (3.2x smaller) |
-| **SLH-DSA-SHA2-128f sign rate** | 36-45 ops/sec -- unsuitable for high-TPS |
-| **10-thread Falcon-512 verify** | 239K ops/sec (ARM, 8.9x), 184K ops/sec (x86, 9.1x) |
-| **Cycle count (RDTSC, x86)** | 146,778 cycles/verify @ 2.80 GHz |
+| Falcon-512 verify (single core) | 23,877-31,133 ops/sec across platforms |
+| ML-DSA-44 verify (x86, AVX-512) | 49,060 ops/sec (2x faster than Falcon on x86) |
+| Falcon-512 vs ECDSA verify | **7.6-8.1x faster**, with quantum resistance |
+| Falcon-512 signature size | 666 B max (3.2x smaller than ML-DSA-44) |
+| 10-thread Falcon-512 scaling | 184K-299K ops/sec (91-94% efficiency) |
+| Blockchain e2e TPS (baseline) | 2,223 TPS (stub verify), ~1,500-1,800 projected with Falcon |
+
+Full numerical data: **[docs/RESULTS.md](docs/RESULTS.md)**
 
 ---
 
-## Benchmark Suite (11 programs)
+## Architecture
 
-| Binary | Source | What it measures |
-|--------|--------|-----------------|
-| `verify_benchmark` | `verify_benchmark.c` | Single-pass Falcon-512 verify throughput, 10K iterations |
-| `statistical_benchmark` | `statistical_benchmark.c` | 1,000 trials x 100 ops; median, IQR, CV, Jarque-Bera |
-| `comparison_benchmark` | `comparison_benchmark.c` | Falcon-512 vs ML-DSA-44 side-by-side |
-| `multicore_benchmark` | `multicore_benchmark.c` | Falcon-512 verify throughput: 1/2/4/6/8/10 threads |
-| `concurrent_benchmark` | `concurrent_benchmark.c` | Thread-pool concurrent verification |
-| `concurrent_signing_benchmark` | `concurrent_signing_benchmark.c` | Thread-pool concurrent signing |
-| `sign_benchmark` | `sign_benchmark.c` | Falcon-512 **signing** throughput: 1/2/4/6/8/10 cores |
-| `signature_size_analysis` | `signature_size_analysis.c` | Falcon-512/padded-512/1024/padded-1024 size distributions (10K sigs each) |
-| `classical_benchmark` | `classical_benchmark.c` | ECDSA secp256k1 + Ed25519 baselines (OpenSSL 3.x EVP API) |
-| `comprehensive_comparison` | `comprehensive_comparison.c` | All 7 algorithms side-by-side: keygen / sign / verify throughput + key/sig sizes |
-| `key_inspection` | `key_inspection.c` | Key material inspection and correctness audit for all 7 algorithms |
+| Component | Description |
+|-----------|-------------|
+| `benchmarks/` | 11 standalone C benchmark programs (Falcon, ML-DSA, SLH-DSA, ECDSA, Ed25519) |
+| `blockchain/` | Fork of blockchain_pos_v45 with hybrid PQC signature support (ECDSA / Falcon-512 / Hybrid) |
+| `docs/` | Research documentation, analysis, and consolidated results |
+| `scripts/` | Automation, Chameleon Cloud setup, analysis scripts |
 
 ---
 
-## Quick Start
+## Getting Started
 
 ### Prerequisites
 
-- **OS:** macOS (Apple Silicon) or Linux
-- **Build:** Git, CMake, Ninja (or Make), C compiler (Clang/GCC)
-- **OpenSSL 3.x:** `brew install openssl` on macOS (`/opt/homebrew/opt/openssl/`)
-- **Optional:** Python 3.10+ and NumPy for analysis scripts
+- **OS:** macOS (Apple Silicon) or Linux (x86-64)
+- **Build tools:** Git, CMake, Ninja (or Make), C compiler (Clang/GCC)
+- **OpenSSL 3.x:** `brew install openssl` on macOS
+- **liboqs 0.15.0:** Built locally via `install_liboqs.sh`
+- **Blockchain additional:** ZeroMQ, Protobuf-C, OpenMP
 
-### Installation
+### Build Benchmarks
 
 ```bash
-# 1. Install liboqs (Open Quantum Safe) locally
+# 1. Build liboqs locally
 ./install_liboqs.sh
 
-# 2. Build all 10 benchmarks
+# 2. Build all benchmark binaries
 cd benchmarks && make all
+
+# 3. Run all benchmarks
+make run
 ```
 
-### Run All Benchmarks
+### Build Blockchain
+
+The blockchain supports three signature schemes via compile-time selection:
 
 ```bash
-cd benchmarks && make run
+cd blockchain
+
+# ECDSA secp256k1 (default)
+make
+
+# Falcon-512 (requires liboqs)
+make SIG_SCHEME=2
+
+# Hybrid ECDSA + Falcon-512 (requires liboqs)
+make SIG_SCHEME=3
 ```
 
-### Run Individually
-
-```bash
-./bin/verify_benchmark
-./bin/statistical_benchmark
-./bin/comparison_benchmark
-./bin/multicore_benchmark
-./bin/concurrent_benchmark
-./bin/concurrent_signing_benchmark
-./bin/sign_benchmark
-./bin/signature_size_analysis
-./bin/classical_benchmark
-./bin/comprehensive_comparison
-./bin/key_inspection
-```
+See [blockchain/README.md](blockchain/README.md) for full blockchain documentation.
 
 ### Full Pipeline (timestamped results + Markdown report)
 
@@ -113,40 +96,24 @@ python3 scripts/generate_report.py
 |------|-------------|
 | `benchmarks/src/` | C benchmark sources (11 programs + `bench_common.h`) |
 | `benchmarks/bin/` | Compiled binaries (after `make all`) |
-| `benchmarks/results/` | Timestamped per-run log files |
-| `docs/` | Research documentation, analysis, and system specs |
-| `scripts/` | Automation: `run_logged.sh` (timestamped runs), `chameleon_setup.sh` (bare-metal bootstrap) |
-| `liboqs_install/` | Local liboqs 0.15.0 install (built by `install_liboqs.sh`) |
+| `benchmarks/results/` | Timestamped per-run output logs |
+| `blockchain/src/` | Blockchain PoS with pluggable crypto backend |
+| `blockchain/include/` | Headers: `crypto_backend.h`, `transaction.h`, `wallet.h` |
+| `blockchain/proto/` | Protobuf schema for wire format |
+| `docs/` | Research documentation and analysis |
+| `scripts/` | `run_logged.sh`, `chameleon_setup.sh`, analysis scripts |
+| `liboqs_install/` | Local liboqs 0.15.0 install |
 | `install_liboqs.sh` | Builds and installs liboqs locally |
 
 ---
 
-## Methodology
+## Hardware Platforms
 
-- **Implementation:** C benchmarks using **liboqs 0.15.0** (Falcon-512, Falcon-1024,
-  ML-DSA-44/65, SLH-DSA-SHA2-128f) and **OpenSSL 3.6.1** (ECDSA secp256k1, Ed25519).
-- **Timing:** `clock_gettime(CLOCK_MONOTONIC)` -- nanosecond-precision, monotonic.
-  Warm-up phases precede every timed loop; no I/O or logging inside timed sections.
-- **Statistics:** 1,000 independent trials for stability; median and IQR reported when
-  distribution is non-Gaussian (Jarque-Bera test).
-- **Multicore:** pthread barrier synchronisation ensures all threads enter the timed
-  section simultaneously; `t_start` is recorded after the barrier releases.
-- **Thread safety:** Signing benchmarks give each thread its own `OQS_SIG` context
-  (required -- Falcon signing is stateful) and call `OQS_thread_stop()` on exit.
-
----
-
-## Hardware
-
-Benchmarks run on two platforms:
-
-| Platform | CPU | Cores | RAM | OS |
-|----------|-----|------:|----:|-----|
-| Apple M2 Pro | ARM64, ~3.5 GHz (P-cores) | 10 | 16 GB | macOS Darwin arm64 |
-| Chameleon Cloud (compute_cascadelake_r650) | Intel Xeon Gold 6242 @ 2.80 GHz | 64 | 187 GB | Ubuntu 22.04 |
-
-The Cascade Lake node uses RDTSC for exact hardware cycle counting.
-See **[docs/SYSTEM_SPECS.md](docs/SYSTEM_SPECS.md)** for full profiles.
+| Platform | CPU | Cores | Location |
+|----------|-----|------:|----------|
+| Apple M2 Pro | ARM64, ~3.5 GHz (P-cores) | 10 (6P + 4E) | Local |
+| Xeon Gold 6242 | Cascade Lake @ 2.80 GHz | 64 logical | Chameleon Cloud |
+| Xeon Gold 6126 | Skylake-SP @ 2.60 GHz | 48 logical | Chameleon Cloud |
 
 ---
 
@@ -154,26 +121,16 @@ See **[docs/SYSTEM_SPECS.md](docs/SYSTEM_SPECS.md)** for full profiles.
 
 | Document | Description |
 |----------|-------------|
-| [docs/BENCHMARK_REPORT.md](docs/BENCHMARK_REPORT.md) | Full methodology and result tables |
-| [docs/COMPREHENSIVE_COMPARISON.md](docs/COMPREHENSIVE_COMPARISON.md) | 7-algorithm comparison, trade-off analysis |
+| [docs/RESULTS.md](docs/RESULTS.md) | **All numerical results** — throughput, scaling, sizes, blockchain baseline |
+| [docs/COMPREHENSIVE_COMPARISON.md](docs/COMPREHENSIVE_COMPARISON.md) | 7-algorithm trade-off analysis |
 | [docs/QUANTUM_THREAT_ANALYSIS.md](docs/QUANTUM_THREAT_ANALYSIS.md) | Post-quantum threat landscape |
-| [docs/SYSTEM_SPECS.md](docs/SYSTEM_SPECS.md) | Test hardware details |
-| [docs/BUILD_CONFIG.md](docs/BUILD_CONFIG.md) | liboqs build flags and library version |
+| [docs/REAL_WORLD_ADOPTION.md](docs/REAL_WORLD_ADOPTION.md) | PQC adoption in production systems |
 | [docs/LIBRARY_SURVEY.md](docs/LIBRARY_SURVEY.md) | Survey of PQC libraries |
+| [docs/BUILD_CONFIG.md](docs/BUILD_CONFIG.md) | liboqs build flags and version details |
+| [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md) | System architecture diagrams |
+| [docs/MEMO_CODE_ANALYSIS.md](docs/MEMO_CODE_ANALYSIS.md) | Pre-integration code audit |
 | [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Known limitations and caveats |
-| [docs/VALIDATION.md](docs/VALIDATION.md) | Cross-validation against published benchmarks |
-
----
-
-## Limitations
-
-- **Reference implementation:** liboqs is a portable reference build. Platform-optimized
-  builds (AVX-512 for ML-DSA on x86, NEON for Falcon on ARM) could improve throughput 2-3x
-  for some algorithms. We use the reference build for fair cross-architecture comparison.
-- **OpenSSL throughput:** Ed25519 and ECDSA numbers reflect OpenSSL's EVP API;
-  hand-optimised libraries (libsodium, secp256k1) can be faster.
-- **Two platforms only:** Results cover ARM64 (Apple M2 Pro) and x86-64 (Cascade Lake).
-  Other microarchitectures (AMD Zen, RISC-V) are not yet measured.
+| [blockchain/README.md](blockchain/README.md) | Blockchain-specific documentation |
 
 ---
 
@@ -190,4 +147,4 @@ See **[docs/SYSTEM_SPECS.md](docs/SYSTEM_SPECS.md)** for full profiles.
 
 ## License
 
-TBD
+This project is licensed under the [MIT License](LICENSE).

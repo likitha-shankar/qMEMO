@@ -38,6 +38,7 @@ WARMUP_BLOCKS=${5:-auto}  # "auto" calculates based on transactions needed
 MAX_TXS_PER_BLOCK=${6:-10000}  # Max transactions per block (for Graph 3 scaling)
 BATCH_SIZE=${7:-64}        # TXs per batch message (64, 128, 256)
 NUM_THREADS=${8:-8}        # OpenMP threads per farmer
+WALLET_SCHEME_FLAG="${9:-}"  # Empty=ECDSA (default), "--scheme falcon" for PQC
 
 # Mining reward per block (must match metronome.h BASE_MINING_REWARD)
 BASE_MINING_REWARD=10000
@@ -237,7 +238,7 @@ echo "  ✓ Environment ready"
 # Build
 print_header "BUILDING PROJECT"
 make clean >/dev/null 2>&1 || true
-if make 2>&1 | tail -5; then
+if make ${MAKE_FLAGS:-} 2>&1 | tail -5; then
     echo "✓ Build successful"
 else
     echo -e "${RED}Build failed${NC}"
@@ -261,9 +262,9 @@ echo ""
 # Create wallets
 print_header "CREATING TEST WALLETS"
 for i in $(seq 1 $NUM_FARMERS); do
-    $BUILD_DIR/wallet create "farmer$i" >/dev/null 2>&1 || true
+    $BUILD_DIR/wallet create "farmer$i" $WALLET_SCHEME_FLAG >/dev/null 2>&1 || true
 done
-$BUILD_DIR/wallet create bench_receiver >/dev/null 2>&1 || true
+$BUILD_DIR/wallet create bench_receiver $WALLET_SCHEME_FLAG >/dev/null 2>&1 || true
 echo "✓ Wallets ready (${NUM_FARMERS} farmers + 1 receiver)"
 
 # Start components

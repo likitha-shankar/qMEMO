@@ -59,13 +59,13 @@ static double get_time_ms(void) {
 void print_usage(const char* prog) {
     printf("\n");
     printf("╔══════════════════════════════════════════════════════════════╗\n");
-    printf("║   WALLET CLI v29 - OpenMP Batch Submission + BLS            ║\n");
+    printf("║   WALLET CLI v29 - OpenMP Batch Submission                   ║\n");
     printf("╚══════════════════════════════════════════════════════════════╝\n");
     printf("\n");
     printf("Usage: %s <command> [args]\n", prog);
     printf("\n");
     printf("Basic Commands:\n");
-    printf("  create <n>                 Create new wallet with name\n");
+    printf("  create <n> [--scheme ecdsa|falcon|mldsa]  Create new wallet\n");
     printf("  info <file>                   Show wallet info from file\n");
     printf("  balance <name|address>        Get balance from blockchain\n");
     printf("  nonce <name|address>          Get transaction nonce\n");
@@ -92,30 +92,33 @@ void print_usage(const char* prog) {
 // BASIC WALLET COMMANDS
 // =============================================================================
 
-int cmd_create(const char* name) {
-    Wallet* wallet = wallet_create_named(name);
+int cmd_create(const char* name, uint8_t sig_type) {
+    Wallet* wallet = wallet_create_named(name, sig_type);
     if (!wallet) {
         fprintf(stderr, "Failed to create wallet\n");
         return 1;
     }
-    
+
     char filename[128];
     snprintf(filename, sizeof(filename), "%s.dat", name);
-    
+
     if (!wallet_save(wallet, filename)) {
         fprintf(stderr, "Failed to save wallet\n");
         wallet_destroy(wallet);
         return 1;
     }
-    
+
+    const char* sig_name = (sig_type == SIG_ML_DSA44) ? "ML-DSA-44" :
+                           (sig_type == SIG_FALCON512) ? "Falcon-512" : "ECDSA-secp256k1";
+
     printf("\n");
     printf("╔══════════════════════════════════════════════════════════════╗\n");
-    printf("║                    WALLET CREATED (BLS)                      ║\n");
+    printf("║                    WALLET CREATED                            ║\n");
     printf("╠══════════════════════════════════════════════════════════════╣\n");
     printf("║  Name:        %-46s║\n", wallet->name);
     printf("║  Address:     %-46s║\n", wallet->address_hex);
     printf("║  Nonce:       %-46lu║\n", wallet->nonce);
-    printf("║  Signature:   %-46s║\n", "BLS (48 bytes)");
+    printf("║  Signature:   %-46s║\n", sig_name);
     printf("║  File:        %-46s║\n", filename);
     printf("╚══════════════════════════════════════════════════════════════╝\n");
     
@@ -242,7 +245,7 @@ int cmd_send(const char* from_name, const char* to_name, uint64_t amount,
     
     Wallet* from_wallet = wallet_load(filename);
     if (!from_wallet) {
-        from_wallet = wallet_create_named(from_name);
+        from_wallet = wallet_create_named(from_name, SIG_SCHEME);
         if (!from_wallet) {
             fprintf(stderr, "Failed to load/create wallet for %s\n", from_name);
             return 1;
@@ -388,7 +391,7 @@ int cmd_batch_send(const char* from_name, const char* to_name,
     printf("║  Count:       %-46d║\n", total_count);
     printf("║  Threads:     %-46d║\n", num_threads);
     printf("║  Batch size:  %-46d║\n", batch_size);
-    printf("║  Signature:   %-46s║\n", "BLS (48 bytes)");
+    printf("║  Signature:   %-46s║\n", CRYPTO_SCHEME_NAME);
     printf("║  Parallelism: %-46s║\n", "OpenMP");
     printf("╚══════════════════════════════════════════════════════════════╝\n");
     
@@ -419,7 +422,7 @@ int cmd_batch_send(const char* from_name, const char* to_name,
         void* pool_socket = zmq_socket(context, ZMQ_REQ);
         zmq_connect(pool_socket, pool_addr);
         
-        Wallet* temp_wallet = wallet_create_named(from_name);
+        Wallet* temp_wallet = wallet_create_named(from_name, SIG_SCHEME);
         if (temp_wallet) {
             snprintf(request, sizeof(request), "GET_PENDING_NONCE:%s", temp_wallet->address_hex);
             zmq_send(pool_socket, request, strlen(request), 0);
@@ -474,7 +477,7 @@ int cmd_batch_send(const char* from_name, const char* to_name,
         int timeout = 10000;
         zmq_setsockopt(thread_sockets[t], ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
         
-        thread_wallets[t] = wallet_create_named(from_name);
+        thread_wallets[t] = wallet_create_named(from_name, SIG_SCHEME);
     }
     
     // Per-thread stats
@@ -543,6 +546,7 @@ int cmd_batch_send(const char* from_name, const char* to_name,
                     pt->public_key.data = tx->public_key;
                     pt->public_key.len = tx->pubkey_len;
                 }
+                pt->sig_type = tx->sig_type;
                 pb_ptrs[txs_in_batch] = pt;
                 txs_in_batch++;
             }
@@ -818,10 +822,18 @@ int main(int argc, char* argv[]) {
     
     if (strcmp(cmd, "create") == 0) {
         if (argc < 3) {
-            fprintf(stderr, "Usage: %s create <n>\n", argv[0]);
+            fprintf(stderr, "Usage: %s create <n> [--scheme ecdsa|falcon|mldsa]\n", argv[0]);
             return 1;
         }
-        return cmd_create(argv[2]);
+        uint8_t sig_type = SIG_ECDSA;
+        for (int i = 3; i < argc; i++) {
+            if (strcmp(argv[i], "--scheme") == 0 && i + 1 < argc) {
+                i++;
+                if (strcmp(argv[i], "falcon") == 0) sig_type = SIG_FALCON512;
+                else if (strcmp(argv[i], "mldsa") == 0) sig_type = SIG_ML_DSA44;
+            }
+        }
+        return cmd_create(argv[2], sig_type);
         
     } else if (strcmp(cmd, "info") == 0) {
         if (argc < 3) {

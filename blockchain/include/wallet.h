@@ -18,6 +18,7 @@ typedef struct Wallet {
     uint8_t secret_key[CRYPTO_SECKEY_MAX];
     size_t  seckey_len;
     crypto_ctx_t *crypto;           // backend context (holds EVP_PKEY for ECDSA)
+    uint8_t sig_type;               // SIG_ECDSA or SIG_FALCON512
     uint64_t nonce;
 } Wallet;
 
@@ -25,8 +26,8 @@ typedef struct Wallet {
 // WALLET FUNCTIONS
 // =============================================================================
 
-Wallet* wallet_create(void);
-Wallet* wallet_create_named(const char* name);
+Wallet* wallet_create(uint8_t sig_type);
+Wallet* wallet_create_named(const char* name, uint8_t sig_type);
 Wallet* wallet_load(const char* filepath);
 bool wallet_save(const Wallet* wallet, const char* filepath);
 

@@ -11,6 +11,8 @@ CC = gcc
 # ── Signature scheme selector ──────────────────────────────────────────
 # 1 = ECDSA secp256k1 (OpenSSL)   [default]
 # 2 = Falcon-512 (liboqs)
+# 3 = Hybrid (ECDSA + Falcon-512)
+# 4 = ML-DSA-44 (liboqs)
 SIG_SCHEME ?= 1
 
 # ── Platform-specific OpenSSL root ─────────────────────────────────────
@@ -64,7 +66,7 @@ else ifneq ($(UNAME_S),Darwin)
   LDFLAGS += -lgomp
 endif
 
-ifeq ($(SIG_SCHEME),2)
+ifneq ($(filter 2 3 4,$(SIG_SCHEME)),)
   CFLAGS  += -I$(OQS_ROOT)/include
   LDFLAGS += -L$(OQS_ROOT)/lib -loqs
 endif
@@ -107,7 +109,11 @@ all: $(BUILD_DIR) $(EXECUTABLES)
 	@echo "╔══════════════════════════════════════════════════════════════╗"
 	@echo "║  BUILD COMPLETE — SIG_SCHEME=$(SIG_SCHEME)                          ║"
 	@echo "╠══════════════════════════════════════════════════════════════╣"
-ifeq ($(SIG_SCHEME),2)
+ifeq ($(SIG_SCHEME),4)
+	@echo "║  Crypto backend: ML-DSA-44 (liboqs)                        ║"
+else ifeq ($(SIG_SCHEME),3)
+	@echo "║  Crypto backend: Hybrid (ECDSA + Falcon-512)               ║"
+else ifeq ($(SIG_SCHEME),2)
 	@echo "║  Crypto backend: Falcon-512 (liboqs)                       ║"
 else
 	@echo "║  Crypto backend: ECDSA secp256k1 (OpenSSL)                 ║"
@@ -158,7 +164,7 @@ $(BUILD_DIR)/benchmark: $(SRC_DIR)/main_benchmark.c $(COMMON_OBJS)
 
 # ── Crypto round-trip test ────────────────────────────────────────────
 $(BUILD_DIR)/test_crypto: test_crypto.c $(SRC_DIR)/crypto_backend.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS) $^ -o $@ -lssl -lcrypto -L$(OPENSSL_ROOT)/lib $(if $(filter 2,$(SIG_SCHEME)),-L$(OQS_ROOT)/lib -loqs)
+	$(CC) $(CFLAGS) $^ -o $@ -L$(OPENSSL_ROOT)/lib $(if $(filter 2 3 4,$(SIG_SCHEME)),-L$(OQS_ROOT)/lib -loqs) -lssl -lcrypto
 
 test_crypto: $(BUILD_DIR)/test_crypto
 	@echo "Running crypto round-trip test (SIG_SCHEME=$(SIG_SCHEME))..."
@@ -193,6 +199,8 @@ help:
 	@echo "║  Variables:                                                  ║"
 	@echo "║    SIG_SCHEME=1   ECDSA secp256k1 (default)                 ║"
 	@echo "║    SIG_SCHEME=2   Falcon-512 (requires liboqs)              ║"
+	@echo "║    SIG_SCHEME=3   Hybrid ECDSA + Falcon-512 (requires liboqs)║"
+	@echo "║    SIG_SCHEME=4   ML-DSA-44 (requires liboqs)              ║"
 	@echo "║    OQS_ROOT=path  liboqs install prefix                     ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""

@@ -87,7 +87,7 @@ static void print_stats_csv(FILE* f, const char* category, const char* name, Ben
 static void benchmark_tx_serialization(int iterations, BenchStats* ser, BenchStats* deser) {
     printf("  Running transaction GPB benchmark (%d iterations)...\n", iterations);
     
-    Wallet* wallet = wallet_create_named("bench_tx");
+    Wallet* wallet = wallet_create_named("bench_tx", SIG_SCHEME);
     if (!wallet) return;
     uint8_t dest_addr[20];
     memset(dest_addr, 0xAB, 20);
@@ -126,7 +126,7 @@ static void benchmark_block_serialization(int iterations, int txs_per_block,
     printf("  Running block GPB benchmark (%d iterations, %d tx/block)...\n", 
            iterations, txs_per_block);
     
-    Wallet* wallet = wallet_create_named("bench_block");
+    Wallet* wallet = wallet_create_named("bench_block", SIG_SCHEME);
     if (!wallet) return;
     uint8_t dest_addr[20];
     memset(dest_addr, 0xCD, 20);

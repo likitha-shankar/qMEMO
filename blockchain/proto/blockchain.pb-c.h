@@ -82,10 +82,14 @@ struct  Blockchain__Transaction
    * Signer's public key (65B ECDSA or 897B Falcon)
    */
   ProtobufCBinaryData public_key;
+  /*
+   * Signature scheme: 1=ECDSA, 2=Falcon-512 (0 defaults to ECDSA)
+   */
+  uint32_t sig_type;
 };
 #define BLOCKCHAIN__TRANSACTION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&blockchain__transaction__descriptor) \
-, 0, 0, {0,NULL}, {0,NULL}, 0, 0, {0,NULL}, {0,NULL} }
+, 0, 0, {0,NULL}, {0,NULL}, 0, 0, {0,NULL}, {0,NULL}, 0 }
 
 
 struct  Blockchain__BlockHeader

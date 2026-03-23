@@ -111,6 +111,7 @@ bool transaction_sign(Transaction* tx, const Wallet* wallet) {
     // Embed signer's public key in the transaction
     memcpy(tx->public_key, wallet->public_key, wallet->pubkey_len);
     tx->pubkey_len = wallet->pubkey_len;
+    tx->sig_type = wallet->sig_type;
 
     return true;
 }
@@ -124,9 +125,9 @@ bool transaction_verify(const Transaction* tx) {
     uint8_t tx_hash[TX_HASH_SIZE];
     transaction_compute_hash(tx, tx_hash);
 
-    return wallet_verify(tx->public_key, tx->pubkey_len,
-                         tx_hash, TX_HASH_SIZE,
-                         tx->signature, tx->sig_len);
+    return crypto_verify_typed(tx->sig_type, tx->signature, tx->sig_len,
+                               tx_hash, TX_HASH_SIZE,
+                               tx->public_key, tx->pubkey_len);
 }
 
 bool transaction_is_expired(const Transaction* tx, uint32_t current_block_height) {
@@ -164,6 +165,8 @@ uint8_t* transaction_serialize_pb(const Transaction* tx, size_t* out_len) {
         pb_tx.public_key.len = tx->pubkey_len;
         pb_tx.public_key.data = (uint8_t*)tx->public_key;
     }
+
+    pb_tx.sig_type = tx->sig_type;
 
     size_t size = blockchain__transaction__get_packed_size(&pb_tx);
     uint8_t* buffer = safe_malloc(size);
@@ -207,6 +210,8 @@ Transaction* transaction_deserialize_pb(const uint8_t* data, size_t len) {
         memcpy(tx->public_key, pb_tx->public_key.data, pklen);
         tx->pubkey_len = pklen;
     }
+
+    tx->sig_type = pb_tx->sig_type ? pb_tx->sig_type : SIG_ECDSA;
 
     blockchain__transaction__free_unpacked(pb_tx, NULL);
     return tx;

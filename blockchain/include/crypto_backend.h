@@ -1,9 +1,11 @@
 /**
- * crypto_backend.h - Compile-time crypto abstraction for ECDSA / Falcon-512
+ * crypto_backend.h - Compile-time crypto abstraction for ECDSA / Falcon-512 / ML-DSA-44 / Hybrid
  *
  * Build with:
  *   SIG_SCHEME=1  (default) -> ECDSA secp256k1 via OpenSSL
  *   SIG_SCHEME=2            -> Falcon-512 via liboqs
+ *   SIG_SCHEME=3            -> Hybrid (both ECDSA + Falcon-512, runtime dispatch)
+ *   SIG_SCHEME=4            -> ML-DSA-44 via liboqs
  */
 #ifndef CRYPTO_BACKEND_H
 #define CRYPTO_BACKEND_H
@@ -17,23 +19,31 @@
 /* ------------------------------------------------------------------ */
 #define SIG_ECDSA      1
 #define SIG_FALCON512  2
+#define SIG_HYBRID     3
+#define SIG_ML_DSA44   4
 
 #ifndef SIG_SCHEME
 #define SIG_SCHEME SIG_ECDSA
 #endif
 
 /* ------------------------------------------------------------------ */
-/* Compile-time size constants                                        */
+/* Compile-time size constants — universal maximums                    */
 /* ------------------------------------------------------------------ */
+/* All buffers use ML-DSA-44 maximums (the largest scheme) regardless */
+/* of SIG_SCHEME. This ensures binary compatibility: a TX serialized  */
+/* by any node can be deserialized by any other node.                 */
+/* ------------------------------------------------------------------ */
+#define CRYPTO_PUBKEY_MAX   1312  /* ML-DSA-44 public key (was 897) */
+#define CRYPTO_SECKEY_MAX   2560  /* ML-DSA-44 secret key (was 1281) */
+#define CRYPTO_SIG_MAX      2420  /* ML-DSA-44 signature (was 690) */
+
 #if SIG_SCHEME == SIG_FALCON512
-  #define CRYPTO_PUBKEY_MAX   897
-  #define CRYPTO_SECKEY_MAX   1281
-  #define CRYPTO_SIG_MAX      690   /* Falcon-512 max sig (padded) */
   #define CRYPTO_SCHEME_NAME  "Falcon-512"
+#elif SIG_SCHEME == SIG_HYBRID
+  #define CRYPTO_SCHEME_NAME  "Hybrid (ECDSA + Falcon-512)"
+#elif SIG_SCHEME == SIG_ML_DSA44
+  #define CRYPTO_SCHEME_NAME  "ML-DSA-44"
 #else  /* SIG_ECDSA */
-  #define CRYPTO_PUBKEY_MAX   65    /* uncompressed secp256k1 */
-  #define CRYPTO_SECKEY_MAX   32    /* raw 256-bit scalar */
-  #define CRYPTO_SIG_MAX      72    /* DER-encoded ECDSA */
   #define CRYPTO_SCHEME_NAME  "ECDSA-secp256k1"
 #endif
 
@@ -45,6 +55,7 @@
  * crypto_ctx_t wraps backend state.
  * For ECDSA: holds EVP_PKEY* so sign/verify don't reconstruct every call.
  * For Falcon: holds OQS_SIG* (one per thread for signing).
+ * For Hybrid: holds sig_type + union of either backend.
  */
 typedef struct crypto_ctx crypto_ctx_t;
 
@@ -52,8 +63,12 @@ typedef struct crypto_ctx crypto_ctx_t;
 /* Lifecycle                                                          */
 /* ------------------------------------------------------------------ */
 
-/** Allocate and initialise a new context. Returns NULL on failure. */
-crypto_ctx_t *crypto_ctx_new(void);
+/**
+ * Allocate and initialise a new context for the given sig_type.
+ * sig_type must be SIG_ECDSA, SIG_FALCON512, or SIG_ML_DSA44.
+ * Returns NULL on failure or if sig_type is not compiled in.
+ */
+crypto_ctx_t *crypto_ctx_new(uint8_t sig_type);
 
 /** Free context and all internal resources. */
 void crypto_ctx_free(crypto_ctx_t *ctx);
@@ -101,6 +116,15 @@ bool crypto_verify(crypto_ctx_t *ctx,
                    const uint8_t *sig, size_t sig_len,
                    const uint8_t *msg, size_t msg_len,
                    const uint8_t *pubkey, size_t pubkey_len);
+
+/**
+ * Stateless verify dispatching by sig_type. Creates a temporary context,
+ * verifies, and frees it. Used for TX verification without wallet context.
+ */
+bool crypto_verify_typed(uint8_t sig_type,
+                         const uint8_t *sig, size_t sig_len,
+                         const uint8_t *msg, size_t msg_len,
+                         const uint8_t *pubkey, size_t pubkey_len);
 
 /* ------------------------------------------------------------------ */
 /* Thread cleanup (call before thread exit in Falcon builds)          */

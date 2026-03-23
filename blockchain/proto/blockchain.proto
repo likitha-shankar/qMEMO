@@ -25,6 +25,7 @@ message Transaction {
     uint32 fee = 6;                 // Transaction fee
     bytes signature = 7;            // Variable-length signature (ECDSA or Falcon-512)
     bytes public_key = 8;           // Signer's public key (65B ECDSA or 897B Falcon)
+    uint32 sig_type = 9;            // Signature scheme: 1=ECDSA, 2=Falcon-512 (0 defaults to ECDSA)
 }
 
 // =============================================================================

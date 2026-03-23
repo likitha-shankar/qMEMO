@@ -35,6 +35,7 @@ typedef struct {
     size_t  sig_len;                             // actual sig bytes
     uint8_t public_key[CRYPTO_PUBKEY_MAX];       // signer's pubkey
     size_t  pubkey_len;                          // actual pubkey bytes
+    uint8_t sig_type;                            // SIG_ECDSA or SIG_FALCON512
 } Transaction;
 
 // =============================================================================

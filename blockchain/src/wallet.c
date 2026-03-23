@@ -8,11 +8,12 @@
 // WALLET CREATION
 // =============================================================================
 
-Wallet* wallet_create(void) {
+Wallet* wallet_create(uint8_t sig_type) {
     Wallet* wallet = safe_malloc(sizeof(Wallet));
     memset(wallet, 0, sizeof(Wallet));
 
-    wallet->crypto = crypto_ctx_new();
+    wallet->sig_type = sig_type;
+    wallet->crypto = crypto_ctx_new(sig_type);
     if (!wallet->crypto) {
         free(wallet);
         return NULL;
@@ -34,14 +35,14 @@ Wallet* wallet_create(void) {
     return wallet;
 }
 
-Wallet* wallet_create_named(const char* name) {
+Wallet* wallet_create_named(const char* name, uint8_t sig_type) {
     Wallet* wallet = safe_malloc(sizeof(Wallet));
     memset(wallet, 0, sizeof(Wallet));
 
     safe_strcpy(wallet->name, name, sizeof(wallet->name));
 
-    // Generate real keypair (needed for signing)
-    wallet->crypto = crypto_ctx_new();
+    wallet->sig_type = sig_type;
+    wallet->crypto = crypto_ctx_new(sig_type);
     if (!wallet->crypto) {
         free(wallet);
         return NULL;
@@ -78,6 +79,7 @@ bool wallet_save(const Wallet* wallet, const char* filepath) {
     fprintf(f, "ADDRESS:%s\n", wallet->address_hex);
     fprintf(f, "NONCE:%lu\n", wallet->nonce);
     fprintf(f, "SCHEME:%s\n", CRYPTO_SCHEME_NAME);
+    fprintf(f, "SIG_TYPE:%u\n", wallet->sig_type);
 
     // Write raw keys as hex
     char *pk_hex = bytes_to_hex(wallet->public_key, wallet->pubkey_len);
@@ -127,25 +129,23 @@ Wallet* wallet_load(const char* filepath) {
                 hex_to_bytes_buf(value, wallet->secret_key, byte_len);
                 wallet->seckey_len = byte_len;
             }
+        } else if (strncmp(line, "SIG_TYPE:", 9) == 0) {
+            wallet->sig_type = (uint8_t)strtoul(line + 9, NULL, 10);
         }
     }
 
     fclose(f);
 
-    // Reconstruct crypto context
-    wallet->crypto = crypto_ctx_new();
+    // Default to ECDSA if no SIG_TYPE line in file (backward compat)
+    if (wallet->sig_type == 0) wallet->sig_type = SIG_ECDSA;
 
-#if SIG_SCHEME == SIG_ECDSA
+    // Reconstruct crypto context
+    wallet->crypto = crypto_ctx_new(wallet->sig_type);
+
+#if SIG_SCHEME == SIG_ECDSA || SIG_SCHEME == SIG_HYBRID
     // For ECDSA we need the EVP_PKEY in the ctx for signing.
-    // Re-generate from saved keys by doing a fresh keygen if seckey is present.
-    // Alternatively, we could reconstruct from raw bytes, but a fresh keygen
-    // into the ctx then overwriting the pubkey/seckey is simpler for the MVP.
-    // For now, if we have a secret key, we generate a throwaway keypair and
-    // note that the loaded wallet won't be able to sign (the address won't match).
     // TODO: Implement EVP_PKEY reconstruction from raw seckey for ECDSA wallet_load.
-    if (wallet->seckey_len > 0 && wallet->crypto) {
-        // We need to reconstruct EVP_PKEY from raw secret key bytes.
-        // Build EC key from private scalar + public point.
+    if (wallet->sig_type == SIG_ECDSA && wallet->seckey_len > 0 && wallet->crypto) {
         // For now, wallet_load is primarily used for named wallets in benchmarks
         // which re-derive keys anyway. Full reconstruction is a future enhancement.
     }
@@ -196,14 +196,10 @@ bool wallet_sign(const Wallet* wallet, const uint8_t* message, size_t msg_len,
 bool wallet_verify(const uint8_t *public_key, size_t pk_len,
                    const uint8_t* message, size_t msg_len,
                    const uint8_t *signature, size_t sig_len) {
-    crypto_ctx_t *ctx = crypto_ctx_new();
-    if (!ctx) return false;
-
-    bool ok = crypto_verify(ctx, signature, sig_len,
-                            message, msg_len,
-                            public_key, pk_len);
-    crypto_ctx_free(ctx);
-    return ok;
+    /* Vestigial — transaction_verify() now uses crypto_verify_typed() directly.
+       Kept for backward compat; defaults to SIG_ECDSA. */
+    return crypto_verify_typed(SIG_ECDSA, signature, sig_len,
+                               message, msg_len, public_key, pk_len);
 }
 
 void wallet_destroy(Wallet* wallet) {

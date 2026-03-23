@@ -252,7 +252,16 @@ bool blockchain_process_block(Blockchain* bc, const Block* block) {
                 skipped_tx_count++;
                 continue;  // Skip this TX entirely — don't debit, don't credit
             }
-            
+
+            // Verify transaction signature
+            if (!transaction_verify(tx)) {
+                char addr_hex[41];
+                bytes_to_hex_buf(tx->source_address, 20, addr_hex);
+                LOG_WARN("TX rejected: invalid signature from %.16s...", addr_hex);
+                skipped_tx_count++;
+                continue;
+            }
+
             // Update nonce
             blockchain_update_nonce(bc, tx->source_address, tx->nonce + 1);
             

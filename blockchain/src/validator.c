@@ -70,7 +70,7 @@ Validator* validator_create(const char* name, uint32_t k_param) {
     safe_strcpy(v->name, name, sizeof(v->name));
     v->k_param = k_param > 0 ? k_param : K_PARAM_DEFAULT;
     
-    v->wallet = wallet_create_named(name);
+    v->wallet = wallet_create_named(name, SIG_SCHEME);
     if (!v->wallet) {
         free(v);
         return NULL;
@@ -377,7 +377,8 @@ bool validator_create_and_submit_block(Validator* v) {
                         memcpy(tx->public_key, pt->public_key.data, pklen);
                         tx->pubkey_len = pklen;
                     }
-                    
+                    tx->sig_type = pt->sig_type ? pt->sig_type : SIG_ECDSA;
+
                     txs[tx_count++] = tx;
                     total_fees += tx->fee;
                 }
