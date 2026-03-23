@@ -2,8 +2,8 @@
  * crypto_backend.c - ECDSA (secp256k1), Falcon-512, and ML-DSA-44 implementations
  *
  * Compile-time selection via SIG_SCHEME (1=ECDSA, 2=Falcon-512, 3=Hybrid, 4=ML-DSA-44).
- * In hybrid mode both ECDSA and Falcon backends are compiled in, with runtime dispatch
- * based on ctx->sig_type.
+ * In hybrid mode all three backends (ECDSA, Falcon-512, ML-DSA-44) are compiled in,
+ * with runtime dispatch based on ctx->sig_type.
  */
 
 #include "../include/crypto_backend.h"
@@ -313,7 +313,7 @@ crypto_ctx_t *crypto_ctx_new(uint8_t sig_type) {
 #elif SIG_SCHEME == SIG_ML_DSA44
     if (sig_type != SIG_ML_DSA44) return NULL;
 #elif SIG_SCHEME == SIG_HYBRID
-    if (sig_type != SIG_ECDSA && sig_type != SIG_FALCON512) return NULL;
+    if (sig_type != SIG_ECDSA && sig_type != SIG_FALCON512 && sig_type != SIG_ML_DSA44) return NULL;
 #endif
 
     crypto_ctx_t *ctx = calloc(1, sizeof(*ctx));

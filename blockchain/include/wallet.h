@@ -18,7 +18,7 @@ typedef struct Wallet {
     uint8_t secret_key[CRYPTO_SECKEY_MAX];
     size_t  seckey_len;
     crypto_ctx_t *crypto;           // backend context (holds EVP_PKEY for ECDSA)
-    uint8_t sig_type;               // SIG_ECDSA or SIG_FALCON512
+    uint8_t sig_type;               // SIG_ECDSA, SIG_FALCON512, or SIG_ML_DSA44
     uint64_t nonce;
 } Wallet;
 

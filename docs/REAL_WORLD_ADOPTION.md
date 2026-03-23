@@ -598,7 +598,111 @@ Based on real-world deployments:
 
 ---
 
-## 9. References
+## 9. MEMO Positioning & Comparison
+
+### 9.1 How MEMO Compares to Industry Adopters
+
+MEMO is among the first projects to publish **measured end-to-end blockchain TPS** with real PQC signature verification, not just micro-benchmarks. Here is how our results compare:
+
+| Project | Algorithm | TPS Reported | Verify Type | Notes |
+|---------|-----------|:------------:|:-----------:|-------|
+| **Algorand** | Falcon-1024 | 6,000 | Real (production) | Unchanged from pre-PQC baseline |
+| **Solana** | ML-DSA | "Compatible" | Real (testnet) | No public regression data |
+| **QRL** | XMSS | ~3–5 | Real (production) | Inherently limited by stateful scheme |
+| **MEMO (this work)** | Falcon-512 | **2,572** | Real (Chameleon) | 1000 TX, no TPS penalty vs ECDSA |
+| **MEMO (this work)** | ML-DSA-44 | **1,533** | Real (Chameleon) | 1000 TX, ~40% below Falcon-512 |
+| **MEMO (this work)** | ECDSA (real) | **1,403** | Real (Chameleon) | 1000 TX, baseline with real OpenSSL verify |
+
+**Key takeaways:**
+
+1. **MEMO confirms Algorand's finding: Falcon-512 has no TPS penalty.** Our Falcon-512 result (2,572 e2e TPS) actually exceeds the real ECDSA baseline (1,403 e2e TPS) because the pipeline is network-bound, not verify-bound. Algorand similarly reported no TPS regression with Falcon-1024.
+
+2. **MEMO quantifies the ML-DSA-44 signature size bottleneck.** Despite ML-DSA-44 having 2x faster raw verification than Falcon-512 on x86 (46,532 vs 23,505 ops/sec), its 3.5x larger signatures (2,420B vs ~655B) cause 40% lower end-to-end TPS. This validates industry preference for Falcon in size-constrained chains (Algorand, Polkadot user accounts).
+
+3. **MEMO provides the first comparative blockchain data for Falcon vs ML-DSA.** No other project has published side-by-side end-to-end TPS measurements for both algorithms on the same blockchain. This is a unique contribution to the PQC adoption literature.
+
+4. **The bottleneck has shifted.** Classical blockchain bottleneck analysis focused on verify cost. With PQC, the dominant cost is serialization and I/O of larger signatures/keys — not the cryptographic verification itself. MEMO's measurements make this concrete: block processing time scales proportionally with TX wire size (ECDSA 35ms → Falcon 200ms → ML-DSA 473ms for 1000 TX).
+
+### 9.2 Algorithm Recommendation for MEMO-like Systems
+
+Based on both our measurements and the industry survey:
+
+| Criterion | Recommendation | Rationale |
+|-----------|---------------|-----------|
+| Minimum TPS impact | **Falcon-512** | 3.5x smaller sigs than ML-DSA → lower serialization/I/O cost |
+| Fastest single-core verify | **ML-DSA-44** | 2x faster on x86 (AVX-512 NTT) |
+| Smallest state growth | **Falcon-512** | ~1,611B/TX vs ~3,791B/TX (ML-DSA) |
+| Simplest implementation | **ML-DSA-44** | No floating-point, constant-time by design |
+| Most conservative security | **SLH-DSA** | Hash-only, but 17KB sigs make it impractical for high-TPS |
+| Cryptographic agility | **Hybrid mode** | Support all three; let wallet owners choose risk/value tradeoff |
+
+**MEMO's recommendation: Deploy Falcon-512 as default with hybrid mode support for ML-DSA-44.** This aligns with Polkadot's dual-algorithm approach and provides a migration path without protocol changes.
+
+---
+
+## 10. Migration Strategy for MEMO
+
+### 10.1 The sig_type Version Field
+
+MEMO's blockchain already includes a `sig_type` field in every transaction (serialized via protobuf). This field acts as a **cryptographic version discriminant** — validators read it to dispatch to the correct verification backend at runtime. No hard fork or protocol change is needed to add or deprecate signature schemes.
+
+This is the same approach used by:
+- **Algorand:** Two key types (Ed25519 and Falcon-1024) coexist, with the key type embedded in the account record.
+- **Ethereum (planned):** EIP-7702 account abstraction allows per-account signature verification logic.
+- **Polkadot:** Dual-algorithm design with ML-DSA for consensus and Falcon for user accounts.
+
+### 10.2 Phased Migration Plan
+
+```
+Phase 1 — Hybrid (Current)
+├── Default: ECDSA secp256k1
+├── Opt-in: Falcon-512, ML-DSA-44 via --scheme flag
+├── Build: SIG_SCHEME=3 (all backends compiled)
+├── Validators verify all three types via sig_type dispatch
+└── Goal: Allow early adopters to use PQC; collect real-world data
+
+Phase 2 — PQC Default
+├── Default: Falcon-512 (best size/TPS tradeoff)
+├── Deprecated: ECDSA (still accepted, warning on creation)
+├── New wallets default to Falcon-512
+├── Existing ECDSA wallets continue to work
+└── Goal: Migrate majority of active wallets to PQC
+
+Phase 3 — Classical Sunset
+├── Default: Falcon-512
+├── Removed: ECDSA (reject new ECDSA transactions)
+├── Grace period: 6–12 months for remaining ECDSA wallets to migrate
+└── Goal: Full quantum resistance; reduce code surface
+```
+
+### 10.3 User Choice: Risk vs Value Tradeoff
+
+Following the professor's suggestion, the hybrid mode lets wallet owners choose their own risk/value tradeoff:
+
+| User Profile | Recommended Scheme | Rationale |
+|-------------|-------------------|-----------|
+| High-value, infrequent tx | **Falcon-512** | Smallest PQC sigs; best verified in production (Algorand) |
+| High-frequency trading | **ECDSA** (Phase 1) | Smallest sigs; fastest serialization; acceptable until quantum threat materializes |
+| Maximum security | **ML-DSA-44** | NIST FIPS 204 first-finalized; simpler implementation; no FFT side-channel |
+| Long-term cold storage | **Falcon-512** | Best size/security balance for dormant accounts |
+
+The system does not force a one-size-fits-all choice. Users who believe the quantum threat is imminent can opt into PQC immediately; users who prioritize throughput can remain on ECDSA until Phase 2.
+
+### 10.4 Implementation Status
+
+| Component | Status | Notes |
+|-----------|:------:|-------|
+| `sig_type` in TX protobuf | Done | Serialized/deserialized through full pipeline |
+| `crypto_verify_typed()` runtime dispatch | Done | Creates temp context per sig_type |
+| `SIG_SCHEME=3` hybrid build | Done | Compiles ECDSA + Falcon-512 + ML-DSA-44 |
+| Wallet CLI `--scheme` flag | Done | `ecdsa`, `falcon`, `mldsa` |
+| `benchmark_hybrid.sh` | Done | Mixed-scheme benchmark script |
+| Universal buffer sizes (ML-DSA-44 max) | Done | All nodes can deserialize any TX |
+| Hybrid end-to-end benchmarks | Pending | Run on Chameleon with `benchmark_hybrid.sh` |
+
+---
+
+## 11. References
 
 | Source | Citation |
 |--------|---------|

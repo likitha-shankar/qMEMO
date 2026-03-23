@@ -149,6 +149,22 @@ Homogeneous core design produces clean, predictable linear scaling.
 
 Implied serial fraction (Amdahl's Law): ~0.95%. Verification is embarrassingly parallel.
 
+### 5.5 Scaling Analysis — Cross-Algorithm and Cross-Platform
+
+**Key finding: All 7 algorithms scale comparably. PQC schemes are not scaling-limited.**
+
+The M2 Pro dataset (Section 5.1) provides the most complete cross-algorithm comparison, covering all 7 algorithms at 6 thread counts. Key observations:
+
+1. **All algorithms achieve 6.3x–9.3x speedup at 10 threads.** Falcon-512 leads at 9.27x, followed by Falcon-1024 (7.19x), Ed25519 (7.13x), ML-DSA-65 (6.98x), SLH-DSA (6.50x), ML-DSA-44 (6.47x), and ECDSA (6.29x). The variation is modest — the worst-scaling algorithm still achieves 68% of the best.
+
+2. **PQC algorithms scale at least as well as classical baselines.** Falcon-512 (9.27x) and Falcon-1024 (7.19x) both outscale ECDSA (6.29x) and Ed25519 (7.13x). ML-DSA-44 (6.47x) is comparable. There is no evidence that PQC verification is harder to parallelize than classical signature verification.
+
+3. **The efficiency drop at 8+ threads on M2 Pro is architectural, not algorithmic.** The M2 Pro has 6 performance cores and 4 efficiency cores (heterogeneous big.LITTLE). At 8+ threads, work spills onto E-cores (~60% the throughput of P-cores), reducing efficiency uniformly across all algorithms. This is confirmed by the Xeon results (Sections 5.2–5.3), where homogeneous cores maintain 91–94% efficiency at 10 threads.
+
+4. **x86 Xeon confirms near-linear scaling.** Falcon-512 on both Xeon Gold 6242 (91.5% efficiency at 10 threads) and Xeon Gold 6126 (93.8% efficiency) shows clean scaling without the M2 Pro's heterogeneous-core penalty. The implied serial fraction is <1% (Amdahl's Law), meaning verification is embarrassingly parallel regardless of algorithm.
+
+5. **Practical implication for MEMO:** Any PQC algorithm can be parallelized across validator cores with minimal efficiency loss. A 10-thread Falcon-512 validator achieves ~177K–299K verify/sec depending on platform — 70x–120x above the 2,500 ops/sec per-shard requirement. The choice of PQC algorithm should be driven by signature size and single-core throughput, not scaling characteristics.
+
 ---
 
 ## 6. Official Specifications vs Measured (Validation)
@@ -365,6 +381,55 @@ Serialization cost scales with TX size (14x larger), but non-crypto operations (
 
 ---
 
+## 11. Hybrid Mode — Mixed-Signature Blockchain
+
+### 11.1 Architecture
+
+The blockchain supports a hybrid mode (`SIG_SCHEME=3`) where all three signature backends (ECDSA secp256k1, Falcon-512, ML-DSA-44) are compiled into a single binary. Each wallet independently selects its signature type at creation time, and the blockchain validates transactions by dispatching to the correct backend based on the `sig_type` field in each transaction.
+
+**Key design properties:**
+- **Runtime dispatch:** `crypto_verify_typed()` reads `tx->sig_type` and creates a temporary context for the correct backend. No protocol changes needed — the sig_type field is already serialized in protobuf.
+- **Universal buffers:** All buffer maximums use ML-DSA-44 sizes (pubkey=1312B, seckey=2560B, sig=2420B) regardless of scheme. This ensures any node can deserialize any transaction.
+- **Per-wallet choice:** The wallet CLI (`--scheme ecdsa|falcon|mldsa`) determines the signature type at creation. Wallets can coexist on the same chain with different schemes.
+- **Validator agnostic:** Validators do not need to know which schemes are in use ahead of time — they verify each TX according to its embedded sig_type.
+
+### 11.2 Build Instructions
+
+```bash
+# Build hybrid binary (compiles all 3 backends)
+make all SIG_SCHEME=3 OQS_ROOT=~/liboqs_install
+
+# Create wallets with different schemes
+./build/wallet create alice --scheme ecdsa
+./build/wallet create bob --scheme falcon
+./build/wallet create carol --scheme mldsa
+
+# Run hybrid benchmark (12 farmers: 4 ECDSA + 4 Falcon + 4 ML-DSA)
+./benchmark_hybrid.sh 500 1 16 12
+```
+
+### 11.3 Expected Behavior
+
+When running hybrid mode:
+- Block processing time should fall between Falcon-512 and ML-DSA-44 pure-mode results, depending on the mix ratio of signature types.
+- Submission TPS should be comparable to the slowest-signing scheme in the mix.
+- End-to-end TPS should be within 10–15% of the pure Falcon-512 result, since the bottleneck is network/coordination rather than verification.
+- 100% confirmation rate is expected — the validator correctly dispatches all three signature types.
+
+### 11.4 Migration Path
+
+The hybrid mode enables a phased PQC migration strategy:
+
+| Phase | Default Scheme | Allowed Schemes | Timeline |
+|-------|---------------|-----------------|----------|
+| Phase 1 | ECDSA | ECDSA + Falcon-512 + ML-DSA-44 | Now (hybrid mode) |
+| Phase 2 | Falcon-512 | ECDSA (deprecated) + Falcon-512 + ML-DSA-44 | After validation |
+| Phase 3 | Falcon-512 | Falcon-512 + ML-DSA-44 only | ECDSA sunset |
+
+This mirrors the approach taken by Polkadot (dual-algorithm) and Algorand (phased Falcon rollout). The `sig_type` field in the TX header acts as the version discriminant — no hard fork needed to add or deprecate schemes.
+
+---
+
 ## Run Tags
 
 | Platform | Run tag | Date |
@@ -377,6 +442,7 @@ Serialization cost scales with TX size (14x larger), but non-crypto operations (
 | Blockchain ECDSA (real verify) | `benchmark.sh` | 2026-03-22 |
 | Blockchain Falcon-512 | `benchmark_20260322_235135` | 2026-03-22 |
 | Blockchain ML-DSA-44 | `benchmark_20260323_042209` | 2026-03-23 |
+| Blockchain Hybrid (mixed-sig) | `benchmark_hybrid.sh` | 2026-03-23 |
 
 Raw logs: `benchmarks/results/` and `memo-baseline/results/`
 

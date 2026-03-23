@@ -4,7 +4,7 @@
  * Build with:
  *   SIG_SCHEME=1  (default) -> ECDSA secp256k1 via OpenSSL
  *   SIG_SCHEME=2            -> Falcon-512 via liboqs
- *   SIG_SCHEME=3            -> Hybrid (both ECDSA + Falcon-512, runtime dispatch)
+ *   SIG_SCHEME=3            -> Hybrid (ECDSA + Falcon-512 + ML-DSA-44, runtime dispatch)
  *   SIG_SCHEME=4            -> ML-DSA-44 via liboqs
  */
 #ifndef CRYPTO_BACKEND_H
@@ -40,7 +40,7 @@
 #if SIG_SCHEME == SIG_FALCON512
   #define CRYPTO_SCHEME_NAME  "Falcon-512"
 #elif SIG_SCHEME == SIG_HYBRID
-  #define CRYPTO_SCHEME_NAME  "Hybrid (ECDSA + Falcon-512)"
+  #define CRYPTO_SCHEME_NAME  "Hybrid (ECDSA + Falcon-512 + ML-DSA-44)"
 #elif SIG_SCHEME == SIG_ML_DSA44
   #define CRYPTO_SCHEME_NAME  "ML-DSA-44"
 #else  /* SIG_ECDSA */
@@ -55,7 +55,7 @@
  * crypto_ctx_t wraps backend state.
  * For ECDSA: holds EVP_PKEY* so sign/verify don't reconstruct every call.
  * For Falcon: holds OQS_SIG* (one per thread for signing).
- * For Hybrid: holds sig_type + union of either backend.
+ * For Hybrid: holds sig_type + union of any backend (ECDSA, Falcon, or ML-DSA).
  */
 typedef struct crypto_ctx crypto_ctx_t;
 

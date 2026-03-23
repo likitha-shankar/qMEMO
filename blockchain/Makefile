@@ -112,7 +112,7 @@ all: $(BUILD_DIR) $(EXECUTABLES)
 ifeq ($(SIG_SCHEME),4)
 	@echo "║  Crypto backend: ML-DSA-44 (liboqs)                        ║"
 else ifeq ($(SIG_SCHEME),3)
-	@echo "║  Crypto backend: Hybrid (ECDSA + Falcon-512)               ║"
+	@echo "║  Crypto backend: Hybrid (ECDSA+Falcon-512+ML-DSA-44)       ║"
 else ifeq ($(SIG_SCHEME),2)
 	@echo "║  Crypto backend: Falcon-512 (liboqs)                       ║"
 else
@@ -199,7 +199,7 @@ help:
 	@echo "║  Variables:                                                  ║"
 	@echo "║    SIG_SCHEME=1   ECDSA secp256k1 (default)                 ║"
 	@echo "║    SIG_SCHEME=2   Falcon-512 (requires liboqs)              ║"
-	@echo "║    SIG_SCHEME=3   Hybrid ECDSA + Falcon-512 (requires liboqs)║"
+	@echo "║    SIG_SCHEME=3   Hybrid ECDSA+Falcon+ML-DSA (requires liboqs)║"
 	@echo "║    SIG_SCHEME=4   ML-DSA-44 (requires liboqs)              ║"
 	@echo "║    OQS_ROOT=path  liboqs install prefix                     ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
