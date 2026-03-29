@@ -16,11 +16,11 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 | Metric                              | Value                                                       |
 |--------------------------------------|-------------------------------------------------------------|
-| Falcon-512 verify (single core)      | 18,731–30,569 ops/sec across platforms                      |
-| ML-DSA-44 verify (x86, AVX-512)      | 44,801 ops/sec (2.4x faster than Falcon on x86)            |
+| Falcon-512 verify (single core)      | 23,505–30,569 ops/sec across platforms                      |
+| ML-DSA-44 verify (x86, AVX-512)      | 46,532–49,060 ops/sec (2.0–2.1x faster than Falcon on x86) |
 | Falcon-512 vs ECDSA verify           | **7.6–8.1x faster**, with quantum resistance                |
 | Falcon-512 signature size            | 666 B max (3.7x smaller than ML-DSA-44)                    |
-| 10-thread Falcon-512 scaling         | 184K ops/sec, **98.3% efficiency** (Skylake-SP)             |
+| 10-thread Falcon-512 scaling         | 183K ops/sec, **96.4% efficiency** (Skylake-SP)             |
 | Blockchain e2e TPS (Falcon-512)      | **2,572 TPS** — no penalty vs classical ECDSA               |
 | Blockchain e2e TPS (ML-DSA-44)       | 1,533 TPS — 40% below Falcon (larger sigs bottleneck I/O)  |
 | Hybrid mode                          | ECDSA + Falcon + ML-DSA coexist on same chain, no hard fork |

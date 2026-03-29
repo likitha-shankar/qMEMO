@@ -62,6 +62,7 @@ void print_usage(const char* prog) {
     printf("  --pool <addr>             Pool address (default: tcp://localhost:5557)\n");
     printf("  --blockchain <addr>       Blockchain (default: tcp://localhost:5555)\n");
     printf("  --max-txs <N>             Max transactions per block (default: 10000)\n");
+    printf("  --scheme <ecdsa|falcon|mldsa>  Signature scheme (hybrid builds only)\n");
     printf("  -h, --help                Show this help\n");
     printf("\n");
 }
@@ -69,6 +70,11 @@ void print_usage(const char* prog) {
 int main(int argc, char* argv[]) {
     uint32_t k_param = 20;
     uint32_t max_txs = 0;  // 0 = use default
+#if SIG_SCHEME == SIG_HYBRID
+    uint8_t sig_type = SIG_FALCON512;  // Default to Falcon-512 in hybrid mode
+#else
+    uint8_t sig_type = SIG_SCHEME;
+#endif
     const char* metronome_req = "tcp://localhost:5556";
     const char* metronome_sub = "tcp://localhost:5558";
     const char* pool_addr = "tcp://localhost:5557";
@@ -82,6 +88,7 @@ int main(int argc, char* argv[]) {
         {"pool", required_argument, 0, 3},
         {"blockchain", required_argument, 0, 4},
         {"max-txs", required_argument, 0, 5},
+        {"scheme", required_argument, 0, 6},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
@@ -95,6 +102,11 @@ int main(int argc, char* argv[]) {
             case 3: pool_addr = optarg; break;
             case 4: blockchain_addr = optarg; break;
             case 5: max_txs = atoi(optarg); break;
+            case 6:
+                if (strcmp(optarg, "falcon") == 0) sig_type = SIG_FALCON512;
+                else if (strcmp(optarg, "mldsa") == 0) sig_type = SIG_ML_DSA44;
+                else sig_type = SIG_ECDSA;
+                break;
             case 'h':
                 print_usage(argv[0]);
                 return 0;
@@ -126,7 +138,7 @@ int main(int argc, char* argv[]) {
     LOG_INFO("  Blockchain:       %s (for block submission when winner)", blockchain_addr);
     LOG_INFO("  Architecture:     Proof → Winner? → Block → Blockchain → Notify");
     
-    validator = validator_create(name, k_param);
+    validator = validator_create(name, k_param, sig_type);
     if (!validator) {
         LOG_ERROR("Failed to create validator");
         return 1;

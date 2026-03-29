@@ -375,10 +375,10 @@ int cmd_send(const char* from_name, const char* to_name, uint64_t amount,
 //
 // =============================================================================
 
-int cmd_batch_send(const char* from_name, const char* to_name, 
+int cmd_batch_send(const char* from_name, const char* to_name,
                    uint64_t amount, int total_count,
                    int num_threads, int batch_size,
-                   int64_t manual_nonce,
+                   int64_t manual_nonce, uint8_t sig_type,
                    const char* blockchain_addr, const char* pool_addr) {
     
     printf("\n");
@@ -422,7 +422,7 @@ int cmd_batch_send(const char* from_name, const char* to_name,
         void* pool_socket = zmq_socket(context, ZMQ_REQ);
         zmq_connect(pool_socket, pool_addr);
         
-        Wallet* temp_wallet = wallet_create_named(from_name, SIG_SCHEME);
+        Wallet* temp_wallet = wallet_create_named(from_name, sig_type);
         if (temp_wallet) {
             snprintf(request, sizeof(request), "GET_PENDING_NONCE:%s", temp_wallet->address_hex);
             zmq_send(pool_socket, request, strlen(request), 0);
@@ -477,7 +477,7 @@ int cmd_batch_send(const char* from_name, const char* to_name,
         int timeout = 10000;
         zmq_setsockopt(thread_sockets[t], ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
         
-        thread_wallets[t] = wallet_create_named(from_name, SIG_SCHEME);
+        thread_wallets[t] = wallet_create_named(from_name, sig_type);
     }
     
     // Per-thread stats
@@ -888,7 +888,12 @@ int main(int argc, char* argv[]) {
         int threads = DEFAULT_NUM_THREADS;
         int batch = DEFAULT_BATCH_SIZE;
         int64_t nonce = -1;
-        
+#if SIG_SCHEME == SIG_HYBRID
+        uint8_t sig_type = SIG_ECDSA;
+#else
+        uint8_t sig_type = SIG_SCHEME;
+#endif
+
         for (int i = 6; i < argc; i++) {
             if (strcmp(argv[i], "--threads") == 0 && i + 1 < argc) {
                 threads = atoi(argv[++i]);
@@ -896,16 +901,21 @@ int main(int argc, char* argv[]) {
                 batch = atoi(argv[++i]);
             } else if (strcmp(argv[i], "--nonce") == 0 && i + 1 < argc) {
                 nonce = atoll(argv[++i]);
+            } else if (strcmp(argv[i], "--scheme") == 0 && i + 1 < argc) {
+                i++;
+                if (strcmp(argv[i], "falcon") == 0) sig_type = SIG_FALCON512;
+                else if (strcmp(argv[i], "mldsa") == 0) sig_type = SIG_ML_DSA44;
+                else sig_type = SIG_ECDSA;
             }
         }
-        
+
         if (batch > MAX_BATCH_SIZE) batch = MAX_BATCH_SIZE;
         if (batch < 1) batch = 1;
         if (threads < 1) threads = 1;
         if (threads > MAX_THREADS) threads = MAX_THREADS;
-        
-        return cmd_batch_send(from, to, amt, count, threads, batch, 
-                             nonce, blockchain_addr, pool_addr);
+
+        return cmd_batch_send(from, to, amt, count, threads, batch,
+                             nonce, sig_type, blockchain_addr, pool_addr);
         
     } else if (strcmp(cmd, "wait_confirm") == 0) {
         if (argc < 5) {

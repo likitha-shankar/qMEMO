@@ -259,13 +259,18 @@ echo ""
 $BUILD_DIR/benchmark -n 500 -k $K_PARAM --csv "$INTERNAL_CSV" 2>&1 | grep -E "^║|µs|ms|/sec|SUMMARY|═══"
 echo ""
 
-# Create wallets
-print_header "CREATING TEST WALLETS"
-for i in $(seq 1 $NUM_FARMERS); do
-    $BUILD_DIR/wallet create "farmer$i" $WALLET_SCHEME_FLAG >/dev/null 2>&1 || true
-done
-$BUILD_DIR/wallet create bench_receiver $WALLET_SCHEME_FLAG >/dev/null 2>&1 || true
-echo "✓ Wallets ready (${NUM_FARMERS} farmers + 1 receiver)"
+# Create wallets (skip if SKIP_WALLET_CREATE=1, e.g. when called from benchmark_hybrid.sh)
+if [ "${SKIP_WALLET_CREATE:-0}" != "1" ]; then
+    print_header "CREATING TEST WALLETS"
+    for i in $(seq 1 $NUM_FARMERS); do
+        $BUILD_DIR/wallet create "farmer$i" $WALLET_SCHEME_FLAG >/dev/null 2>&1 || true
+    done
+    $BUILD_DIR/wallet create bench_receiver $WALLET_SCHEME_FLAG >/dev/null 2>&1 || true
+    echo "✓ Wallets ready (${NUM_FARMERS} farmers + 1 receiver)"
+else
+    print_header "USING PRE-CREATED WALLETS"
+    echo "✓ Wallets already created (skipping)"
+fi
 
 # Start components
 print_header "STARTING BLOCKCHAIN COMPONENTS"
@@ -309,6 +314,13 @@ fi
 echo "  ✓ Metronome (PID: $METRONOME_PID)"
 
 for i in $(seq 1 $NUM_FARMERS); do
+    # Per-validator scheme: use VALIDATOR_SCHEMES array if set, else empty (uses default)
+    VSCHEME_FLAG=""
+    if [ -n "${VALIDATOR_SCHEMES:-}" ]; then
+        IFS=',' read -ra _VSCHEMES <<< "$VALIDATOR_SCHEMES"
+        _idx=$(( (i - 1) % ${#_VSCHEMES[@]} ))
+        VSCHEME_FLAG="--scheme ${_VSCHEMES[$_idx]}"
+    fi
     $BUILD_DIR/validator "farmer$i" \
         --metronome-sub "tcp://localhost:$METRONOME_PUB_PORT" \
         --metronome-req "tcp://localhost:$METRONOME_REP_PORT" \
@@ -316,6 +328,7 @@ for i in $(seq 1 $NUM_FARMERS); do
         --blockchain "tcp://localhost:$BLOCKCHAIN_PORT" \
         -k "$K_PARAM" \
         --max-txs "$MAX_TXS_PER_BLOCK" \
+        $VSCHEME_FLAG \
         > "$BENCHMARK_DIR/farmer${i}.log" 2>&1 &
     sleep 0.3
 done
@@ -514,10 +527,18 @@ for i in $(seq 1 $NUM_FARMERS); do
         NONCE=${FARMER_NONCES[$i]}
         FARMER_RESULTS[$i]="$BENCHMARK_DIR/farmer${i}_submit.tmp"
         
+        # Per-farmer scheme flag for hybrid mode
+        BSCHEME_FLAG=""
+        if [ -n "${VALIDATOR_SCHEMES:-}" ]; then
+            IFS=',' read -ra _BSCHEMES <<< "$VALIDATOR_SCHEMES"
+            _bidx=$(( (i - 1) % ${#_BSCHEMES[@]} ))
+            BSCHEME_FLAG="--scheme ${_BSCHEMES[$_bidx]}"
+        fi
         # OpenMP parallel batch submission: 8 threads × batch_size per message
         # Pool accepts any nonce order → sorts by nonce at block creation time
         $BUILD_DIR/wallet batch_send "farmer$i" bench_receiver 1 $TX_COUNT \
             --threads $NUM_THREADS --batch $BATCH_SIZE --nonce "$NONCE" \
+            $BSCHEME_FLAG \
             > "${FARMER_RESULTS[$i]}" 2>"$SUBMIT_PROGRESS_DIR/farmer${i}.progress" &
         FARMER_PIDS[$i]=$!
     fi

@@ -57,7 +57,7 @@ This document provides ASCII architecture diagrams covering:
   │  │ 1 run            │   │ 1,000 trials x 100 ops       │    │
   │  │ 10,000 verif.    │   │ Stats: mean, median, SD, CV  │    │
   │  │ wall-clock timer │   │ JB normality, skew, kurtosis │    │
-  │  │ → 42,853 ops/s   │   │ → median 44,228 ops/s        │    │
+  │  │ → 30,757 ops/s   │   │ → median 31,133 ops/s        │    │
   │  └──────────────────┘   └─────────────────────────────┘    │
   │                                                             │
   │  ┌──────────────────────────────────────────────────────┐   │
@@ -92,10 +92,10 @@ This document provides ASCII architecture diagrams covering:
 
  RESULTS STORE
  ──────────────
-  benchmarks/results/run_20260217_211549/
+  benchmarks/results/run_20260228_203535/
   ├── system_specs.json
-  ├── verify_results.json       (42,853 ops/s)
-  ├── statistical_results.json  (median 44,228 ops/s, CV 3.59%)
+  ├── verify_results.json       (30,757 ops/s)
+  ├── statistical_results.json  (median 31,133 ops/s, CV 3.92%)
   ├── comparison_results.json   (Falcon 1.16x faster, 3.7x smaller)
   ├── summary.json              (aggregated key metrics)
   ├── REPORT.md
@@ -200,11 +200,11 @@ This document provides ASCII architecture diagrams covering:
   ──────────────────────────────────────────────────
   Node receives TX  →  OQS_SIG_verify(Falcon-512, tx_body, signature, pubkey)
                               │
-                        ~22.7 µs / call
-                        44,228 ops/s (median, M2 Pro)
+                        ~32.2 µs / call
+                        31,133 ops/s (median, M2 Pro)
                               │
-                        Headroom at 2,500 TPS/shard:  17.7x  ← safe
-                        Headroom at   198 TPS/shard: 223x   ← very safe
+                        Headroom at 2,500 TPS/shard:  12.5x  ← safe
+                        Headroom at   198 TPS/shard: 157x   ← very safe
 
   COLD PATH (once per wallet address creation)
   ─────────────────────────────────────────────
@@ -368,8 +368,8 @@ This document provides ASCII architecture diagrams covering:
   TODAY (qMEMO benchmarks)              FUTURE (test MEMO blockchain)
   ─────────────────────────             ──────────────────────────────
   Proven: Falcon-512 verify             Validate: end-to-end TPS under
-  achieves 44,228 ops/s on             consensus + network + multi-shard
-  Apple M2 Pro (17x headroom)          conditions with real MEMO nodes
+  achieves 31,133 ops/s on             consensus + network + multi-shard
+  Apple M2 Pro (12.5x headroom)        conditions with real MEMO nodes
         │                                          │
         └──────────────────────────────────────────┘
          Same Falcon-512, same liboqs, same IIT research group

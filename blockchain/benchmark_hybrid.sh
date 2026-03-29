@@ -64,9 +64,9 @@ for i in $(seq 1 $NUM_FARMERS); do
     scheme=${SCHEMES[$idx]}
     $BUILD_DIR/wallet create "farmer$i" --scheme "$scheme" >/dev/null 2>&1 || true
     case $scheme in
-        ecdsa)  ((ecdsa_count++)) ;;
-        falcon) ((falcon_count++)) ;;
-        mldsa)  ((mldsa_count++)) ;;
+        ecdsa)  ecdsa_count=$((ecdsa_count + 1)) ;;
+        falcon) falcon_count=$((falcon_count + 1)) ;;
+        mldsa)  mldsa_count=$((mldsa_count + 1)) ;;
     esac
 done
 
@@ -87,7 +87,7 @@ echo ""
 # The benchmark.sh will try to rebuild and recreate wallets.
 # We run it with MAKE_FLAGS passing SIG_SCHEME=3 so the build step works,
 # and with an empty scheme flag (wallets already exist, create is idempotent).
-MAKE_FLAGS="SIG_SCHEME=3 ${MAKE_FLAGS:-}" bash benchmark.sh \
+SKIP_WALLET_CREATE=1 VALIDATOR_SCHEMES="ecdsa,falcon,mldsa" MAKE_FLAGS="SIG_SCHEME=3 ${MAKE_FLAGS:-}" bash benchmark.sh \
     $NUM_TX $BLOCK_INTERVAL $K_PARAM $NUM_FARMERS $WARMUP $MAX_TXS $BATCH $THREADS ""
 
 echo ""

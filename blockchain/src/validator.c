@@ -63,14 +63,14 @@ static uint64_t calculate_mining_reward(uint32_t block_height) {
 // VALIDATOR CREATION
 // =============================================================================
 
-Validator* validator_create(const char* name, uint32_t k_param) {
+Validator* validator_create(const char* name, uint32_t k_param, uint8_t sig_type) {
     Validator* v = safe_malloc(sizeof(Validator));
     memset(v, 0, sizeof(Validator));
-    
+
     safe_strcpy(v->name, name, sizeof(v->name));
     v->k_param = k_param > 0 ? k_param : K_PARAM_DEFAULT;
-    
-    v->wallet = wallet_create_named(name, SIG_SCHEME);
+
+    v->wallet = wallet_create_named(name, sig_type);
     if (!v->wallet) {
         free(v);
         return NULL;

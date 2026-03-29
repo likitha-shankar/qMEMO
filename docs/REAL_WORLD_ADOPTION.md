@@ -185,8 +185,10 @@
   leading candidates; no final selection as of March 2026
 - **Implementation date:** No production deployment; quantum readiness added to 2026
   core protocol roadmap
-- **Status:** **Research / Roadmap** — account abstraction (EIP-7702) provides the
-  migration pathway
+- **Status:** **Active Development** — EIP-8141 (Frame Transaction) drafted Jan 29, 2026
+  by Vitalik Buterin, targeting Hegotia hard fork late 2026; account abstraction (EIP-7702)
+  provides the migration pathway; Ethereum Foundation elevated PQ to core priority with $2M
+  research prizes and dedicated team; multiple PQ testnets running
 - **Reason for choice (leading candidates):**
   > "Post-quantum signatures are massive, and the lightest one, called Falcon, is still
   > 10 times larger than current ECDSA signatures. Coding the lattice solution in Solidity
@@ -415,7 +417,7 @@
 **Falcon is the leading choice where signature size is the binding constraint:**
 - 666 bytes (Falcon-512) vs 2,420 bytes (ML-DSA-44) — 3.6× smaller
 - Critical for state proofs, light clients, and bandwidth-constrained environments
-- NIST FIPS 206 (FN-DSA) finalized August 2025
+- NIST FIPS 206 (FN-DSA) draft submitted August 2025; final expected late 2026
 
 ### 4.2 Algorithm Selection Criteria Observed Across Projects
 
@@ -723,7 +725,7 @@ The system does not force a one-size-fits-all choice. Users who believe the quan
 | Bitcoin proposals | [Project Eleven — PQ Proposals for Bitcoin](https://blog.projecteleven.com/posts/a-look-at-post-quantum-proposals-for-bitcoin) |
 | NIST FIPS 204 (ML-DSA) | [csrc.nist.gov/pubs/fips/204/final](https://csrc.nist.gov/pubs/fips/204/final) |
 | NIST FIPS 205 (SLH-DSA) | [csrc.nist.gov/pubs/fips/205/final](https://csrc.nist.gov/pubs/fips/205/final) |
-| NIST FIPS 206 (FN-DSA) | [csrc.nist.gov/pubs/fips/206/final](https://csrc.nist.gov/pubs/fips/206/final) |
+| NIST FIPS 206 (FN-DSA, draft) | [csrc.nist.gov/pubs/fips/206/final](https://csrc.nist.gov/pubs/fips/206/final) |
 | NIST announcement | [NIST Releases First 3 PQC Standards (Aug 2024)](https://www.nist.gov/news-events/news/2024/08/nist-releases-first-3-finalized-post-quantum-encryption-standards) |
 | Academic SoK survey | [Quantum Disruption — arXiv 2512.13333](https://arxiv.org/html/2512.13333v1) |
 | Performance benchmarks | [Springer: Quantum-Resistant Blockchain Performance](https://link.springer.com/article/10.1007/s11128-024-04272-6) |

@@ -42,17 +42,24 @@ Falcon-512 is 18% faster on ARM. Algorithm selection should depend on deployment
 
 **Future Work:** Monitor CPU temperature, test with controlled cooling.
 
-### CPU Core Affinity Not Controlled
+### CPU Core Affinity — Partially Resolved
 
-**Limitation:** Did not pin process to performance cores.
+**Status: Partially resolved.** Core pinning is implemented on x86 Linux via `sched_setaffinity`
+(2026-03-23). macOS does not expose equivalent per-thread core pinning.
 
-**Impact:**
+**Resolved (x86 Linux):**
 
-- Some trials may have run on efficiency cores (2.4 GHz vs 3.5 GHz)
-- Could explain left-skewed distribution
-- Outliers likely include E-core execution
+- `multicore_all_benchmark` pins each thread to a distinct physical core via `sched_setaffinity`
+- Eliminates OS scheduler migration and E-core/P-core mixing
+- Falcon-512 efficiency improved from 91.5% (unpinned) to 96.4% (pinned) on Skylake-SP
 
-**Future Work:** Use CPU affinity (taskset on Linux, thread policies on macOS).
+**Remaining (macOS):**
+
+- macOS `thread_policy_set` provides affinity hints, not hard pinning
+- M2 Pro results still include potential E-core spillover at 8+ threads
+- Cannot fully isolate P-core vs E-core performance on macOS
+
+**Future Work:** Use macOS `thread_policy_set` affinity hints; benchmark on Linux ARM (Graviton) for pinned ARM data.
 
 ---
 
@@ -78,13 +85,13 @@ Falcon-512 is 18% faster on ARM. Algorithm selection should depend on deployment
 
 **Measured scaling (1/2/4/6/8/10 threads):**
 
-| Threads | M2 Pro | Cascade Lake |
-|------:|-------:|-------------:|
-| 1 | 27,022 | 20,169 |
-| 10 | 239,297 (8.86x) | 184,467 (9.15x) |
+| Threads | M2 Pro | Cascade Lake | Skylake-SP (pinned) |
+|------:|-------:|-------------:|--------------------:|
+| 1 | 32,237 | 20,169 | 19,022 |
+| 10 | 298,837 (9.27x) | 184,467 (9.15x) | 183,292 (9.64x) |
 
-Both platforms show near-linear scaling to 4 cores and approximately 8.8x at 10 cores.
-Results are in `docs/COMPREHENSIVE_COMPARISON.md` and `benchmarks/results/`.
+All three platforms show near-linear scaling. Core-pinned Skylake-SP data (2026-03-23) covers
+all 7 algorithms — see `docs/COMPREHENSIVE_COMPARISON.md` and `docs/RESULTS.md` Section 5.3.1.
 
 ### Classical Baseline Comparison -- Resolved
 
@@ -330,7 +337,8 @@ ops/sec, but has 32-byte public keys and purely hash-based security assumptions.
 These limitations **do not** invalidate the core findings:
 
 **Falcon-512 provides 9.5-12.5x single-core headroom (10,000 TPS / 4 shards scenario),
-expanding to 70x+ with 10-core scaling. Both ARM and x86 platforms confirm this.**
+expanding to 73x with 10-core core-pinned scaling (183K ops/sec on Skylake-SP). All three
+platforms (M2 Pro, Cascade Lake, Skylake-SP) confirm this.**
 
 Key limitations resolved in current work:
 - [x] Multi-platform (ARM + x86 now measured)
@@ -338,12 +346,13 @@ Key limitations resolved in current work:
 - [x] SLH-DSA comparison (comprehensive_comparison covers all 7 algorithms)
 - [x] Multithreaded scaling (measured on both platforms)
 - [x] Hardware cycle counters (RDTSC on x86)
+- [x] CPU core pinning on x86 Linux (sched_setaffinity, all 7 algorithms)
 
 Remaining limitations for future work:
 - [ ] AMD and Graviton platforms
 - [ ] ARM PMU cycle counters
 - [ ] Long-duration sustained-load testing
-- [ ] CPU affinity pinning on macOS
+- [ ] CPU affinity pinning on macOS (thread_policy_set hints only)
 
 **The research question is answered conclusively** within these limitations. Results are
 sufficient for algorithm selection and architectural planning.

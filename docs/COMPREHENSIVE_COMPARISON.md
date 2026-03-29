@@ -26,13 +26,13 @@
 |-----------|------|:----------:|---------------:|---------------:|------------:|
 | Falcon-512 | Lattice (NTRU) | 1 | 897 | 1,281 | 666 |
 | Falcon-1024 | Lattice (NTRU) | 5 | 1,793 | 2,305 | 1,280 |
-| ML-DSA-44 (Dilithium) | Module Lattice | 2 | 1,312 | 2,528 | 2,420 |
-| ML-DSA-65 (Dilithium) | Module Lattice | 3 | 1,952 | 4,000 | 3,293 |
+| ML-DSA-44 (Dilithium) | Module Lattice | 2 | 1,312 | 2,560 | 2,420 |
+| ML-DSA-65 (Dilithium) | Module Lattice | 3 | 1,952 | 4,032 | 3,309 |
 | SLH-DSA-SHA2-128f | Hash-based | 1 | 32 | 64 | 17,088 |
 | ECDSA secp256k1 | Elliptic Curve | -- | 65 | 32 | ~72 (DER) |
 | Ed25519 | EdDSA (Curve25519) | -- | 32 | 32 | 64 |
 
-> Sizes from NIST FIPS 204/205/206 specifications and liboqs 0.15.0 headers.
+> Sizes from NIST FIPS 204/205 specifications, Falcon submission, and liboqs 0.15.0 headers.
 > ECDSA NIST level is not applicable -- secp256k1 provides ~128-bit classical security.
 > SLH-DSA-SHA2-128f uses the "fast" parameter set (more and shorter trees than 128s).
 
@@ -226,6 +226,28 @@ super-linear scaling to 6 threads (6.90x at 6 threads) due to its higher-bandwid
 cache hierarchy accommodating the working set. At 10 threads, Cascade Lake achieves 9.15x
 speedup. A 10-thread Cascade Lake deployment reaches 184K verifications/sec.
 
+### All 7 Algorithms — Skylake-SP Core-Pinned (2026-03-23)
+
+> Source: `multicore_all_benchmark` on Intel Xeon Gold 6126 Skylake-SP. 1,000 verify iterations/thread (100 for SLH-DSA), barrier-synchronized, each thread pinned to a distinct physical core via `sched_setaffinity`.
+
+| Algorithm           | 1 Core  | 2 Cores | 4 Cores | 6 Cores | 8 Cores | 10 Cores | Speedup    | Efficiency |
+|---------------------|--------:|--------:|--------:|--------:|--------:|---------:|:----------:|:----------:|
+| ML-DSA-44           |  42,935 |  56,428 | 105,975 | 162,719 | 207,663 |  277,987 | 6.47x      | 64.7%      |
+| ML-DSA-65           |  27,900 |  37,803 |  88,961 | 126,921 | 166,740 |  211,604 | 7.58x      | 75.8%      |
+| Falcon-512          |  19,022 |  32,375 |  74,960 | 111,099 | 147,920 |  183,292 | **9.64x**  | **96.4%**  |
+| Falcon-1024         |  11,157 |  18,617 |  42,106 |  58,957 |  79,554 |   98,467 | 8.83x      | 88.3%      |
+| Ed25519             |   8,249 |  14,134 |  29,587 |  43,357 |  56,367 |   69,420 | 8.42x      | 84.2%      |
+| ECDSA secp256k1     |   2,445 |   4,698 |   9,244 |  13,551 |  17,302 |   21,342 | 8.73x      | 87.3%      |
+| SLH-DSA-SHA2-128f   |     691 |   1,207 |   2,365 |   3,741 |   4,648 |    6,101 | 8.83x      | 88.3%      |
+
+All values in ops/sec, sorted by 10-core throughput. Falcon-512 achieves the best scaling
+efficiency (96.4%) — its compact FFT working set fits cleanly in per-core L2 cache. ML-DSA-44
+has the highest absolute throughput (278K ops/sec at 10 cores) but lower scaling efficiency
+(64.7%) because its high single-core throughput saturates memory bandwidth at higher core
+counts. The Falcon-512-only table above (M2 Pro + Cascade Lake) uses non-pinned threads; the
+all-7-algorithm table uses `sched_setaffinity` core pinning on homogeneous Xeon cores, which
+improves Falcon-512 efficiency from 91.5% to 96.4%.
+
 ## Multithreaded Signing Throughput
 
 See `benchmarks/src/sign_benchmark.c`. Run `./benchmarks/bin/sign_benchmark` for
@@ -255,6 +277,6 @@ exactly the maximum length, trading bandwidth efficiency for constant-time behav
 - Falcon specification: https://falcon-sign.info/
 - FIPS 204 (ML-DSA / Dilithium): https://csrc.nist.gov/pubs/fips/204/final
 - FIPS 205 (SLH-DSA / SPHINCS+): https://csrc.nist.gov/pubs/fips/205/final
-- FIPS 206 (ML-KEM -- key encapsulation, not covered here)
+- FIPS 203 (ML-KEM -- key encapsulation, not covered here)
 - liboqs 0.15.0: https://openquantumsafe.org/liboqs/
 - OpenSSL 3.6.1: https://openssl.org/

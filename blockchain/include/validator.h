@@ -74,7 +74,7 @@ typedef struct {
 // VALIDATOR FUNCTIONS
 // =============================================================================
 
-Validator* validator_create(const char* name, uint32_t k_param);
+Validator* validator_create(const char* name, uint32_t k_param, uint8_t sig_type);
 
 bool validator_init_sockets(Validator* v,
                             const char* metronome_req_addr,

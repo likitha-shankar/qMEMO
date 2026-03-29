@@ -116,9 +116,9 @@ This mirrors Polkadot (dual-algorithm) and Algorand (phased Falcon rollout). No 
 | Blockchain            | Algorithm                          | Status                    |
 |-----------------------|------------------------------------|---------------------------|
 | QRL                   | XMSS (hash-based, stateful)        | Production since 2018     |
-| Algorand              | Falcon-512                         | State proofs in production|
-| Polkadot              | Bandersnatch + Falcon (planned)    | Research phase            |
-| Ethereum              | Researching (no commitment)        | EIP discussions only      |
+| Algorand              | Falcon-1024                        | State proofs in production|
+| Polkadot              | ML-DSA / Falcon (PQC roadmap)      | Research phase            |
+| Ethereum              | Falcon/STARK candidates (EIP-8141) | Active development, targeting late 2026 |
 | **MEMO (this work)**  | **Falcon-512 / ML-DSA-44 / Hybrid**| **Measured, integrated**  |
 
 MEMO is ahead of most projects — we have measured end-to-end TPS with real PQC verification, not just micro-benchmarks.
@@ -127,9 +127,9 @@ MEMO is ahead of most projects — we have measured end-to-end TPS with real PQC
 
 ## 9. Bottom Line
 
-1. **Falcon-512 is the recommended PQC signature for MEMO.** It has the smallest signatures (666 B), best multicore scaling (98.3% efficiency), and delivers equal or better blockchain TPS than ECDSA.
+1. **Falcon-512 is the recommended PQC signature for MEMO.** It has the smallest signatures (666 B), best multicore scaling (96.4% efficiency), and delivers equal or better blockchain TPS than ECDSA.
 
-2. **ML-DSA-44 is the throughput king on x86** (272K verify/sec at 10 threads) but its 3.5x larger signatures make it 40% slower in end-to-end blockchain benchmarks. Use it where raw verify speed matters more than wire size.
+2. **ML-DSA-44 is the throughput king on x86** (278K verify/sec at 10 cores) but its 3.5x larger signatures make it 40% slower in end-to-end blockchain benchmarks. Use it where raw verify speed matters more than wire size.
 
 3. **SLH-DSA is not viable for high-throughput blockchain use.** At 705 verify/sec single-threaded, it's 27x slower than Falcon-512. Reserve for low-frequency, high-security applications.
 
