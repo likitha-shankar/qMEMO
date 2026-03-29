@@ -1,0 +1,14 @@
+category,operation,count,avg_us,min_us,max_us,ops_per_sec,avg_bytes
+GPB,tx_serialize,500,0.545,0.486,4.326,1836453,193
+GPB,tx_deserialize,500,2.099,1.782,13.927,476382,193
+GPB,block_1tx_serialize,50,1.931,1.828,4.871,517856,1890
+GPB,block_1tx_deserialize,50,7.586,4.379,56.926,131824,1890
+GPB,block_10tx_serialize,50,15.335,15.207,15.523,65212,17087
+GPB,block_10tx_deserialize,50,40.604,38.203,76.139,24628,17087
+GPB,block_100tx_serialize,5,245.819,150.124,343.742,4068,169052
+GPB,block_100tx_deserialize,5,518.854,497.142,540.111,1927,169052
+BLAKE3,hash_256bytes,500,1.140,1.116,6.657,877462,256
+Proof,plot_generation,1,108.090,108.090,108.090,9252,2097152
+Proof,proof_search,50,0.023,0.019,0.158,44404973,96
+ZMQ,inproc_rtt,500,5.889,5.579,21.750,169818,66
+ZMQ,tcp_rtt,50,168.779,145.944,978.562,5925,258
