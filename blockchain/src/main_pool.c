@@ -36,6 +36,7 @@
 
 #include "../include/transaction_pool.h"
 #include "../include/transaction.h"
+#include "../include/crypto_backend.h"
 #include "../include/common.h"
 #include "../proto/blockchain.pb-c.h"
 #include <stdlib.h>
@@ -63,7 +64,7 @@ void signal_handler(int sig) {
 static Transaction* pb_to_transaction(const Blockchain__Transaction* pt) {
     Transaction* tx = safe_malloc(sizeof(Transaction));
     memset(tx, 0, sizeof(Transaction));
-    
+
     tx->nonce = pt->nonce;
     tx->expiry_block = pt->expiry_block;
     if (pt->source_address.data && pt->source_address.len >= 20)
@@ -73,19 +74,20 @@ static Transaction* pb_to_transaction(const Blockchain__Transaction* pt) {
     tx->value = pt->value;
     tx->fee = pt->fee;
     if (pt->signature.data && pt->signature.len > 0) {
-        size_t sig_len = pt->signature.len < 64 ? pt->signature.len : 64;
+        size_t sig_len = pt->signature.len;
+        if (sig_len > CRYPTO_SIG_MAX) sig_len = CRYPTO_SIG_MAX;
         memcpy(tx->signature, pt->signature.data, sig_len);
+        tx->sig_len = sig_len;
     }
-    
-    return tx;
-}
+    if (pt->public_key.data && pt->public_key.len > 0) {
+        size_t pk_len = pt->public_key.len;
+        if (pk_len > CRYPTO_PUBKEY_MAX) pk_len = CRYPTO_PUBKEY_MAX;
+        memcpy(tx->public_key, pt->public_key.data, pk_len);
+        tx->pubkey_len = pk_len;
+    }
+    tx->sig_type = pt->sig_type ? (uint8_t)pt->sig_type : SIG_ED25519;
 
-// Extract Ed25519 pubkey from protobuf transaction (32 bytes or NULL)
-static const uint8_t* pb_get_pubkey(const Blockchain__Transaction* pt) {
-    if (pt->public_key.data && pt->public_key.len >= 32) {
-        return pt->public_key.data;
-    }
-    return NULL;
+    return tx;
 }
 
 int main(int argc, char* argv[]) {
@@ -234,8 +236,7 @@ int main(int argc, char* argv[]) {
                     if (batch) {
                         for (size_t i = 0; i < batch->n_transactions; i++) {
                             Transaction* tx = pb_to_transaction(batch->transactions[i]);
-                            const uint8_t* pubkey = pb_get_pubkey(batch->transactions[i]);
-                            if (pool_add_with_pubkey(pool, tx, pubkey)) {
+                            if (pool_add(pool, tx)) {
                                 accepted++;
                                 total_submitted++;
                             } else {
