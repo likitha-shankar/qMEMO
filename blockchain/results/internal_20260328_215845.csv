@@ -1,6 +1,0 @@
-category,operation,count,avg_us,min_us,max_us,ops_per_sec,avg_bytes
-BLAKE3,hash_256bytes,500,4.078,2.766,15.474,245196,256
-Proof,plot_generation,1,168.584,168.584,168.584,5932,2097152
-Proof,proof_search,50,0.054,0.044,0.419,18656716,96
-ZMQ,inproc_rtt,500,14.022,13.516,44.181,71316,66
-ZMQ,tcp_rtt,50,182.662,159.682,993.857,5475,258
