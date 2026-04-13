@@ -138,8 +138,12 @@ int cmd_info(const char* filepath) {
     printf("║  Name:        %-46s║\n", wallet->name);
     printf("║  Address:     %-46s║\n", wallet->address_hex);
     printf("║  Nonce:       %-46lu║\n", wallet->nonce);
-    printf("║  Private Key: %-46s║\n", 
-           strlen(wallet->private_key_pem) > 0 ? "Present (can sign TXs)" : "MISSING (read-only)");
+    printf("║  Sig scheme:  %-46s║\n",
+           wallet->sig_type == SIG_ED25519  ? "Ed25519"   :
+           wallet->sig_type == SIG_FALCON512 ? "Falcon-512" :
+           wallet->sig_type == SIG_ML_DSA44  ? "ML-DSA-44"  : "Hybrid");
+    printf("║  Private Key: %-46s║\n",
+           (wallet->evp_key || wallet->oqs_seckey_len > 0) ? "Present (can sign TXs)" : "MISSING (read-only)");
     printf("╚══════════════════════════════════════════════════════════════╝\n");
     
     wallet_destroy(wallet);
