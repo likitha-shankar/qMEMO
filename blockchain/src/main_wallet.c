@@ -337,14 +337,18 @@ int cmd_send(const char* from_name, const char* to_name, uint64_t amount,
     pb_tx.dest_address.len = 20;
     pb_tx.value = tx->value;
     pb_tx.fee = tx->fee;
-    if (!is_zero(tx->signature, 64)) {
+    if (tx->sig_len > 0) {
+        pb_tx.signature.data = tx->signature;
+        pb_tx.signature.len = tx->sig_len;
+    } else if (!is_zero(tx->signature, 64)) {
         pb_tx.signature.data = tx->signature;
         pb_tx.signature.len = 64;
     }
-    if (!is_zero(from_wallet->ed25519_pubkey, 32)) {
-        pb_tx.public_key.data = from_wallet->ed25519_pubkey;
-        pb_tx.public_key.len = 32;
+    if (tx->pubkey_len > 0) {
+        pb_tx.public_key.data = tx->public_key;
+        pb_tx.public_key.len = tx->pubkey_len;
     }
+    pb_tx.sig_type = tx->sig_type;
     
     batch.n_transactions = 1;
     batch.transactions = pb_ptrs;
@@ -573,15 +577,19 @@ int cmd_batch_send(const char* from_name, const char* to_name,
                 pt->dest_address.len = 20;
                 pt->value = tx->value;
                 pt->fee = tx->fee;
-                if (!is_zero(tx->signature, 64)) {
+                if (tx->sig_len > 0) {
+                    pt->signature.data = tx->signature;
+                    pt->signature.len = tx->sig_len;
+                } else if (!is_zero(tx->signature, 64)) {
                     pt->signature.data = tx->signature;
                     pt->signature.len = 64;
                 }
-                // Include Ed25519 pubkey for pool storage and validator verification
-                if (!is_zero(wallet->ed25519_pubkey, 32)) {
-                    pt->public_key.data = wallet->ed25519_pubkey;
-                    pt->public_key.len = 32;
+                // Pubkey and sig_type: TX carries them inline (supports PQC variable-length)
+                if (tx->pubkey_len > 0) {
+                    pt->public_key.data = tx->public_key;
+                    pt->public_key.len = tx->pubkey_len;
                 }
+                pt->sig_type = tx->sig_type;
                 pb_ptrs[txs_in_batch] = pt;
                 txs_in_batch++;
             }

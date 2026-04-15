@@ -367,15 +367,21 @@ int main(int argc, char* argv[]) {
                             pt->dest_address.len = 20;
                             pt->value = txs[i]->value;
                             pt->fee = txs[i]->fee;
-                            if (!is_zero(txs[i]->signature, 64)) {
+                            // Signature: use actual sig_len (supports PQC variable-length sigs)
+                            if (txs[i]->sig_len > 0) {
+                                pt->signature.data = txs[i]->signature;
+                                pt->signature.len = txs[i]->sig_len;
+                            } else if (!is_zero(txs[i]->signature, 64)) {
+                                // Fallback: Ed25519 with no sig_len set
                                 pt->signature.data = txs[i]->signature;
                                 pt->signature.len = 64;
                             }
-                            // Include Ed25519 pubkey for validator verification
-                            if (pubkeys && !is_zero(pubkeys + i * 32, 32)) {
-                                pt->public_key.data = pubkeys + i * 32;
-                                pt->public_key.len = 32;
+                            // Pubkey: TX carries it inline (v47 design, supports PQC variable-length)
+                            if (txs[i]->pubkey_len > 0) {
+                                pt->public_key.data = txs[i]->public_key;
+                                pt->public_key.len = txs[i]->pubkey_len;
                             }
+                            pt->sig_type = txs[i]->sig_type;
                             pb_ptrs[i] = pt;
                             total_fees += txs[i]->fee;
                         }
