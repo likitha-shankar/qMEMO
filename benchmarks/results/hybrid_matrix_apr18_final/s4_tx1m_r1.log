@@ -1,0 +1,418 @@
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  BLOCKCHAIN BENCHMARK v6 (END-TO-END)
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+
+Configuration:
+  Transactions to send                         : 1000000
+  Block interval                               : 1s
+  K parameter                                  : 16 (2^16 = 65536 entries)
+  Number of farmers                            : 1
+  Warmup blocks                                : 0
+  Max TXs per block                            : 10000
+  Batch size                                   : 64
+  Threads per farmer                           : 8
+  Explicit difficulty                          : 13
+
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  PREPARING ENVIRONMENT
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+  Stopping any existing blockchain processes...
+  ✓ Environment ready
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  BUILDING PROJECT
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+cc -Wall -Wextra -O2 -g -I./include -I./proto -fopenmp -DSIG_SCHEME=1 src/main_metronome.c build/common.o build/blake3.o build/crypto_backend.o build/transaction.o build/wallet.o build/block.o build/blockchain.o build/consensus.o build/transaction_pool.o build/metronome.o build/validator.o build/blockchain.pb-c.o -o build/metronome -lzmq -lssl -lcrypto -lm -lprotobuf-c -fopenmp
+cc -Wall -Wextra -O2 -g -I./include -I./proto -fopenmp -DSIG_SCHEME=1 src/main_pool.c build/common.o build/blake3.o build/crypto_backend.o build/transaction.o build/wallet.o build/block.o build/blockchain.o build/consensus.o build/transaction_pool.o build/metronome.o build/validator.o build/blockchain.pb-c.o -o build/pool -lzmq -lssl -lcrypto -lm -lprotobuf-c -fopenmp
+cc -Wall -Wextra -O2 -g -I./include -I./proto -fopenmp -DSIG_SCHEME=1 src/main_validator.c build/common.o build/blake3.o build/crypto_backend.o build/transaction.o build/wallet.o build/block.o build/blockchain.o build/consensus.o build/transaction_pool.o build/metronome.o build/validator.o build/blockchain.pb-c.o -o build/validator -lzmq -lssl -lcrypto -lm -lprotobuf-c -fopenmp
+cc -Wall -Wextra -O2 -g -I./include -I./proto -fopenmp -DSIG_SCHEME=1 src/main_wallet.c build/common.o build/blake3.o build/crypto_backend.o build/transaction.o build/wallet.o build/block.o build/blockchain.o build/consensus.o build/transaction_pool.o build/metronome.o build/validator.o build/blockchain.pb-c.o -o build/wallet -lzmq -lssl -lcrypto -lm -lprotobuf-c -fopenmp
+cc -Wall -Wextra -O2 -g -I./include -I./proto -fopenmp -DSIG_SCHEME=1 src/main_benchmark.c build/common.o build/blake3.o build/crypto_backend.o build/transaction.o build/wallet.o build/block.o build/blockchain.o build/consensus.o build/transaction_pool.o build/metronome.o build/validator.o build/blockchain.pb-c.o -o build/benchmark -lzmq -lssl -lcrypto -lm -lprotobuf-c -fopenmp
+✓ Build successful
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  RUNNING MICRO BENCHMARK (GPB & ZMQ)
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+
+╔══════════════════════════════════════════════════════════════════════════╗
+║               BLOCKCHAIN INTERNAL BENCHMARK                               ║
+╠══════════════════════════════════════════════════════════════════════════╣
+║  Iterations: 500        K parameter: 16 (2^16 = 65536   entries)     ║
+╚══════════════════════════════════════════════════════════════════════════╝
+═══════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════
+  Serialize (GPB encode)             : avg 0.57 µs, min 0.38 µs, max 7.98 µs
+                                       1752805 ops/sec, avg 153 bytes
+  Deserialize (GPB decode)           : avg 1.55 µs, min 0.99 µs, max 11.01 µs
+                                       645071 ops/sec, avg 153 bytes
+  Serialize (GPB encode)             : avg 3.90 µs, min 3.63 µs, max 11.05 µs
+                                       256695 ops/sec, avg 4026 bytes
+  Deserialize (GPB decode)           : avg 37.19 µs, min 23.23 µs, max 338.63 µs
+                                       26887 ops/sec, avg 4026 bytes
+  Serialize (GPB encode)             : avg 33.97 µs, min 33.57 µs, max 36.44 µs
+                                       29435 ops/sec, avg 38447 bytes
+  Deserialize (GPB decode)           : avg 83.05 µs, min 76.12 µs, max 153.03 µs
+                                       12040 ops/sec, avg 38447 bytes
+  Serialize (GPB encode)             : avg 617.15 µs, min 428.58 µs, max 702.45 µs
+                                       1620 ops/sec, avg 382652 bytes
+  Deserialize (GPB decode)           : avg 1312.11 µs, min 1283.74 µs, max 1341.43 µs
+                                       762 ops/sec, avg 382652 bytes
+═══════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════
+  Hash computation                   : avg 1.17 µs, min 1.11 µs, max 16.80 µs
+                                       857258 ops/sec, avg 256 bytes
+═══════════════════════════════════════════════════════════════════════════
+══════════════════════════════════════════════════════════════[32m[INFO] 2026-04-18 06:41:41: 📁 ════════════════════════════════════════════════════════════[0m
+[32m[INFO] 2026-04-18 06:41:41: 📁 ════════════════════════════════════════════════════════════[0m
+═════════════
+  Plot generation                    : avg 68.69 µs, min 68.69 µs, max 68.69 µs
+                                       14559 ops/sec, avg 2097152 bytes
+  Proof search (binary search)       : avg 0.03 µs, min 0.02 µs, max 0.29 µs
+                                       39123631 ops/sec, avg 96 bytes
+═══════════════════════════════════════════════════════════════════════════
+═══════════════════════════════════════════════════════════════════════════
+  Round-trip latency                 : avg 5.96 µs, min 5.65 µs, max 21.64 µs
+                                       167681 ops/sec, avg 66 bytes
+  Round-trip latency                 : avg 167.33 µs, min 145.09 µs, max 1011.18 µs
+                                       5976 ops/sec, avg 258 bytes
+╔══════════════════════════════════════════════════════════════════════════╗
+║                              SUMMARY                                      ║
+╠══════════════════════════════════════════════════════════════════════════╣
+║  GPB Transaction serialize:         0.57 µs                              ║
+║  GPB Transaction deserialize:       1.55 µs                              ║
+║  GPB Round-trip (ser+deser):        2.12 µs                              ║
+║  BLAKE3 hash (256 bytes):           1.17 µs                              ║
+║  ZMQ inproc round-trip:             5.96 µs                              ║
+║  ZMQ TCP round-trip:              167.33 µs                              ║
+║  Proof search (k=16):               0.03 µs                              ║
+║  Plot generation (k=16):            0.07 ms                              ║
+╠══════════════════════════════════════════════════════════════════════════╣
+║  THEORETICAL PERFORMANCE:                                                ║
+║    TX processing time:              8.08 µs (GPB + ZMQ)                  ║
+║    Max TPS (single thread):       123695 tx/sec                          ║
+║    Proof searches/sec:          39123631 /sec                            ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  CREATING TEST WALLETS
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+✓ Wallets ready (1 validators + 1 senders + 1 receiver)
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  STARTING BLOCKCHAIN COMPONENTS
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+  ✓ Blockchain server (PID: 66361)
+  ✓ Transaction pool (PID: 66365)
+  ✓ Metronome (PID: 66369)
+  ✓ 1 farmers started
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  PRE-FUNDING SENDER WALLETS
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+  Funding 1 sender wallets with 3010000 coins each...
+  (Using FUND_WALLET — direct ledger credit, no mining needed)
+
+  ✓ sender1: 3010000 coins
+
+  Waiting for validators to generate plots...
+  Plot generation: 1 / 12 seconds  Plot generation: 2 / 12 seconds  Plot generation: 3 / 12 seconds  Plot generation: 4 / 12 seconds  Plot generation: 5 / 12 seconds  Plot generation: 6 / 12 seconds  Plot generation: 7 / 12 seconds  Plot generation: 8 / 12 seconds  Plot generation: 9 / 12 seconds  Plot generation: 10 / 12 seconds  Plot generation: 11 / 12 seconds  Plot generation: 12 / 12 seconds
+  ✓ Plots should be ready
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  VERIFYING INITIAL STATE
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+  Sender1: 3010000 coins, nonce 0
+  Receiver: 0 coins
+  Total available: 3010000 coins
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  RUNNING END-TO-END TRANSACTION BENCHMARK
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+
+  Architecture: 1 sender wallets → Pool → 1 validators
+  Transactions per sender: 1000000
+  Extra transactions for sender1: 0
+  Submission runs IN PARALLEL with block creation (no pause/resume)
+
+  ✓ Block monitor started (subscribing to pool PUB on port 5561)
+  Difficulty set: DIFFICULTY_SET:13 (target: 13)
+
+═══════════════════════════════════════════════════════════════════════════
+  SUBMITTING 1000000 TXs from 1 senders (parallel with blocks)
+═══════════════════════════════════════════════════════════════════════════
+
+  Using 8 OpenMP threads per sender × 1 parallel senders (batch=64)
+
+  Waiting for all senders to complete...
+  Sender1: submitted 1000000/1000000 transactions
+
+Submission complete: 1000000 submitted in 10.846029812s
+Submission throughput: 92199.63 tx/sec
+
+═══════════════════════════════════════════════════════════════════════════
+  WAITING FOR CONFIRMATIONS (blocks being created in parallel)
+═══════════════════════════════════════════════════════════════════════════
+
+  Watching for 1000000 transactions to be confirmed...
+
+  📡 Subscribed to tcp://localhost:5561
+  📊 Target: 1000000 confirmed TXs for bench_receiver
+  Block #14 (1 TXs) | Confirmed: 0/1000000 | Interval: 154ms | 0.2s  Block #15 (2001 TXs) | Confirmed: 2000/1000000 | Interval: 1125ms | 1.3s  Block #16 (3001 TXs) | Confirmed: 5000/1000000 | Interval: 1012ms | 2.3s  Block #17 (4001 TXs) | Confirmed: 9000/1000000 | Interval: 997ms | 3.3s  Block #18 (8001 TXs) | Confirmed: 17000/1000000 | Interval: 1050ms | 4.3s  Block #19 (10001 TXs) | Confirmed: 27000/1000000 | Interval: 917ms | 5.3s  Block #20 (10001 TXs) | Confirmed: 37000/1000000 | Interval: 963ms | 6.2s  Block #21 (10001 TXs) | Confirmed: 47000/1000000 | Interval: 1015ms | 7.2s  Block #22 (10001 TXs) | Confirmed: 57000/1000000 | Interval: 1002ms | 8.2s  Block #23 (10001 TXs) | Confirmed: 67000/1000000 | Interval: 1008ms | 9.2s  Block #24 (10001 TXs) | Confirmed: 77000/1000000 | Interval: 1026ms | 10.3s  Block #25 (10001 TXs) | Confirmed: 87000/1000000 | Interval: 998ms | 11.3s  Block #26 (10001 TXs) | Confirmed: 97000/1000000 | Interval: 1038ms | 12.3s  Block #27 (10001 TXs) | Confirmed: 107000/1000000 | Interval: 978ms | 13.3s  Block #28 (10001 TXs) | Confirmed: 117000/1000000 | Interval: 1012ms | 14.3s  Block #29 (10001 TXs) | Confirmed: 127000/1000000 | Interval: 1023ms | 15.3s  Block #30 (10001 TXs) | Confirmed: 137000/1000000 | Interval: 1007ms | 16.3s  Block #31 (10001 TXs) | Confirmed: 147000/1000000 | Interval: 1001ms | 17.3s  Block #32 (10001 TXs) | Confirmed: 157000/1000000 | Interval: 961ms | 18.3s  Block #33 (10001 TXs) | Confirmed: 167000/1000000 | Interval: 1007ms | 19.3s  Block #34 (10001 TXs) | Confirmed: 177000/1000000 | Interval: 1012ms | 20.3s  Block #35 (10001 TXs) | Confirmed: 187000/1000000 | Interval: 995ms | 21.3s  Block #36 (10001 TXs) | Confirmed: 197000/1000000 | Interval: 1018ms | 22.3s  Block #37 (10001 TXs) | Confirmed: 207000/1000000 | Interval: 1000ms | 23.3s  Block #38 (10001 TXs) | Confirmed: 217000/1000000 | Interval: 1009ms | 24.3s  Block #39 (10001 TXs) | Confirmed: 227000/1000000 | Interval: 995ms | 25.3s  Block #40 (10001 TXs) | Confirmed: 237000/1000000 | Interval: 1008ms | 26.3s  Block #41 (10001 TXs) | Confirmed: 247000/1000000 | Interval: 1015ms | 27.3s  Block #42 (10001 TXs) | Confirmed: 257000/1000000 | Interval: 998ms | 28.3s  Block #43 (10001 TXs) | Confirmed: 267000/1000000 | Interval: 1020ms | 29.4s  Block #44 (10001 TXs) | Confirmed: 277000/1000000 | Interval: 1005ms | 30.4s  Block #45 (10001 TXs) | Confirmed: 287000/1000000 | Interval: 1005ms | 31.4s  Block #46 (10001 TXs) | Confirmed: 297000/1000000 | Interval: 1012ms | 32.4s  Block #47 (10001 TXs) | Confirmed: 307000/1000000 | Interval: 987ms | 33.4s  Block #48 (10001 TXs) | Confirmed: 317000/1000000 | Interval: 1016ms | 34.4s  Block #49 (10001 TXs) | Confirmed: 327000/1000000 | Interval: 999ms | 35.4s  Block #50 (10001 TXs) | Confirmed: 337000/1000000 | Interval: 1002ms | 36.4s  Block #51 (10001 TXs) | Confirmed: 347000/1000000 | Interval: 1007ms | 37.4s  Block #52 (10001 TXs) | Confirmed: 357000/1000000 | Interval: 1008ms | 38.4s  Block #53 (10001 TXs) | Confirmed: 367000/1000000 | Interval: 1007ms | 39.4s  Block #54 (10001 TXs) | Confirmed: 377000/1000000 | Interval: 1008ms | 40.4s  Block #55 (10001 TXs) | Confirmed: 387000/1000000 | Interval: 1008ms | 41.4s  Block #56 (10001 TXs) | Confirmed: 397000/1000000 | Interval: 1008ms | 42.4s  Block #57 (10001 TXs) | Confirmed: 407000/1000000 | Interval: 1012ms | 43.4s  Block #58 (10001 TXs) | Confirmed: 417000/1000000 | Interval: 996ms | 44.4s  Block #59 (10001 TXs) | Confirmed: 427000/1000000 | Interval: 1007ms | 45.5s  Block #60 (10001 TXs) | Confirmed: 437000/1000000 | Interval: 1010ms | 46.5s  Block #61 (10001 TXs) | Confirmed: 447000/1000000 | Interval: 1006ms | 47.5s  Block #62 (10001 TXs) | Confirmed: 457000/1000000 | Interval: 1009ms | 48.5s  Block #63 (10001 TXs) | Confirmed: 467000/1000000 | Interval: 1007ms | 49.5s  Block #64 (10001 TXs) | Confirmed: 477000/1000000 | Interval: 1014ms | 50.5s  Block #65 (10001 TXs) | Confirmed: 487000/1000000 | Interval: 1015ms | 51.5s  Block #66 (10001 TXs) | Confirmed: 497000/1000000 | Interval: 985ms | 52.5s  Block #67 (10001 TXs) | Confirmed: 507000/1000000 | Interval: 1009ms | 53.5s  Block #68 (10001 TXs) | Confirmed: 517000/1000000 | Interval: 1008ms | 54.5s  Block #69 (10001 TXs) | Confirmed: 527000/1000000 | Interval: 1007ms | 55.5s  Block #70 (10001 TXs) | Confirmed: 537000/1000000 | Interval: 1010ms | 56.5s  Block #71 (10001 TXs) | Confirmed: 547000/1000000 | Interval: 1007ms | 57.5s  Block #72 (10001 TXs) | Confirmed: 557000/1000000 | Interval: 1009ms | 58.5s  Block #73 (10001 TXs) | Confirmed: 567000/1000000 | Interval: 1007ms | 59.6s  Block #74 (10001 TXs) | Confirmed: 577000/1000000 | Interval: 1019ms | 60.6s  Block #75 (10001 TXs) | Confirmed: 587000/1000000 | Interval: 1000ms | 61.6s  Block #76 (10001 TXs) | Confirmed: 597000/1000000 | Interval: 997ms | 62.6s  Block #77 (10001 TXs) | Confirmed: 607000/1000000 | Interval: 1009ms | 63.6s  Block #78 (10001 TXs) | Confirmed: 617000/1000000 | Interval: 1008ms | 64.6s  Block #79 (10001 TXs) | Confirmed: 627000/1000000 | Interval: 1009ms | 65.6s  Block #80 (10001 TXs) | Confirmed: 637000/1000000 | Interval: 1006ms | 66.6s  Block #81 (10001 TXs) | Confirmed: 647000/1000000 | Interval: 1010ms | 67.6s  Block #82 (10001 TXs) | Confirmed: 657000/1000000 | Interval: 1006ms | 68.6s  Block #83 (10001 TXs) | Confirmed: 667000/1000000 | Interval: 1009ms | 69.6s  Block #84 (10001 TXs) | Confirmed: 677000/1000000 | Interval: 1008ms | 70.6s  Block #85 (10001 TXs) | Confirmed: 687000/1000000 | Interval: 1009ms | 71.6s  Block #86 (10001 TXs) | Confirmed: 697000/1000000 | Interval: 1017ms | 72.7s  Block #87 (10001 TXs) | Confirmed: 707000/1000000 | Interval: 998ms | 73.7s  Block #88 (10001 TXs) | Confirmed: 717000/1000000 | Interval: 1008ms | 74.7s  Block #89 (10001 TXs) | Confirmed: 727000/1000000 | Interval: 1008ms | 75.7s  Block #90 (10001 TXs) | Confirmed: 737000/1000000 | Interval: 1007ms | 76.7s  Block #91 (10001 TXs) | Confirmed: 747000/1000000 | Interval: 1018ms | 77.7s  Block #92 (10001 TXs) | Confirmed: 757000/1000000 | Interval: 1000ms | 78.7s  Block #93 (10001 TXs) | Confirmed: 767000/1000000 | Interval: 997ms | 79.7s  Block #94 (10001 TXs) | Confirmed: 777000/1000000 | Interval: 1008ms | 80.7s  Block #95 (10001 TXs) | Confirmed: 787000/1000000 | Interval: 1009ms | 81.7s  Block #96 (10001 TXs) | Confirmed: 797000/1000000 | Interval: 1007ms | 82.7s  Block #97 (10001 TXs) | Confirmed: 807000/1000000 | Interval: 1017ms | 83.7s  Block #98 (10001 TXs) | Confirmed: 817000/1000000 | Interval: 998ms | 84.7s  Block #99 (10001 TXs) | Confirmed: 827000/1000000 | Interval: 1009ms | 85.7s  Block #100 (10001 TXs) | Confirmed: 837000/1000000 | Interval: 1009ms | 86.8s  Block #101 (10001 TXs) | Confirmed: 847000/1000000 | Interval: 1007ms | 87.8s  Block #102 (10001 TXs) | Confirmed: 857000/1000000 | Interval: 1007ms | 88.8s  Block #103 (10001 TXs) | Confirmed: 867000/1000000 | Interval: 1009ms | 89.8s  Block #104 (10001 TXs) | Confirmed: 877000/1000000 | Interval: 1007ms | 90.8s  Block #105 (10001 TXs) | Confirmed: 887000/1000000 | Interval: 1008ms | 91.8s  Block #106 (10001 TXs) | Confirmed: 897000/1000000 | Interval: 1008ms | 92.8s  Block #107 (10001 TXs) | Confirmed: 907000/1000000 | Interval: 1035ms | 93.8s  Block #108 (10001 TXs) | Confirmed: 917000/1000000 | Interval: 990ms | 94.8s  Block #109 (10001 TXs) | Confirmed: 927000/1000000 | Interval: 989ms | 95.8s  Block #110 (10001 TXs) | Confirmed: 937000/1000000 | Interval: 1008ms | 96.8s  Block #111 (10001 TXs) | Confirmed: 947000/1000000 | Interval: 961ms | 97.8s  Block #112 (10001 TXs) | Confirmed: 957000/1000000 | Interval: 1017ms | 98.8s  Block #113 (10001 TXs) | Confirmed: 967000/1000000 | Interval: 998ms | 99.8s  Block #114 (10001 TXs) | Confirmed: 977000/1000000 | Interval: 1018ms | 100.8s  Block #115 (10001 TXs) | Confirmed: 987000/1000000 | Interval: 1087ms | 101.9s  Block #116 (10001 TXs) | Confirmed: 997000/1000000 | Interval: 928ms | 102.8s  Block #117 (3001 TXs) | Confirmed: 1000000/1000000 | Interval: 998ms | 103.8s
+  ✅ All 1000000 transactions confirmed!
+  📊 Blocks received: 104, Elapsed: 103831.7 ms
+
+  PUB/SUB reported: 1000000 confirmed
+  📊 Using balance query confirmed count: 1000000
+
+  [0;32m✓ Processing time: 103.5s (RESUME to last confirmed block)[0m
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  BENCHMARK RESULTS
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+[0;36m  SUBMISSION METRICS (Wallet → Pool)[0m
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+  Transactions submitted                       : 1000000
+  Submission errors                            : 0
+  Submission time                              : 10.846029812s
+  Submission throughput (TPS)                  : 92199.63 tx/sec
+
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+[0;36m  CONFIRMATION METRICS (Pool → Block → Chain)[0m
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+  Transactions confirmed                       : 1000000
+  Confirmation rate                            : 100.0%
+  Processing time (RESUME to done)             : 103.5s
+  Processing throughput (TPS)                  : 9661.83 tx/sec
+
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+[0;36m  END-TO-END METRICS (Complete Pipeline)[0m
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+  Submission time (Phase A)                    : 10.846029812s
+  Processing time (Phase B)                    : 103.5s
+  Total benchmark time (A + B)                 : 114.346029812s
+  End-to-end throughput (TPS)                  : 8745.38 tx/sec
+
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+[0;36m  BLOCK METRICS[0m
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+  Blocks created during benchmark              : 104
+  Blocks per second                            : 1.0048
+  Average transactions per block               : 9615.3
+  Block interval (configured)                  : 1s
+  Chain height (before → after)              : 13 → 117
+
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+[0;36m  PER-BLOCK TIMING ANALYSIS (where time is spent)[0m
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+
+  Block#    TXs       Interval      Elapsed       Confirmed   New TXs
+  ──────  ────  ────────  ───────  ─────────  ───────
+  #14       1         [0;32m154ms       [0m  0.2s          0           +0
+  #15       2001      [0;32m1125ms      [0m  1.3s          2000        +2000
+  #16       3001      [0;32m1012ms      [0m  2.3s          5000        +3000
+  #17       4001      [0;32m997ms       [0m  3.3s          9000        +4000
+  #18       8001      [0;32m1050ms      [0m  4.3s          17000       +8000
+  #19       10001     [0;32m917ms       [0m  5.3s          27000       +10000
+  #20       10001     [0;32m963ms       [0m  6.2s          37000       +10000
+  #21       10001     [0;32m1015ms      [0m  7.2s          47000       +10000
+  #22       10001     [0;32m1002ms      [0m  8.2s          57000       +10000
+  #23       10001     [0;32m1008ms      [0m  9.2s          67000       +10000
+  #24       10001     [0;32m1026ms      [0m  10.3s         77000       +10000
+  #25       10001     [0;32m998ms       [0m  11.3s         87000       +10000
+  #26       10001     [0;32m1038ms      [0m  12.3s         97000       +10000
+  #27       10001     [0;32m978ms       [0m  13.3s         107000      +10000
+  #28       10001     [0;32m1012ms      [0m  14.3s         117000      +10000
+  #29       10001     [0;32m1023ms      [0m  15.3s         127000      +10000
+  #30       10001     [0;32m1007ms      [0m  16.3s         137000      +10000
+  #31       10001     [0;32m1001ms      [0m  17.3s         147000      +10000
+  #32       10001     [0;32m961ms       [0m  18.3s         157000      +10000
+  #33       10001     [0;32m1007ms      [0m  19.3s         167000      +10000
+  #34       10001     [0;32m1012ms      [0m  20.3s         177000      +10000
+  #35       10001     [0;32m995ms       [0m  21.3s         187000      +10000
+  #36       10001     [0;32m1018ms      [0m  22.3s         197000      +10000
+  #37       10001     [0;32m1000ms      [0m  23.3s         207000      +10000
+  #38       10001     [0;32m1009ms      [0m  24.3s         217000      +10000
+  #39       10001     [0;32m995ms       [0m  25.3s         227000      +10000
+  #40       10001     [0;32m1008ms      [0m  26.3s         237000      +10000
+  #41       10001     [0;32m1015ms      [0m  27.3s         247000      +10000
+  #42       10001     [0;32m998ms       [0m  28.3s         257000      +10000
+  #43       10001     [0;32m1020ms      [0m  29.4s         267000      +10000
+  #44       10001     [0;32m1005ms      [0m  30.4s         277000      +10000
+  #45       10001     [0;32m1005ms      [0m  31.4s         287000      +10000
+  #46       10001     [0;32m1012ms      [0m  32.4s         297000      +10000
+  #47       10001     [0;32m987ms       [0m  33.4s         307000      +10000
+  #48       10001     [0;32m1016ms      [0m  34.4s         317000      +10000
+  #49       10001     [0;32m999ms       [0m  35.4s         327000      +10000
+  #50       10001     [0;32m1002ms      [0m  36.4s         337000      +10000
+  #51       10001     [0;32m1007ms      [0m  37.4s         347000      +10000
+  #52       10001     [0;32m1008ms      [0m  38.4s         357000      +10000
+  #53       10001     [0;32m1007ms      [0m  39.4s         367000      +10000
+  #54       10001     [0;32m1008ms      [0m  40.4s         377000      +10000
+  #55       10001     [0;32m1008ms      [0m  41.4s         387000      +10000
+  #56       10001     [0;32m1008ms      [0m  42.4s         397000      +10000
+  #57       10001     [0;32m1012ms      [0m  43.4s         407000      +10000
+  #58       10001     [0;32m996ms       [0m  44.4s         417000      +10000
+  #59       10001     [0;32m1007ms      [0m  45.5s         427000      +10000
+  #60       10001     [0;32m1010ms      [0m  46.5s         437000      +10000
+  #61       10001     [0;32m1006ms      [0m  47.5s         447000      +10000
+  #62       10001     [0;32m1009ms      [0m  48.5s         457000      +10000
+  #63       10001     [0;32m1007ms      [0m  49.5s         467000      +10000
+  #64       10001     [0;32m1014ms      [0m  50.5s         477000      +10000
+  #65       10001     [0;32m1015ms      [0m  51.5s         487000      +10000
+  #66       10001     [0;32m985ms       [0m  52.5s         497000      +10000
+  #67       10001     [0;32m1009ms      [0m  53.5s         507000      +10000
+  #68       10001     [0;32m1008ms      [0m  54.5s         517000      +10000
+  #69       10001     [0;32m1007ms      [0m  55.5s         527000      +10000
+  #70       10001     [0;32m1010ms      [0m  56.5s         537000      +10000
+  #71       10001     [0;32m1007ms      [0m  57.5s         547000      +10000
+  #72       10001     [0;32m1009ms      [0m  58.5s         557000      +10000
+  #73       10001     [0;32m1007ms      [0m  59.6s         567000      +10000
+  #74       10001     [0;32m1019ms      [0m  60.6s         577000      +10000
+  #75       10001     [0;32m1000ms      [0m  61.6s         587000      +10000
+  #76       10001     [0;32m997ms       [0m  62.6s         597000      +10000
+  #77       10001     [0;32m1009ms      [0m  63.6s         607000      +10000
+  #78       10001     [0;32m1008ms      [0m  64.6s         617000      +10000
+  #79       10001     [0;32m1009ms      [0m  65.6s         627000      +10000
+  #80       10001     [0;32m1006ms      [0m  66.6s         637000      +10000
+  #81       10001     [0;32m1010ms      [0m  67.6s         647000      +10000
+  #82       10001     [0;32m1006ms      [0m  68.6s         657000      +10000
+  #83       10001     [0;32m1009ms      [0m  69.6s         667000      +10000
+  #84       10001     [0;32m1008ms      [0m  70.6s         677000      +10000
+  #85       10001     [0;32m1009ms      [0m  71.6s         687000      +10000
+  #86       10001     [0;32m1017ms      [0m  72.7s         697000      +10000
+  #87       10001     [0;32m998ms       [0m  73.7s         707000      +10000
+  #88       10001     [0;32m1008ms      [0m  74.7s         717000      +10000
+  #89       10001     [0;32m1008ms      [0m  75.7s         727000      +10000
+  #90       10001     [0;32m1007ms      [0m  76.7s         737000      +10000
+  #91       10001     [0;32m1018ms      [0m  77.7s         747000      +10000
+  #92       10001     [0;32m1000ms      [0m  78.7s         757000      +10000
+  #93       10001     [0;32m997ms       [0m  79.7s         767000      +10000
+  #94       10001     [0;32m1008ms      [0m  80.7s         777000      +10000
+  #95       10001     [0;32m1009ms      [0m  81.7s         787000      +10000
+  #96       10001     [0;32m1007ms      [0m  82.7s         797000      +10000
+  #97       10001     [0;32m1017ms      [0m  83.7s         807000      +10000
+  #98       10001     [0;32m998ms       [0m  84.7s         817000      +10000
+  #99       10001     [0;32m1009ms      [0m  85.7s         827000      +10000
+  #100      10001     [0;32m1009ms      [0m  86.8s         837000      +10000
+  #101      10001     [0;32m1007ms      [0m  87.8s         847000      +10000
+  #102      10001     [0;32m1007ms      [0m  88.8s         857000      +10000
+  #103      10001     [0;32m1009ms      [0m  89.8s         867000      +10000
+  #104      10001     [0;32m1007ms      [0m  90.8s         877000      +10000
+  #105      10001     [0;32m1008ms      [0m  91.8s         887000      +10000
+  #106      10001     [0;32m1008ms      [0m  92.8s         897000      +10000
+  #107      10001     [0;32m1035ms      [0m  93.8s         907000      +10000
+  #108      10001     [0;32m990ms       [0m  94.8s         917000      +10000
+  #109      10001     [0;32m989ms       [0m  95.8s         927000      +10000
+  #110      10001     [0;32m1008ms      [0m  96.8s         937000      +10000
+  #111      10001     [0;32m961ms       [0m  97.8s         947000      +10000
+  #112      10001     [0;32m1017ms      [0m  98.8s         957000      +10000
+  #113      10001     [0;32m998ms       [0m  99.8s         967000      +10000
+  #114      10001     [0;32m1018ms      [0m  100.8s        977000      +10000
+  #115      10001     [0;32m1087ms      [0m  101.9s        987000      +10000
+  #116      10001     [0;32m928ms       [0m  102.8s        997000      +10000
+  #117      3001      [0;32m998ms       [0m  103.8s        1000000     +3000
+
+  Blocks observed (PUB/SUB)                    : 104
+  Average block interval                       : 998ms (target: 1000ms)
+  Min / Max interval                           : 917ms / 1125ms
+  Average overhead per block                   : -2ms
+
+  📊 OVERHEAD BREAKDOWN (v45.3 strict 1-second blocks):
+     Block time (configured):              1000 ms (HARD DEADLINE)
+     ├─ Proof collection window:            adaptive (~800 ms)
+     ├─ Winner announce + block creation:   adaptive (~85 ms)
+     ├─ Blockchain validation + confirm:    async via PUB/SUB
+     └─ Safety margin:                      50 ms
+     Average measured interval:             ~998 ms
+
+
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+[0;36m  VALIDATOR STEP TIMING (from logs)[0m
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+
+  Farmer 1 (last block):
+    Step 1 (GET_LAST_HASH):      0 ms
+    Step 2 (Pool→Validator):      118 ms
+
+
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+[0;36m  PROOF METRICS[0m
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+  Proofs found by farmers                      : 347
+  Valid proofs accepted                        : 116
+  Proofs per farmer per block                  : 3.3
+
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+[0;36m  BALANCE VERIFICATION[0m
+[0;36m═══════════════════════════════════════════════════════════════════════════[0m
+  --- Sender Wallets (TX senders) ---
+  Sender1 (initial → final)                  : 3010000 → 1010000 (Δ: -2000000)
+
+  --- Validator Wallets (miners) ---
+  Farmer1 (mining rewards)                     : 2160000 coins
+
+  ═══════════════════════════════════════════════════════
+  Fee Flow Analysis:
+  ═══════════════════════════════════════════════════════
+  DEBITS (from senders):
+    Value transferred:    1000000 coins (1000000 TXs × 1 coin)
+    Fees paid:            1000000 coins (1000000 TXs × 1 coin)
+    Total debited:        2000000 coins
+
+  CREDITS (to recipients):
+    Receiver got:         1000000 coins
+    Mining base rewards:  1040000 coins (104 blocks × 10000)
+    Mining fee rewards:   1000000 coins (all TX fees → winners)
+    Total mining rewards: 2040000 coins
+
+  NET BALANCE CHECK:
+    Total debited:        2000000 coins
+    Total credited:       3040000 coins
+    Net farmer Δ:         -2000000 coins (mining rewards - TX costs)
+  ═══════════════════════════════════════════════════════
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  EXPORTING GRAPH DATA
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+  ✓ Graph 2 data: 116 blocks → ./benchmark_results/graph2_block_timing.csv
+  ✓ Graph 4 data: 118 rounds → ./benchmark_results/graph4_round_timing.csv
+  ✓ Graph 1 data: 3907 progress points → ./benchmark_results/graph1_submit_progress.csv
+  ✓ Block times: ./benchmark_results/block_times.tmp
+
+  Generating graphs...
+  Generating graphs from: ./benchmark_results
+  
+      ✓ Graph 1 saved: ./benchmark_results/graph1_submission_progress.png
+      ✓ Graph 2 saved: ./benchmark_results/graph2_block_pipeline.png
+      ✓ Graph 4 saved: ./benchmark_results/graph4_metronome_pipeline.png
+
+Results saved to:
+  • ./benchmark_results/benchmark_20260418_064133.csv (system benchmark)
+  • ./benchmark_results/internal_20260418_064133.csv (micro benchmark)
+  • ./benchmark_results/report_20260418_064341.html (visual report)
+  • Logs in ./benchmark_results/
+
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  BENCHMARK COMPLETE
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+
+[0;32m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;32m║                      SUMMARY                                      ║[0m
+[0;32m╠══════════════════════════════════════════════════════════════════╣[0m
+[0;32m║[0m  Submission TPS      : 92199.63 tx/sec                         [0;32m║[0m
+[0;32m║[0m  End-to-End TPS      : 8745.38 tx/sec                          [0;32m║[0m
+[0;32m║[0m  Confirmation Rate   : 100.0%                                  [0;32m║[0m
+[0;32m║[0m  Avg TX/Block        : 9615.3                                  [0;32m║[0m
+[0;32m║[0m  Warmup Blocks       : 0                                       [0;32m║[0m
+[0;32m╚══════════════════════════════════════════════════════════════════╝[0m
+
+[0;34m╔══════════════════════════════════════════════════════════════════╗[0m
+[0;34m║[0m  CLEANUP
+[0;34m╚══════════════════════════════════════════════════════════════════╝[0m
+  Stopping blockchain processes...
+  ✓ Done
