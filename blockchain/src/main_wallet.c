@@ -8,7 +8,7 @@
  * ==============
  * 1. OpenMP parallel for: distributes batch iterations across threads
  * 2. Batch submission: Send multiple TXs in single ZMQ message
- * 3. BLS signatures: 48-byte signatures (like Ethereum 2.0)
+ * 3. Multi-scheme signatures via crypto_backend (Ed25519/Falcon/ML-DSA)
  * 4. Configurable batch_size (default 64, power of 2)
  * 
  * PARALLEL ARCHITECTURE:
@@ -60,7 +60,7 @@ static double get_time_ms(void) {
 void print_usage(const char* prog) {
     printf("\n");
     printf("╔══════════════════════════════════════════════════════════════╗\n");
-    printf("║   WALLET CLI v29 - OpenMP Batch Submission + BLS            ║\n");
+    printf("║   WALLET CLI v29 - OpenMP Batch Submission + PQ Signatures  ║\n");
     printf("╚══════════════════════════════════════════════════════════════╝\n");
     printf("\n");
     printf("Usage: %s <command> [args]\n", prog);
@@ -111,12 +111,15 @@ int cmd_create(const char* name) {
     
     printf("\n");
     printf("╔══════════════════════════════════════════════════════════════╗\n");
-    printf("║                    WALLET CREATED (BLS)                      ║\n");
+    printf("║                    WALLET CREATED                            ║\n");
     printf("╠══════════════════════════════════════════════════════════════╣\n");
     printf("║  Name:        %-46s║\n", wallet->name);
     printf("║  Address:     %-46s║\n", wallet->address_hex);
-    printf("║  Nonce:       %-46lu║\n", wallet->nonce);
-    printf("║  Signature:   %-46s║\n", "BLS (48 bytes)");
+        printf("║  Nonce:       %-46llu║\n", (unsigned long long)wallet->nonce);
+    printf("║  Signature:   %-46s║\n",
+           SIG_SCHEME == SIG_ED25519  ? "Ed25519" :
+           SIG_SCHEME == SIG_FALCON512 ? "Falcon-512" :
+           SIG_SCHEME == SIG_ML_DSA44  ? "ML-DSA-44" : "Hybrid");
     printf("║  File:        %-46s║\n", filename);
     printf("╚══════════════════════════════════════════════════════════════╝\n");
     
@@ -137,7 +140,7 @@ int cmd_info(const char* filepath) {
     printf("╠══════════════════════════════════════════════════════════════╣\n");
     printf("║  Name:        %-46s║\n", wallet->name);
     printf("║  Address:     %-46s║\n", wallet->address_hex);
-    printf("║  Nonce:       %-46lu║\n", wallet->nonce);
+    printf("║  Nonce:       %-46llu║\n", (unsigned long long)wallet->nonce);
     printf("║  Sig scheme:  %-46s║\n",
            wallet->sig_type == SIG_ED25519  ? "Ed25519"   :
            wallet->sig_type == SIG_FALCON512 ? "Falcon-512" :
@@ -174,7 +177,7 @@ int cmd_balance(const char* name_or_addr, const char* blockchain_addr) {
         uint64_t balance = strtoull(response, NULL, 10);
         
         printf("\n");
-        printf("💰 Balance for %s: %lu coins\n", name_or_addr, balance);
+        printf("💰 Balance for %s: %llu coins\n", name_or_addr, (unsigned long long)balance);
         printf("\n");
     } else {
         fprintf(stderr, "Failed to get balance\n");
@@ -209,7 +212,7 @@ int cmd_nonce(const char* name_or_addr, const char* blockchain_addr) {
         uint64_t nonce = strtoull(response, NULL, 10);
         
         printf("\n");
-        printf("🔢 Nonce for %s: %lu\n", name_or_addr, nonce);
+        printf("🔢 Nonce for %s: %llu\n", name_or_addr, (unsigned long long)nonce);
         printf("\n");
     } else {
         fprintf(stderr, "Failed to get nonce\n");
@@ -292,6 +295,7 @@ int cmd_send(const char* from_name, const char* to_name, uint64_t amount,
         }
         zmq_close(pool_socket_nonce);
         
+        // Pick the larger of chain nonce and pending-pool nonce to avoid replay/rejects.
         nonce = (bc_nonce > pool_nonce) ? bc_nonce : pool_nonce;
     }
     
@@ -430,7 +434,10 @@ int cmd_batch_send(const char* from_name, const char* to_name,
     printf("║  Count:       %-46d║\n", total_count);
     printf("║  Threads:     %-46d║\n", num_threads);
     printf("║  Batch size:  %-46d║\n", batch_size);
-    printf("║  Signature:   %-46s║\n", "BLS (48 bytes)");
+    printf("║  Signature:   %-46s║\n",
+           SIG_SCHEME == SIG_ED25519  ? "Ed25519" :
+           SIG_SCHEME == SIG_FALCON512 ? "Falcon-512" :
+           SIG_SCHEME == SIG_ML_DSA44  ? "ML-DSA-44" : "Hybrid");
     printf("║  Parallelism: %-46s║\n", "OpenMP");
     printf("╚══════════════════════════════════════════════════════════════╝\n");
     
@@ -476,7 +483,7 @@ int cmd_batch_send(const char* from_name, const char* to_name,
         zmq_close(pool_socket);
     }
     
-    printf("  Starting nonce: %lu\n", base_nonce);
+    printf("  Starting nonce: %llu\n", (unsigned long long)base_nonce);
     
     // Get current height
     zmq_send(bc_socket, "GET_HEIGHT", 10, 0);

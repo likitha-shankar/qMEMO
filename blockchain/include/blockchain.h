@@ -10,18 +10,28 @@
 // BLOCKCHAIN STRUCTURE
 // =============================================================================
 
+// Maximum number of blocks the chain can hold in memory.
+// At 1 block/6 seconds: ~100K blocks = ~7 days of continuous operation.
+// For production use, blocks beyond this limit would need paging to disk.
 #define MAX_BLOCKS 100000
 
 typedef struct {
     Block** blocks;
     uint64_t height;
-    uint8_t last_hash[32];
-    
-    // Ledger (address -> balance)
+    uint8_t last_hash[32];    // Cached hash of most recent block (avoids full chain walk)
+
+    // Ledger: flat array mapping address → {balance, nonce}.
+    //
+    // IMPLEMENTATION NOTE: Linear search O(n) via find_ledger_entry().
+    // This is acceptable for benchmarks with ≤10K distinct senders.
+    // For production, replace with a hash map (e.g., uthash or khash) to get O(1).
+    //
+    // 10000-entry cap: at 20 bytes/address + 16 bytes state = 360KB — fits in L2.
+    // A real blockchain (e.g., Ethereum) uses a Patricia Merkle Trie for this.
     struct {
         uint8_t address[20];
         uint64_t balance;
-        uint64_t nonce;        // Transaction nonce for this address
+        uint64_t nonce;        // Next expected TX nonce (prevents replay attacks)
     } ledger[10000];
     uint32_t ledger_count;
 } Blockchain;

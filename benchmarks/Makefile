@@ -15,16 +15,16 @@
 # ── Paths (all relative to this Makefile's directory: benchmarks/) ---------
 SRCDIR       := src
 BINDIR       := bin
-OQS_ROOT     := ../liboqs_install
+OQS_ROOT     ?= ../liboqs_install
 
 # OpenSSL: Homebrew on macOS, system package on Linux.
 # Override on the command line if your install is elsewhere:
 #   make OPENSSL_ROOT=/usr/local all
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-    OPENSSL_ROOT := /opt/homebrew/opt/openssl
+    OPENSSL_ROOT ?= /opt/homebrew/opt/openssl
 else
-    OPENSSL_ROOT := /usr
+    OPENSSL_ROOT ?= /usr
 endif
 
 # ── Toolchain ──────────────────────────────────────────────────────────────
@@ -115,12 +115,26 @@ ALL_BINS := $(VERIFY_BIN) $(STATS_BIN) $(COMPARE_BIN) $(MULTICORE_BIN) \
 #  Targets
 # ══════════════════════════════════════════════════════════════════════════════
 
-.PHONY: all verify stats compare multicore multicore_all concurrent concurrent_sign \
-        sign sigsize classical comprehensive key_inspection clean run help
+.PHONY: all build-all verify stats compare multicore multicore_all concurrent concurrent_sign \
+        sign sigsize classical comprehensive key_inspection clean run help check-deps
+.NOTPARALLEL: all
 
-all: $(ALL_BINS) ## Build all benchmarks
+all: check-deps build-all ## Build all benchmarks
+build-all: $(ALL_BINS)
 	@echo ""
 	@echo "All benchmarks built in $(BINDIR)/."
+
+check-deps:
+	@if [ ! -f "$(OQS_ROOT)/include/oqs/oqs.h" ]; then \
+		echo "ERROR: liboqs headers not found at $(OQS_ROOT)/include/oqs/oqs.h"; \
+		echo "Set OQS_ROOT=/path/to/liboqs_install"; \
+		exit 1; \
+	fi
+	@if [ ! -f "$(OQS_ROOT)/lib/liboqs.a" ] && [ ! -f "$(OQS_ROOT)/lib/liboqs.so" ] && [ ! -f "$(OQS_ROOT)/lib/liboqs.dylib" ]; then \
+		echo "ERROR: liboqs library not found under $(OQS_ROOT)/lib"; \
+		echo "Build/install liboqs first, or pass OQS_ROOT=/path/to/liboqs_install"; \
+		exit 1; \
+	fi
 
 # ── Individual builds ──────────────────────────────────────────────────────
 

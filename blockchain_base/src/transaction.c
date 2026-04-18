@@ -1,9 +1,9 @@
 /**
  * ============================================================================
- * TRANSACTION.C - Ethereum 2.0 Style Transaction with BLS Signatures
+ * TRANSACTION.C - Compact Transaction with Ed25519 Signatures
  * ============================================================================
  * 
- * v26 - Now uses BLS signatures (48 bytes) like Ethereum 2.0
+ * Base implementation uses Ed25519 signatures (64 bytes)
  * 
  * TRANSACTION STRUCTURE (128 bytes total):
  * ========================================
@@ -16,20 +16,13 @@
  * │ dest_address   │ 20 bytes│ Recipient's address                         │
  * │ value          │ 8 bytes │ Amount to transfer                          │
  * │ fee            │ 4 bytes │ Transaction fee for miner                   │
- * │ signature      │ 48 bytes│ BLS signature (BLS12-381, like Eth2.0)      │
+ * │ signature      │ 64 bytes│ Ed25519 signature                            │
  * └────────────────┴─────────┴─────────────────────────────────────────────┘
  * 
- * BLS SIGNATURES (Boneh-Lynn-Shacham):
- * ====================================
- * - Uses BLS12-381 curve (same as Ethereum 2.0)
- * - Produces 48-byte compressed G1 point signatures
- * - Supports signature aggregation (multiple sigs → 1 sig)
- * - Verification: e(sig, g2) == e(H(m), pk)
- * 
- * Benefits over ECDSA:
- * - Signature aggregation reduces block size
- * - Constant verification time regardless of signers
- * - Simpler multi-signature schemes
+ * Ed25519 signatures:
+ * - 64-byte deterministic signatures
+ * - 32-byte public keys
+ * - Fast verification for high-throughput transaction pipelines
  * 
  * ============================================================================
  */
@@ -136,7 +129,7 @@ char* transaction_get_hash_hex(const Transaction* tx) {
 }
 
 // =============================================================================
-// BLS-STYLE SIGNING AND VERIFICATION (48-byte signatures like Ethereum 2.0)
+// Ed25519 SIGNING AND VERIFICATION
 // =============================================================================
 // Ed25519 TRANSACTION SIGNING
 // =============================================================================

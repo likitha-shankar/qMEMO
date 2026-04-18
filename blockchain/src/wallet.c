@@ -142,7 +142,7 @@ bool wallet_save(const Wallet* wallet, const char* filepath) {
     
     fprintf(f, "NAME:%s\n", wallet->name);
     fprintf(f, "ADDRESS:%s\n", wallet->address_hex);
-    fprintf(f, "NONCE:%lu\n", wallet->nonce);
+    fprintf(f, "NONCE:%llu\n", (unsigned long long)wallet->nonce);
     
     // Store Ed25519 seed as hex (32 bytes → 64 hex chars)
     char seed_hex[65] = {0};
@@ -342,9 +342,16 @@ bool wallet_verify(const uint8_t* public_key, size_t pubkey_len,
     if (!public_key || !message || !signature) return false;
     if (sig_len == 0 || pubkey_len == 0) return false;
 
-    // Dispatch to crypto_backend (handles Ed25519, Falcon, ML-DSA)
-    // Default to Ed25519 if pubkey_len == 32, else use typed dispatch
-    uint8_t sig_type = (pubkey_len == 32) ? SIG_ED25519 : SIG_FALCON512;
+    // Legacy helper path: infer scheme from key/signature lengths.
+    // Canonical transaction verification should use tx->sig_type directly.
+    uint8_t sig_type;
+    if (pubkey_len == 32) {
+        sig_type = SIG_ED25519;
+    } else if (pubkey_len == 1312 || sig_len == 2420) {
+        sig_type = SIG_ML_DSA44;
+    } else {
+        sig_type = SIG_FALCON512;
+    }
     return crypto_verify_typed(sig_type, signature, sig_len,
                                message, msg_len, public_key, pubkey_len);
 }

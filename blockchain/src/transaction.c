@@ -72,7 +72,34 @@ Transaction* transaction_create_coinbase(const uint8_t farmer_address[20],
 // =============================================================================
 // TRANSACTION HASH COMPUTATION
 // =============================================================================
-
+//
+// Only the "economic core" of the transaction is hashed — NOT the signature
+// or public key. This is a deliberate design choice:
+//
+//   1. The signature ITSELF is computed over this hash, so including it in
+//      the hash would create a circular dependency.
+//
+//   2. Light clients (e.g., payment provers) can verify that a TX was included
+//      in a block without reconstructing the full signature. All they need is
+//      the 64-byte economic payload.
+//
+//   3. Public keys are variable-length across signature schemes (32B Ed25519,
+//      897B Falcon-512, 1312B ML-DSA-44). Excluding them keeps the hash input
+//      fixed-size (64 bytes) regardless of scheme, so the same hash function
+//      works across all four schemes without special-casing.
+//
+// Fields hashed (64 bytes total):
+//   nonce (8) | expiry_block (4) | source_address (20) |
+//   dest_address (20) | value (8) | fee (4)
+//
+// Hash algorithm: BLAKE3 truncated to TX_HASH_SIZE (28 bytes)
+//   - 28 bytes gives 2^112 preimage resistance — collision-safe for blockchain
+//     use (birthday bound: ~2^56 operations).
+//   - Truncation chosen over a shorter hash (SHA256/32) to save 4 bytes
+//     per TX in the block header commitment (28 * 65K TXs = 1.8MB saving).
+//   - BLAKE3 is used (not SHA256) for consistency with the Proof-of-Space
+//     plot hashes, keeping a single hash dependency in the codebase.
+//
 void transaction_compute_hash(const Transaction* tx, uint8_t hash[TX_HASH_SIZE]) {
     uint8_t buffer[8 + 4 + 20 + 20 + 8 + 4];  // 64 bytes
     size_t offset = 0;

@@ -98,7 +98,7 @@ bool wallet_save(const Wallet* wallet, const char* filepath) {
     
     fprintf(f, "NAME:%s\n", wallet->name);
     fprintf(f, "ADDRESS:%s\n", wallet->address_hex);
-    fprintf(f, "NONCE:%lu\n", wallet->nonce);
+    fprintf(f, "NONCE:%llu\n", (unsigned long long)wallet->nonce);
     
     // Store Ed25519 seed as hex (32 bytes → 64 hex chars)
     char seed_hex[65] = {0};

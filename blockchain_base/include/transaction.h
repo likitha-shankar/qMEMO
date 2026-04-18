@@ -99,7 +99,6 @@ extern const uint8_t COINBASE_ADDRESS[20];
 // =============================================================================
 
 #define TX_IS_COINBASE(tx) (memcmp((tx)->source_address, COINBASE_ADDRESS, 20) == 0)
-#define TX_NO_EXPIRY       0
 
 // =============================================================================
 // TRANSACTION FUNCTIONS
@@ -119,8 +118,8 @@ Transaction* transaction_create_coinbase(const uint8_t farmer_address[20],
                                          uint64_t total_fees,
                                          uint32_t block_height);
 
-// Compute transaction hash (ID) - returns 28 bytes
-// Hash = BLAKE3(nonce || expiry_block || source || dest || value || fee)[0:28]
+// Compute transaction hash (ID) - returns TX_HASH_SIZE bytes (32 in base build)
+// Hash = BLAKE3(nonce || expiry_block || source || dest || value || fee)
 void transaction_compute_hash(const Transaction* tx, uint8_t hash[TX_HASH_SIZE]);
 
 // Get transaction hash as hex string (caller must free)
