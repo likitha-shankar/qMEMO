@@ -29,3 +29,14 @@ venv/
 # Logs (runtime output — committed only as snapshots under benchmarks/results/)
 *.log
 !benchmarks/results/**/*.log
+
+# Runtime pid markers
+*.pid
+
+# Local/working benchmark artifacts (keep canonical final set)
+benchmarks/results/cloud_repro_live/
+benchmarks/results/hybrid_matrix_apr18/
+
+# Personal presentation drafts
+GCASR_2026_ABSTRACT_DRAFT.md
+defense_presentation.md

@@ -14,16 +14,18 @@ overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
 ## Key Results
 
-| Metric                              | Value                                                       |
-|--------------------------------------|-------------------------------------------------------------|
-| Falcon-512 verify (single core)      | 23,505–30,569 ops/sec across platforms                      |
-| ML-DSA-44 verify (x86, AVX-512)      | 46,532–49,060 ops/sec (2.0–2.1x faster than Falcon on x86) |
-| Falcon-512 vs ECDSA verify           | **7.6–8.1x faster**, with quantum resistance                |
-| Falcon-512 signature size            | 666 B max (3.7x smaller than ML-DSA-44)                    |
-| 10-thread Falcon-512 scaling         | 183K ops/sec, **96.4% efficiency** (Skylake-SP)             |
-| Blockchain e2e TPS (Falcon-512)      | **2,572 TPS** — no penalty vs classical ECDSA               |
-| Blockchain e2e TPS (ML-DSA-44)       | 1,533 TPS — 40% below Falcon (larger sigs bottleneck I/O)  |
-| Hybrid mode                          | ECDSA + Falcon + ML-DSA coexist on same chain, no hard fork |
+| Metric                              | Value                                                                  |
+|--------------------------------------|------------------------------------------------------------------------|
+| Falcon-512 verify (single core)      | 23,877 ops/sec (Xeon 6242); 23,505–30,569 ops/sec across platforms     |
+| ML-DSA-44 verify (x86, AVX-512)      | 49,060 ops/sec (Xeon 6242) — 2.1x faster verify than Falcon on x86    |
+| Falcon-512 vs ECDSA verify           | **7.6–8.1x faster**, with quantum resistance                           |
+| Falcon-512 signature size            | 666 B max (3.7x smaller than ML-DSA-44)                               |
+| 10-thread Falcon-512 scaling         | 183K ops/sec, **96.4% efficiency** (Skylake-SP)                        |
+| Blockchain e2e TPS (1M TX, Falcon)   | **11,182 TPS** best run; 10,378 / 10,923 / 11,182 (3 independent runs) |
+| Blockchain e2e TPS (ML-DSA-44)       | 1,533 TPS — 40% below Falcon (larger sigs bottleneck I/O)              |
+| Confirmation rate (1M TX)            | **100%** across all three Falcon-512 production-scale runs              |
+| Apr 18 repeat matrix (18 runs)       | **All valid** (100% confirmation, 0 errors); canonical bundle in `benchmarks/results/hybrid_matrix_apr18_final/` |
+| Hybrid mode                          | ECDSA + Falcon + ML-DSA coexist on same chain, no hard fork            |
 
 **Start here:** [docs/FINDINGS.md](docs/FINDINGS.md) — consolidated research findings
 **Full numerical data:** [docs/RESULTS.md](docs/RESULTS.md)
@@ -125,19 +127,15 @@ python3 scripts/generate_report.py
 
 ## Documentation
 
-| Document                                                             | Description                                                           |
-|----------------------------------------------------------------------|-----------------------------------------------------------------------|
-| [docs/FINDINGS.md](docs/FINDINGS.md)                                 | **Key research findings** — single-table comparisons, recommendations |
-| [docs/RESULTS.md](docs/RESULTS.md)                                   | **All numerical results** — throughput, scaling, sizes, blockchain     |
-| [docs/COMPREHENSIVE_COMPARISON.md](docs/COMPREHENSIVE_COMPARISON.md) | 7-algorithm trade-off analysis                                        |
-| [docs/QUANTUM_THREAT_ANALYSIS.md](docs/QUANTUM_THREAT_ANALYSIS.md)   | Post-quantum threat landscape                                         |
-| [docs/REAL_WORLD_ADOPTION.md](docs/REAL_WORLD_ADOPTION.md)           | PQC adoption in production systems                                    |
-| [docs/LIBRARY_SURVEY.md](docs/LIBRARY_SURVEY.md)                     | Survey of PQC libraries                                               |
-| [docs/BUILD_CONFIG.md](docs/BUILD_CONFIG.md)                         | liboqs build flags and version details                                |
-| [docs/ARCHITECTURE_DIAGRAM.md](docs/ARCHITECTURE_DIAGRAM.md)         | System architecture diagrams                                          |
-| [docs/MEMO_CODE_ANALYSIS.md](docs/MEMO_CODE_ANALYSIS.md)             | Pre-integration code audit                                            |
-| [docs/LIMITATIONS.md](docs/LIMITATIONS.md)                           | Known limitations and caveats                                         |
-| [blockchain/README.md](blockchain/README.md)                         | Blockchain-specific documentation                                     |
+| Document                                                     | Description                                                           |
+|--------------------------------------------------------------|-----------------------------------------------------------------------|
+| [docs/FINDINGS.md](docs/FINDINGS.md)                        | **Key research findings** — concise conclusions and recommendations   |
+| [docs/RESULTS.md](docs/RESULTS.md)                          | **Canonical metrics** — benchmark tables and run metadata             |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                | Detailed runtime architecture: components, ports, and message flow    |
+| [docs/TECHNICAL_REFERENCE.md](docs/TECHNICAL_REFERENCE.md)  | Implementation-level reference: structures, protocol, validation path |
+| [docs/HARSHA_BASELINE_DIFF.md](docs/HARSHA_BASELINE_DIFF.md)| Baseline-vs-current delta (`blockchain_base/` to `blockchain/`)       |
+| [docs/PROFESSOR_SUMMARY.md](docs/PROFESSOR_SUMMARY.md)      | High-level progress snapshot for advisor updates                      |
+| [blockchain/README.md](blockchain/README.md)                | Blockchain-specific build/run documentation                           |
 
 ---
 

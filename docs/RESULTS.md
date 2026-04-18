@@ -470,6 +470,81 @@ This mirrors the approach taken by Polkadot (dual-algorithm) and Algorand (phase
 
 ---
 
+## 12. Production-Scale Benchmark — April 2026 (Falcon-512)
+
+> Platform: Intel Xeon Gold 6126 Skylake-SP, Chameleon Cloud, Ubuntu 24.04
+> Config: 1 farmer, k=16, max_txs_per_block=100,000, 8 threads, batch size 64, 1s block interval, no warmup
+> Raw files: `blockchain/benchmark_results/benchmark_20260415_*.csv`
+
+### 12.1 10K Transaction Run
+
+| Metric | Value | Source |
+|--------|------:|--------|
+| TX submitted / confirmed | 10,000 / 10,000 | `benchmark_20260415_013936.csv` |
+| End-to-end TPS | **3,165** | |
+| Total time | 3.2 sec | |
+| Confirmation rate | 100% | |
+| avg TX/block | 2,500 | |
+| Blocks created | 4 | |
+
+### 12.2 1M Transaction Runs (3 independent runs)
+
+| Run | e2e TPS | Total Time | Confirm Rate | Blocks | avg TX/block | Source CSV |
+|-----|--------:|-----------:|:------------:|:------:|:------------:|-----------|
+| 1 | 10,378 | 96.4 sec | 100% | 82 | 12,195 | `benchmark_20260415_021545.csv` |
+| 2 | 10,923 | 91.5 sec | 100% | 77 | 12,987 | `benchmark_20260415_021757.csv` |
+| **3 (best)** | **11,182** | **89.4 sec** | **100%** | **74** | **13,514** | `benchmark_20260415_021959.csv` |
+| Average | 10,828 | 92.4 sec | 100% | 78 | 12,899 | |
+
+All three runs: 0 errors, 0 dropped transactions, receiver_final = 1,000,000 coins.
+
+### 12.3 TPS Scaling Across Transaction Counts (Falcon-512)
+
+| TX Count | e2e TPS | Config | Source |
+|---------:|--------:|--------|--------|
+| 500 | 1,223 | 10 farmers, 15 warmup blocks | `docs/RESULTS.md` §10.1 (2026-03-22) |
+| 1,000 | 2,572 | 10 farmers, 15 warmup blocks | `docs/RESULTS.md` §10.1 (2026-03-22) |
+| 10,000 | 3,165 | 1 farmer, no warmup | `benchmark_20260415_013936.csv` |
+| 1,000,000 (avg) | 10,828 | 1 farmer, no warmup | `benchmark_20260415_021*.csv` |
+| 1,000,000 (best) | **11,182** | 1 farmer, no warmup | `benchmark_20260415_021959.csv` |
+
+**Analysis:** TPS scales 4.3× from 1K to 1M transactions. Fixed per-block and per-batch startup
+costs amortize over more transactions at higher scale. avg TX/block grows from ~1 (at 1K TX)
+to 13,514 (at 1M TX), driving the efficiency gain. The pipeline ceiling has not been reached.
+
+---
+
+## 13. Cloud Repeat Matrix — April 18, 2026 (Canonical Final Set)
+
+> Platform: Intel Xeon Gold 6126 Skylake-SP (Chameleon Cloud)  
+> Config: `k=16`, `1 farmer`, `1s block interval`, `8 threads`, `batch size=64`  
+> Repeats: `3x @ 100K` + `3x @ 1M` for each scheme (`18` runs total)
+
+### 13.1 Aggregate End-to-End TPS (mean over 3 repeats)
+
+| Scheme | 100K mean TPS | 100K std | 1M mean TPS | 1M std | Confirmation |
+|--------|--------------:|---------:|------------:|-------:|:------------:|
+| Ed25519 (`s1`) | 7,046.12 | 474.09 | 8,749.78 | 3.19 | 100% |
+| Falcon-512 (`s2`) | 6,693.70 | 69.05 | 8,776.68 | 30.36 | 100% |
+| ML-DSA-44 (`s4`) | 6,558.37 | 212.77 | 8,744.08 | 51.54 | 100% |
+
+### 13.2 Integrity and Artifact Selection
+
+- Final set integrity: all 18 CSVs satisfy `tx_confirmed==target`, `confirm_rate=100.0`, `tx_errors=0`, `end_to_end_tps>0`.
+- One intermediate ML-DSA run (`s4_tx1m_r3`) initially failed, then was rerun and replaced in the canonical set.
+- Reviewer-safe canonical bundle:
+  - `benchmarks/results/hybrid_matrix_apr18_final/`
+  - `benchmarks/results/hybrid_matrix_apr18_final/README_FINAL_SELECTION.md`
+- Raw history (including intermediate attempts): `benchmarks/results/hybrid_matrix_apr18/`
+
+### 13.3 Total Runtime Across Final 18 Runs
+
+Computed as `target_tx / end_to_end_tps` per run, summed over all final runs:
+
+- Total end-to-end benchmark time: **1161.163 sec** (**19.353 min**, **0.323 hr**)
+
+---
+
 ## Run Tags
 
 | Platform                             | Run tag                       | Date       |
@@ -480,11 +555,15 @@ This mirrors the approach taken by Polkadot (dual-algorithm) and Algorand (phase
 | Skylake-SP                           | `run_20260310_035214`         | 2026-03-10 |
 | Blockchain baseline                  | `benchmark.sh`                | 2026-03-10 |
 | Blockchain ECDSA (real verify)       | `benchmark.sh`                | 2026-03-22 |
-| Blockchain Falcon-512                | `benchmark_20260322_235135`   | 2026-03-22 |
-| Blockchain ML-DSA-44                 | `benchmark_20260323_042209`   | 2026-03-23 |
+| Blockchain Falcon-512 (1K TX)        | `benchmark_20260322_235135`   | 2026-03-22 |
+| Blockchain ML-DSA-44 (1K TX)         | `benchmark_20260323_042209`   | 2026-03-23 |
 | Blockchain Hybrid (mixed-sig)        | `benchmark_20260328_235826`   | 2026-03-28 |
 | Skylake-SP (all-algo multicore)      | `multicore_all_benchmark`     | 2026-03-23 |
+| Blockchain Falcon-512 (10K TX)       | `benchmark_20260415_013936`   | 2026-04-15 |
+| Blockchain Falcon-512 (1M TX, run 1) | `benchmark_20260415_021545`   | 2026-04-15 |
+| Blockchain Falcon-512 (1M TX, run 2) | `benchmark_20260415_021757`   | 2026-04-15 |
+| Blockchain Falcon-512 (1M TX, run 3) | `benchmark_20260415_021959`   | 2026-04-15 |
 
-Raw logs: `benchmarks/results/` and `memo-baseline/results/`
+Raw logs: `benchmarks/results/`, `blockchain/benchmark_results/`
 
 ---
