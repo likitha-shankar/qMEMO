@@ -543,6 +543,18 @@ Computed as `target_tx / end_to_end_tps` per run, summed over all final runs:
 
 - Total end-to-end benchmark time: **1161.163 sec** (**19.353 min**, **0.323 hr**)
 
+### 13.4 Single-Run Log Evidence (Citation Ready)
+
+For a concrete run-level artifact with CSV-log consistency checks, see:
+
+- `docs/RUN_EVIDENCE.md`
+
+The evidence file captures two canonical `1M` runs (`s1_tx1m_r1` and `s2_tx1m_r3`) with:
+
+- exact CSV metrics,
+- matching log excerpt,
+- explicit consistency checks (`confirmed`, `errors`, `confirm_rate`, `e2e_tps`, `total_time`).
+
 ---
 
 ## Run Tags

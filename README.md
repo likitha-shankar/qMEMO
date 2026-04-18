@@ -10,6 +10,15 @@
 baselines (ECDSA, Ed25519) in signing throughput, verification throughput, and on-chain
 overhead -- and do they scale adequately for high-TPS blockchain workloads?**
 
+## Quick Navigation
+
+- **Start with outcomes:** `docs/FINDINGS.md`
+- **Full numbers and tables:** `docs/RESULTS.md`
+- **Run-level evidence artifacts:** `docs/RUN_EVIDENCE.md`
+- **System architecture:** `docs/ARCHITECTURE.md`
+- **Implementation details:** `docs/TECHNICAL_REFERENCE.md`
+- **Baseline vs qMEMO changes:** `docs/HARSHA_BASELINE_DIFF.md`
+
 ---
 
 ## Key Results
@@ -113,6 +122,30 @@ python3 scripts/generate_report.py
 | `liboqs_install/`     | Local liboqs 0.15.0 install                                   |
 | `install_liboqs.sh`   | Builds and installs liboqs locally                             |
 
+## Folder READMEs
+
+To keep the repository self-explanatory, each major folder includes a local `README.md`:
+
+| Folder | Local README |
+|--------|--------------|
+| `benchmarks/` | `benchmarks/README.md` |
+| `benchmarks/src/` | `benchmarks/src/README.md` |
+| `benchmarks/bin/` | `benchmarks/bin/README.md` |
+| `benchmarks/results/` | `benchmarks/results/README.md` |
+| `blockchain/` | `blockchain/README.md` |
+| `blockchain/include/` | `blockchain/include/README.md` |
+| `blockchain/src/` | `blockchain/src/README.md` |
+| `blockchain/proto/` | `blockchain/proto/README.md` |
+| `blockchain/build/` | `blockchain/build/README.md` |
+| `blockchain/benchmark_results/` | `blockchain/benchmark_results/README.md` |
+| `blockchain_base/` | `blockchain_base/README.md` |
+| `blockchain_base/include/` | `blockchain_base/include/README.md` |
+| `blockchain_base/src/` | `blockchain_base/src/README.md` |
+| `blockchain_base/proto/` | `blockchain_base/proto/README.md` |
+| `blockchain_base/build/` | `blockchain_base/build/README.md` |
+| `docs/` | `docs/README.md` |
+| `scripts/` | `scripts/README.md` |
+
 ---
 
 ## Hardware Platforms
@@ -133,6 +166,7 @@ python3 scripts/generate_report.py
 | [docs/RESULTS.md](docs/RESULTS.md)                          | **Canonical metrics** — benchmark tables and run metadata             |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                | Detailed runtime architecture: components, ports, and message flow    |
 | [docs/TECHNICAL_REFERENCE.md](docs/TECHNICAL_REFERENCE.md)  | Implementation-level reference: structures, protocol, validation path |
+| [docs/RUN_EVIDENCE.md](docs/RUN_EVIDENCE.md)                | Two canonical 1M runs (Ed25519 + Falcon) with log/CSV consistency     |
 | [docs/HARSHA_BASELINE_DIFF.md](docs/HARSHA_BASELINE_DIFF.md)| Baseline-vs-current delta (`blockchain_base/` to `blockchain/`)       |
 | [docs/PROFESSOR_SUMMARY.md](docs/PROFESSOR_SUMMARY.md)      | High-level progress snapshot for advisor updates                      |
 | [blockchain/README.md](blockchain/README.md)                | Blockchain-specific build/run documentation                           |

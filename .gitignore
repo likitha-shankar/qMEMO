@@ -1,6 +1,10 @@
 # Build artifacts
-benchmarks/bin/
-blockchain/build/
+benchmarks/bin/*
+!benchmarks/bin/README.md
+blockchain/build/*
+!blockchain/build/README.md
+blockchain_base/build/*
+!blockchain_base/build/README.md
 *.o
 *.a
 *.so
@@ -35,7 +39,13 @@ venv/
 
 # Local/working benchmark artifacts (keep canonical final set)
 benchmarks/results/cloud_repro_live/
+!benchmarks/results/cloud_repro_live/
+benchmarks/results/cloud_repro_live/*
+!benchmarks/results/cloud_repro_live/README.md
 benchmarks/results/hybrid_matrix_apr18/
+!benchmarks/results/hybrid_matrix_apr18/
+benchmarks/results/hybrid_matrix_apr18/*
+!benchmarks/results/hybrid_matrix_apr18/README.md
 
 # Personal presentation drafts
 GCASR_2026_ABSTRACT_DRAFT.md
