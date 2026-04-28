@@ -47,8 +47,13 @@ mem_inst_retired.all_loads,\
 mem_inst_retired.all_stores,\
 offcore_requests.all_data_rd"
 
-EVENTS_TOPDOWN="topdown-fe-bound,topdown-be-bound,\
-topdown-bad-spec,topdown-retiring"
+# topdown-fe-bound etc. are not available on all kernels; use the raw slot
+# counters that are universally present on Cascade Lake:
+#   slots-retired / total-slots ≈ retiring
+#   fetch-bubbles / total-slots ≈ frontend-bound
+#   recovery-bubbles / total-slots ≈ bad-speculation
+EVENTS_TOPDOWN="topdown-total-slots,topdown-slots-retired,\
+topdown-fetch-bubbles,topdown-recovery-bubbles"
 
 # ---------------------------------------------------------------------
 # Helpers
@@ -95,7 +100,9 @@ run_perf() {
       --pin-strategy compact \
       --output-prefix "${prefix}" \
       --tag "perf_spotcheck_${label}" \
-    >> "${OUT}/run.log" 2>&1
+    >> "${OUT}/run.log" 2>&1 || {
+      log "    WARN: perf stat exited non-zero for ${label} (unsupported event?); continuing"
+  }
 
   log "    -> ${perf_csv}"
 }
