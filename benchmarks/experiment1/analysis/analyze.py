@@ -480,7 +480,7 @@ def fig8_freq_time(metrics: pd.DataFrame, agg: pd.DataFrame, out_dir: str, fmt: 
     # Use dilithium2 compact runs as the showcase
     fig, ax = plt.subplots(figsize=(9, 4.5))
     # Metrics file doesn't have algo/threads labels currently — placeholder note
-    ax.plot(metrics.index, metrics["cpu0_freq_khz"] / 1e3,
+    ax.plot(metrics.index, metrics["cpu0_freq_khz"] / 1e6,
             color="steelblue", linewidth=1, label="CPU0 freq (GHz)")
     ax.set_xlabel("Sample index (100 ms intervals)")
     ax.set_ylabel("Frequency (GHz)")
@@ -488,9 +488,12 @@ def fig8_freq_time(metrics: pd.DataFrame, agg: pd.DataFrame, out_dir: str, fmt: 
     ax.grid(alpha=0.3)
     ax.legend()
     # Annotate nominal frequency if readable
-    nominal = metrics["cpu0_freq_khz"].median() / 1e3
+    nominal = metrics["cpu0_freq_khz"].median() / 1e6
     ax.axhline(nominal, color="red", ls="--", lw=0.8, label=f"median {nominal:.2f} GHz")
     ax.legend()
+    ax.annotate("base clock 2.4 GHz, turbo disabled",
+                xy=(0.02, 0.08), xycoords="axes fraction", fontsize=8,
+                color="gray")
 
     savefig(fig, out_dir, "fig8_freq_time", fmt, dpi)
     plt.close(fig)

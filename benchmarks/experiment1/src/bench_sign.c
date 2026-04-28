@@ -42,6 +42,9 @@
 #define MSG_FIXED       0
 #define MSG_FRESH       1
 
+#define CTX_FRESH       0   /* EVP_MD_CTX_new/free per iteration — matches qMEMO wallet */
+#define CTX_REUSE       1   /* pre-allocated, reset per iteration — lower-bound cost */
+
 #define MAX_THREADS     128
 #define MAX_PATH_LEN    512
 #define MAX_TAG_LEN     256
@@ -66,6 +69,7 @@ typedef struct {
     char   output_prefix[MAX_PATH_LEN];
     char   tag[MAX_TAG_LEN];
     int    verify_after_sign;
+    int    ctx_mode;
     char   cores_str[MAX_CORES_STR];
     char   pin_strategy_str[16];
 } config_t;
@@ -372,7 +376,7 @@ static void *worker_fn(void *raw) {
                 ok = 0; wa->rc = 1;
             }
             if (kctx) EVP_PKEY_CTX_free(kctx);
-            if (ok) {
+            if (ok && cfg->ctx_mode == CTX_REUSE) {
                 evp_ctx = EVP_MD_CTX_new();
                 if (!evp_ctx) { ok = 0; wa->rc = 1; }
             }
@@ -407,17 +411,32 @@ static void *worker_fn(void *raw) {
     if (ok) {
         for (long w = 0; w < cfg->warmup; w++) {
             size_t slen = sig_max;
-            if (cfg->algo == ALGO_ED25519)
-                sign_ed25519(evp_ctx, evp_key, msg, (size_t)cfg->message_size, sig_buf, &slen);
-            else
+            if (cfg->algo == ALGO_ED25519) {
+                if (cfg->ctx_mode == CTX_FRESH) {
+                    EVP_MD_CTX *wctx = EVP_MD_CTX_new();
+                    EVP_DigestSignInit(wctx, NULL, NULL, NULL, evp_key);
+                    EVP_DigestSign(wctx, sig_buf, &slen, msg, (size_t)cfg->message_size);
+                    EVP_MD_CTX_free(wctx);
+                } else {
+                    sign_ed25519(evp_ctx, evp_key, msg, (size_t)cfg->message_size, sig_buf, &slen);
+                }
+            } else {
                 sign_oqs(oqs, msg, (size_t)cfg->message_size, sig_buf, &slen, sk);
+            }
         }
 
         /* Sanity verify on one warmup signature */
         if (cfg->verify_after_sign) {
             size_t slen = sig_max; int vok = 0;
             if (cfg->algo == ALGO_ED25519) {
-                sign_ed25519(evp_ctx, evp_key, msg, (size_t)cfg->message_size, sig_buf, &slen);
+                if (cfg->ctx_mode == CTX_FRESH) {
+                    EVP_MD_CTX *vwctx = EVP_MD_CTX_new();
+                    EVP_DigestSignInit(vwctx, NULL, NULL, NULL, evp_key);
+                    EVP_DigestSign(vwctx, sig_buf, &slen, msg, (size_t)cfg->message_size);
+                    EVP_MD_CTX_free(vwctx);
+                } else {
+                    sign_ed25519(evp_ctx, evp_key, msg, (size_t)cfg->message_size, sig_buf, &slen);
+                }
                 EVP_MD_CTX *vctx = EVP_MD_CTX_new();
                 vok = vctx &&
                       EVP_DigestVerifyInit(vctx, NULL, NULL, NULL, evp_key) == 1 &&
@@ -453,10 +472,19 @@ static void *worker_fn(void *raw) {
             asm volatile("" ::: "memory");
             clock_gettime(CLOCK_MONOTONIC, &ts0);
 
-            if (cfg->algo == ALGO_ED25519)
-                sign_ed25519(evp_ctx, evp_key, msg, (size_t)cfg->message_size, sig_buf, &slen);
-            else
+            if (cfg->algo == ALGO_ED25519) {
+                if (cfg->ctx_mode == CTX_FRESH) {
+                    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+                    EVP_DigestSignInit(ctx, NULL, NULL, NULL, evp_key);
+                    EVP_DigestSign(ctx, sig_buf, &slen, msg, (size_t)cfg->message_size);
+                    EVP_MD_CTX_free(ctx);
+                } else {
+                    sign_ed25519(evp_ctx, evp_key, msg, (size_t)cfg->message_size,
+                                 sig_buf, &slen);
+                }
+            } else {
                 sign_oqs(oqs, msg, (size_t)cfg->message_size, sig_buf, &slen, sk);
+            }
 
             clock_gettime(CLOCK_MONOTONIC, &ts1);
             asm volatile("" ::: "memory");
@@ -616,6 +644,7 @@ static void write_meta(const char *prefix, const config_t *cfg,
                "    \"runs\": %d,\n"
                "    \"message_size\": %d,\n"
                "    \"message_mode\": \"%s\",\n"
+               "    \"ctx_mode\": \"%s\",\n"
                "    \"verify_after_sign\": %d,\n"
                "    \"numa_node\": %d,\n"
                "    \"tag\": \"%s\"\n"
@@ -631,6 +660,7 @@ static void write_meta(const char *prefix, const config_t *cfg,
             cfg->pin_strategy_str, cfg->iterations, cfg->warmup,
             cfg->runs, cfg->message_size,
             cfg->message_mode == MSG_FRESH ? "fresh" : "fixed",
+            cfg->ctx_mode == CTX_FRESH ? "fresh" : "reuse",
             cfg->verify_after_sign, cfg->numa_node, cfg->tag,
             (unsigned long)t_start_ns, (unsigned long)t_end_ns);
 
@@ -657,6 +687,7 @@ static void usage(const char *prog) {
         "  --runs N          full repetitions                      [default 5]\n"
         "  --message-size B  message size in bytes                 [default 32]\n"
         "  --message-mode    fixed | fresh                         [default fresh]\n"
+        "  --ctx-mode        fresh | reuse  (Ed25519 only)         [default fresh]\n"
         "  --pin-strategy    compact | spread | none               [default compact]\n"
         "  --numa-node N     restrict to NUMA node                 [default -1]\n"
         "  --output-prefix   required output path prefix\n"
@@ -676,6 +707,7 @@ static int parse_args(int argc, char **argv, config_t *cfg) {
     cfg->runs            = 5;
     cfg->message_size    = 32;
     cfg->message_mode    = MSG_FRESH;
+    cfg->ctx_mode        = CTX_FRESH;
     cfg->pin_strategy    = PIN_COMPACT;
     cfg->numa_node       = -1;
     cfg->output_prefix[0] = '\0';
@@ -698,6 +730,7 @@ static int parse_args(int argc, char **argv, config_t *cfg) {
         {"output-prefix",      required_argument, 0, 'O'},
         {"tag",                required_argument, 0, 'G'},
         {"verify-after-sign",  required_argument, 0, 'V'},
+        {"ctx-mode",           required_argument, 0, 'X'},
         {0, 0, 0, 0}
     };
 
@@ -744,6 +777,11 @@ static int parse_args(int argc, char **argv, config_t *cfg) {
         case 'O': snprintf(cfg->output_prefix, MAX_PATH_LEN, "%s", optarg); break;
         case 'G': snprintf(cfg->tag, MAX_TAG_LEN, "%s", optarg); break;
         case 'V': cfg->verify_after_sign = atoi(optarg); break;
+        case 'X':
+            if      (strcmp(optarg, "fresh") == 0) cfg->ctx_mode = CTX_FRESH;
+            else if (strcmp(optarg, "reuse") == 0) cfg->ctx_mode = CTX_REUSE;
+            else { fprintf(stderr, "Unknown ctx-mode: %s\n", optarg); return 0; }
+            break;
         default:  usage(argv[0]); return 0;
         }
     }
@@ -802,7 +840,10 @@ int main(int argc, char **argv) {
            cfg.algo_str, cfg.n_threads, cfg.pin_strategy_str,
            cfg.runs, cfg.iterations, cfg.warmup);
     printf("  output prefix: %s\n", cfg.output_prefix);
-    printf("  sampler CPU:   %d\n", sampler_cpu);
+    if (sampler_cpu >= 0)
+        printf("  sampler CPU:   %d\n", sampler_cpu);
+    else
+        printf("  sampler CPU:   none (all CPUs used; frequency sampling disabled)\n");
     fflush(stdout);
 
     /* Allocate per-thread latency arrays for one run at a time */
@@ -835,13 +876,16 @@ int main(int argc, char **argv) {
             wa[t].sink       = 0;
         }
 
-        /* Start sampler */
+        /* Start sampler (only if a free CPU is available) */
         sampler_state_t sst;
-        sst.running = 1;
-        sst.cpu     = sampler_cpu;
-        snprintf(sst.path, MAX_PATH_LEN, "%s_metrics.csv", cfg.output_prefix);
         pthread_t sampler_tid;
-        pthread_create(&sampler_tid, NULL, sampler_fn, &sst);
+        int sampler_active = (sampler_cpu >= 0);
+        if (sampler_active) {
+            sst.running = 1;
+            sst.cpu     = sampler_cpu;
+            snprintf(sst.path, MAX_PATH_LEN, "%s_metrics.csv", cfg.output_prefix);
+            pthread_create(&sampler_tid, NULL, sampler_fn, &sst);
+        }
 
         /* Launch workers */
         for (int t = 0; t < cfg.n_threads; t++)
@@ -860,8 +904,10 @@ int main(int argc, char **argv) {
         uint64_t wall_ns = t_end - t_start;
 
         /* Stop sampler */
-        sst.running = 0;
-        pthread_join(sampler_tid, NULL);
+        if (sampler_active) {
+            sst.running = 0;
+            pthread_join(sampler_tid, NULL);
+        }
 
         /* Check for failures */
         int nfail = 0;
