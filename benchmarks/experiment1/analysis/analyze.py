@@ -379,8 +379,13 @@ def fig5_topdown(perf: pd.DataFrame, out_dir: str, fmt: str, dpi: int):
 # ═════════════════════════════════════════════════════════════════════════════
 
 def fig6_avx(agg: pd.DataFrame, out_dir: str, fmt: str, dpi: int):
-    avx512 = agg[~agg.get("tag", pd.Series(dtype=str)).str.contains("avx2", na=False)]
-    avx2   = agg[agg.get("tag",  pd.Series(dtype=str)).str.contains("avx2", na=False)]
+    if "tag" not in agg.columns:
+        print("  SKIP fig6: no 'tag' column (AVX2 control run not in this sweep)")
+        return
+    mask_avx2 = agg["tag"].str.contains("avx2", na=False).reset_index(drop=True)
+    agg2 = agg.reset_index(drop=True)
+    avx512 = agg2[~mask_avx2]
+    avx2   = agg2[mask_avx2]
 
     if avx2.empty:
         print("  SKIP fig6: no AVX2 results (run bench_sign with --tag avx2 using avx2 build)")
