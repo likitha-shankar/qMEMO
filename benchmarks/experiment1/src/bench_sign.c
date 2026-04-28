@@ -296,7 +296,7 @@ static void *sampler_fn(void *arg) {
         long freq_khz = 0, rss_kb = 0, vol = 0, invol = 0;
 
         FILE *ff = fopen("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq", "r");
-        if (ff) { fscanf(ff, "%ld", &freq_khz); fclose(ff); }
+        if (ff) { (void)fscanf(ff, "%ld", &freq_khz); fclose(ff); }
 
         FILE *sf = fopen("/proc/self/status", "r");
         if (sf) {
@@ -560,7 +560,7 @@ static void write_summary_row(const char *prefix, const config_t *cfg,
             pct_ns(all, total, 95.0),
             pct_ns(all, total, 99.0),
             pct_ns(all, total, 99.9),
-            total > 0 ? all[total - 1] : 0ULL,
+            total > 0 ? all[total - 1] : (uint64_t)0,
             sd);
 
     fclose(f);
