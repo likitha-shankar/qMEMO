@@ -19,7 +19,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BENCH="${SCRIPT_DIR}/../bin/bench_sign"
+BENCH="${SCRIPT_DIR}/../../bin/bench_sign"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTDIR=""
 ITERS=100000

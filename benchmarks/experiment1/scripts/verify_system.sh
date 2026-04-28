@@ -132,7 +132,7 @@ else
 fi
 
 # ── 10. bench_sign binary ────────────────────────────────────────────────────
-BENCH="$(dirname "$0")/../bin/bench_sign"
+BENCH="$(dirname "$0")/../../bin/bench_sign"
 if [[ ! -x "$BENCH" ]]; then
     fail "bench_sign binary not found at $BENCH. Run: make -C $(dirname "$0")/.."
 fi
