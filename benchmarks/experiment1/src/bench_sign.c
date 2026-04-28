@@ -300,7 +300,7 @@ static void *sampler_fn(void *arg) {
         long freq_khz = 0, rss_kb = 0, vol = 0, invol = 0;
 
         FILE *ff = fopen("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq", "r");
-        if (ff) { (void)fscanf(ff, "%ld", &freq_khz); fclose(ff); }
+        if (ff) { int _r = fscanf(ff, "%ld", &freq_khz); (void)_r; fclose(ff); }
 
         FILE *sf = fopen("/proc/self/status", "r");
         if (sf) {
