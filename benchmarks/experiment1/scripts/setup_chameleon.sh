@@ -34,8 +34,8 @@ sudo apt-get install -y cpupower 2>/dev/null || true
 ok "System packages done"
 
 # ── 2. Python analysis dependencies ───────────────────────────────────────────
-info "Installing Python packages..."
-pip3 install --quiet pandas matplotlib numpy
+info "Installing Python packages (via apt — Ubuntu 24.04 PEP 668)..."
+sudo apt-get install -y python3-pandas python3-matplotlib python3-numpy
 ok "Python packages done"
 
 # ── 3. Clone liboqs ───────────────────────────────────────────────────────────
