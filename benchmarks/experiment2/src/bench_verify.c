@@ -277,12 +277,17 @@ static void *worker(void *arg) {
 
     /* -- Build message -- */
     size_t msg_len = (size_t)cfg->message_size;
-    uint8_t *msg = malloc(msg_len);
+    uint8_t *msg       = NULL;
+    uint8_t *valid_sig = NULL;
+    uint8_t *invalid_sig = NULL;
+    uint8_t *invalid_pk  = NULL;
+
+    msg = malloc(msg_len);
     if (!msg) { wa->rc = 1; goto done; }
     for (size_t i = 0; i < msg_len; i++) msg[i] = (uint8_t)((tid * 7 + i) & 0xff);
 
     /* -- Sign one valid signature (not timed) -- */
-    uint8_t *valid_sig = malloc(sig_len_expected + 16);
+    valid_sig = malloc(sig_len_expected + 16);
     if (!valid_sig) { wa->rc = 1; goto done; }
     size_t actual_sig_len = sig_len_expected;
 
@@ -304,8 +309,7 @@ static void *worker(void *arg) {
     }
 
     /* -- Build invalid signature variants -- */
-    uint8_t *invalid_sig = malloc(actual_sig_len + 16);
-    uint8_t *invalid_pk  = NULL;
+    invalid_sig = malloc(actual_sig_len + 16);
     if (!invalid_sig) { wa->rc = 1; goto done; }
     memcpy(invalid_sig, valid_sig, actual_sig_len);
 
