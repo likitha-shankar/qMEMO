@@ -1,0 +1,11 @@
+# started on Wed Apr 29 02:27:01 2026
+
+17430655721,,cycles,4082991376,55.00,,
+62958039975,,instructions,4892887395,66.00,3.61,insn per cycle
+14820663462,,L1-dcache-loads,4874169931,66.00,,
+185234010,,L1-dcache-load-misses,4866972376,66.00,1.25,of all L1-dcache accesses
+14818152911,,dTLB-loads,4877546620,66.00,,
+69814,,dTLB-load-misses,4895811657,66.00,0.00,of all dTLB cache accesses
+14701707324,,mem_inst_retired.all_loads,3284339816,44.00,,
+6109315916,,mem_inst_retired.all_stores,3284342097,44.00,,
+1117215,,offcore_requests.all_data_rd,3272729419,44.00,,

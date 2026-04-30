@@ -1,0 +1,4 @@
+t=1  REUSE/FRESH = 1.00x
+t=96 REUSE/FRESH = 1.02x
+VERDICT: ALLOCATOR REFUTED — context allocation is not the bottleneck.
+  Look elsewhere (NUMA, kernel scheduler, cache topology).

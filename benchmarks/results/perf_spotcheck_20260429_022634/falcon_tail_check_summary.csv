@@ -1,0 +1,2 @@
+algo,threads,cores_str,pin_strategy,run_id,total_signatures,wall_clock_ns,ops_per_sec_total,ops_per_sec_per_thread,mean_ns,median_ns,p95_ns,p99_ns,p99_9_ns,max_ns,stddev_ns,speedup_vs_1thread,parallel_efficiency_pct
+falcon512,1,"0",explicit,0,1000000,373115339368,2680.14,2680.14,373076.8,373037,378623,381322,389846,611727,3537.2,-1,-1

@@ -1,0 +1,4 @@
+algo,threads,cores_str,pin_strategy,run_id,total_signatures,wall_clock_ns,ops_per_sec_total,ops_per_sec_per_thread,mean_ns,median_ns,p95_ns,p99_ns,p99_9_ns,max_ns,stddev_ns,speedup_vs_1thread,parallel_efficiency_pct
+ed25519,8,"0,1,2,3,4,5,6,7",compact,0,800000,7954285681,100574.71,12571.84,78544.3,77947,87807,94352,101605,376172,5004.4,-1,-1
+ed25519,8,"0,1,2,3,4,5,6,7",compact,1,800000,7918947018,101023.53,12627.94,78330.8,78005,85877,92119,99489,635343,4422.2,-1,-1
+ed25519,8,"0,1,2,3,4,5,6,7",compact,2,800000,7887401234,101427.58,12678.45,78438.7,77909,86988,93739,101289,682043,4796.8,-1,-1

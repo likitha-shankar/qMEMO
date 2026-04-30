@@ -1,0 +1,13 @@
+# started on Wed Apr 29 02:26:35 2026
+
+17409921639,,cycles,3312143803,45.00,,
+62964260791,,instructions,3984869331,54.00,3.62,insn per cycle
+3148593275,,branches,3992896196,54.00,,
+4340254,,branch-misses,4000436975,54.00,0.14,of all branches
+4177426,,cache-references,4006014035,54.00,,
+400045,,cache-misses,4006842484,54.00,9.58,of all cache refs
+421645,,LLC-loads,2660949692,36.00,,
+66273,,LLC-load-misses,2653861084,36.00,15.72,of all LL-cache accesses
+9162441,,cycle_activity.stalls_l3_miss,2648778107,36.00,,
+334962949,,cycle_activity.stalls_mem_any,2648204212,36.00,,
+510004615,,cycle_activity.stalls_total,2648023931,36.00,,

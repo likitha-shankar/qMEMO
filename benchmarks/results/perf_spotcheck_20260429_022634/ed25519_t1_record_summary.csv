@@ -1,0 +1,2 @@
+algo,threads,cores_str,pin_strategy,run_id,total_signatures,wall_clock_ns,ops_per_sec_total,ops_per_sec_per_thread,mean_ns,median_ns,p95_ns,p99_ns,p99_9_ns,max_ns,stddev_ns,speedup_vs_1thread,parallel_efficiency_pct
+ed25519,1,"0",explicit,0,200000,14270710969,14014.72,14014.72,71313.5,70579,76690,77692,82587,165230,2101.8,-1,-1

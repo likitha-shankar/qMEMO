@@ -1,0 +1,61 @@
+======================================================================
+PERF SPOT-CHECK VERDICT
+======================================================================
+
+Claim 2: ML-DSA-44 shows bimodal latency at threads=1.
+----------------------------------------------------------------------
+  ML-DSA-44 p99/p50 ratio: 4.08
+  Falcon-512 p99/p50 ratio: 1.02
+
+  VERDICT: SUPPORTED. ML-DSA-44 shows a real tail wider than Falcon's.
+           This is unusual and worth investigating in the paper.
+           Inspect cdf_bimodality.pdf; if there are two distinct steps,
+           bimodality is real. If smooth, it's just a long tail.
+
+Claim 1: Ed25519's poor scaling is due to memory-bandwidth saturation.
+----------------------------------------------------------------------
+  L3-miss stall fraction at threads=1:  0.05%
+  L3-miss stall fraction at threads=96: 1.23%
+
+  VERDICT: REFUTED. L3-miss stalls remain low even at threads=96.
+           Ed25519 scaling cliff is NOT memory-bandwidth.
+           Most likely culprit: EVP_MD_CTX allocation in the hot loop.
+           Check ed25519_t1_symbols.txt for malloc/free dominance.
+           Add a context-reuse variant to bench_sign before publishing.
+
+Top symbols, Ed25519 at threads=1:
+----------------------------------------------------------------------
+   2.65%  libcrypto.so.3             0x0000000000167eda
+   1.16%  libcrypto.so.3             0x0000000000169c11
+   1.11%  libcrypto.so.3             0x0000000000169bec
+   1.09%  libcrypto.so.3             0x0000000000169c05
+   1.08%  libcrypto.so.3             0x0000000000169c09
+   1.04%  libcrypto.so.3             0x0000000000169c28
+   1.03%  libcrypto.so.3             0x0000000000169c34
+   1.02%  libcrypto.so.3             0x0000000000169bef
+   0.98%  libcrypto.so.3             0x0000000000169be0
+   0.89%  libcrypto.so.3             0x0000000000169c2d
+
+  Allocator/context functions = 0.0% of cycles.
+  Allocator is NOT the dominant cost. Look elsewhere for
+  the Ed25519 scaling cliff.
+
+Cross-algorithm stalls at threads=96:
+----------------------------------------------------------------------
+  ed25519       l3-miss-stalls:  1.23%   mem-any-stalls: 62.25%   total-stalls: 63.86%
+  falcon512     l3-miss-stalls:  0.24%   mem-any-stalls: 12.33%   total-stalls: 21.73%
+  dilithium2    l3-miss-stalls:  1.15%   mem-any-stalls: 10.96%   total-stalls: 23.59%
+
+  If Ed25519 stalls_l3_miss is SIGNIFICANTLY higher than Falcon/ML-DSA
+  at the same thread count, the differential supports the
+  'Ed25519-specific memory-bandwidth bottleneck' claim.
+
+======================================================================
+RECOMMENDATION FOR EXPERIMENT 2
+======================================================================
+
+Proceed to Experiment 2 only if:
+  1. Bimodality claim is either confirmed or removed from the paper.
+  2. Ed25519 scaling claim has a clear hardware-counter explanation.
+  3. If allocator was the smoking gun, bench_verify must use the same
+     context-reuse policy as bench_sign for fair comparison.

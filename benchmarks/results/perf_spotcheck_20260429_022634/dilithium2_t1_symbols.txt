@@ -1,0 +1,661 @@
+# ========
+# captured on    : Wed Apr 29 02:42:09 2026
+# header version : 1
+# data offset    : 1024
+# data size      : 91442624
+# feat offset    : 91443648
+# hostname : qmemo1
+# os release : 6.8.0-106-generic
+# perf version : 6.8.12
+# arch : x86_64
+# nrcpus online : 96
+# nrcpus avail : 96
+# cpudesc : Intel(R) Xeon(R) Gold 6240R CPU @ 2.40GHz
+# cpuid : GenuineIntel,6,85,7
+# total memory : 196479548 kB
+# cmdline : /usr/lib/linux-tools-6.8.0-106/perf record -F 999 --call-graph dwarf -o ./results/perf_spotcheck_20260429_022634/dilithium2_t1_record.data -- ./bin/bench_sign --algo dilithium2 --threads 1 --cores 0 --iterations 100000 --warmup 1000 --runs 1 --pin-strategy compact --output-prefix ./results/perf_spotcheck_20260429_022634/dilithium2_t1_record --tag hot_symbol_profile 
+# event : name = cycles:P, , id = { 27581, 27582, 27583, 27584, 27585, 27586, 27587, 27588, 27589, 27590, 27591, 27592, 27593, 27594, 27595, 27596, 27597, 27598, 27599, 27600, 27601, 27602, 27603, 27604, 27605, 27606, 27607, 27608, 27609, 27610, 27611, 27612, 27613, 27614, 27615, 27616, 27617, 27618, 27619, 27620, 27621, 27622, 27623, 27624, 27625, 27626, 27627, 27628, 27629, 27630, 27631, 27632, 27633, 27634, 27635, 27636, 27637, 27638, 27639, 27640, 27641, 27642, 27643, 27644, 27645, 27646, 27647, 27648, 27649, 27650, 27651, 27652, 27653, 27654, 27655, 27656, 27657, 27658, 27659, 27660, 27661, 27662, 27663, 27664, 27665, 27666, 27667, 27668, 27669, 27670, 27671, 27672, 27673, 27674, 27675, 27676 }, type = 0 (PERF_TYPE_HARDWARE), size = 136, config = 0 (PERF_COUNT_HW_CPU_CYCLES), { sample_period, sample_freq } = 999, sample_type = IP|TID|TIME|ADDR|CALLCHAIN|PERIOD|REGS_USER|STACK_USER|DATA_SRC, read_format = ID|LOST, disabled = 1, inherit = 1, mmap = 1, comm = 1, freq = 1, enable_on_exec = 1, task = 1, precise_ip = 3, mmap_data = 1, sample_id_all = 1, exclude_callchain_user = 1, mmap2 = 1, comm_exec = 1, ksymbol = 1, bpf_event = 1, sample_regs_user = 0xff0fff, sample_stack_user = 8192
+# CPU_TOPOLOGY info available, use -I to display
+# NUMA_TOPOLOGY info available, use -I to display
+# pmu mappings: cpu = 4, breakpoint = 5, cstate_core = 76, cstate_pkg = 77, intel_bts = 10, intel_pt = 11, kprobe = 8, msr = 12, power = 78, software = 1, tracepoint = 2, uncore_cha_0 = 31, uncore_cha_1 = 32, uncore_cha_2 = 33, uncore_cha_3 = 34, uncore_cha_4 = 35, uncore_cha_5 = 36, uncore_cha_6 = 37, uncore_cha_7 = 38, uncore_cha_8 = 39, uncore_cha_9 = 40, uncore_cha_10 = 41, uncore_cha_11 = 42, uncore_cha_12 = 43, uncore_cha_13 = 44, uncore_cha_14 = 45, uncore_cha_15 = 46, uncore_cha_16 = 47, uncore_cha_17 = 48, uncore_cha_18 = 49, uncore_cha_19 = 50, uncore_cha_20 = 51, uncore_cha_21 = 52, uncore_cha_22 = 53, uncore_cha_23 = 54, uncore_cha_24 = 55, uncore_cha_25 = 56, uncore_iio_free_running_1 = 64, uncore_iio_free_running_3 = 66, uncore_iio_free_running_5 = 68, uncore_iio_0 = 57, uncore_iio_2 = 59, uncore_iio_4 = 61, uncore_iio_free_running_0 = 63, uncore_iio_free_running_2 = 65, uncore_iio_free_running_4 = 67, uncore_iio_1 = 58, uncore_iio_3 = 60, uncore_iio_5 = 62, uncore_imc_0 = 15, uncore_imc_1 = 16, uncore_imc_2 = 17, uncore_imc_3 = 18, uncore_imc_4 = 19, uncore_imc_5 = 20, uncore_irp_0 = 69, uncore_irp_1 = 70, uncore_irp_2 = 71, uncore_irp_3 = 72, uncore_irp_4 = 73, uncore_irp_5 = 74, uncore_m2m_0 = 13, uncore_m2m_1 = 14, uncore_m2pcie_0 = 27, uncore_m2pcie_1 = 28, uncore_m2pcie_2 = 29, uncore_m3upi_0 = 24, uncore_m3upi_1 = 25, uncore_m3upi_2 = 26, uncore_pcu = 75, uncore_ubox = 30, uncore_upi_0 = 21, uncore_upi_1 = 22, uncore_upi_2 = 23, uprobe = 9
+# CACHE info available, use -I to display
+# time of first sample : 91099.351202
+# time of last sample : 91110.161458
+# sample duration :  10810.257 ms
+# MEM_TOPOLOGY info available, use -I to display
+# cpu pmu capabilities: branches=32, max_precise=3, pmu_name=skylake
+# intel_pt pmu capabilities: topa_multiple_entries=1, psb_cyc=1, single_range_output=1, mtc_periods=249, ip_filtering=1, output_subsys=0, cr3_filtering=1, psb_periods=3f, event_trace=0, cycle_thresholds=3fff, power_event_trace=0, mtc=1, payloads_lip=0, ptwrite=0, num_address_ranges=2, max_subleaf=1, topa_output=1, tnt_disable=0
+# missing features: TRACING_DATA BRANCH_STACK GROUP_DESC AUXTRACE STAT CLOCKID DIR_FORMAT COMPRESSED CLOCK_DATA HYBRID_TOPOLOGY 
+# ========
+#
+Warning:
+Kernel address maps (/proc/{kallsyms,modules}) were restricted.
+
+Check /proc/sys/kernel/kptr_restrict before running 'perf record'.
+
+As no suitable kallsyms nor vmlinux was found, kernel samples
+can't be resolved.
+
+Samples in kernel modules can't be resolved as well.
+
+#
+# Total Lost Samples: 0
+#
+# Samples: 10K of event 'cycles:P'
+# Event count (approx.): 25480801521
+#
+# Overhead  Command     Shared Object         Symbol                                                                 
+# ........  ..........  ....................  .......................................................................
+#
+    32.91%  bench_sign  bench_sign            [.] keccak_rnd_loop
+            |
+            ---keccak_rnd_loop
+               |          
+               |--8.98%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_uniform_gamma1_4x
+               |          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvecl_uniform_gamma1
+               |          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+               |          
+               |--8.58%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_uniform_4x
+               |          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvec_matrix_expand
+               |          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+               |          
+                --1.93%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+    15.65%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_invntt_avx2
+            |          
+             --15.64%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_invntt_avx2
+                       |          
+                       |--8.22%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_invntt_tomont
+                       |          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+                       |          
+                        --7.42%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+    11.80%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_ntt_avx2
+            |          
+             --11.79%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_ntt_avx2
+                       |          
+                       |--5.42%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvecl_ntt
+                       |          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+                       |          
+                       |--4.03%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+                       |          
+                        --2.33%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_ntt
+                                  PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     6.01%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyz_pack
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyz_pack
+               |          
+                --6.00%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     4.67%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyw1_pack
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyw1_pack
+               |          
+                --4.65%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_pack_w1
+                          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     3.16%  bench_sign  bench_sign            [.] Lpointwise_acc_l4_avx2_looptop2
+            |
+            ---Lpointwise_acc_l4_avx2_looptop2
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvec_matrix_pointwise_montgomery
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     2.27%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_pack_sig_c_h
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_pack_sig_c_h
+               |          
+                --2.26%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     1.99%  bench_sign  bench_sign            [.] Lpointwise_avx2_looptop1
+            |
+            ---Lpointwise_avx2_looptop1
+               |          
+               |--1.03%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_pointwise_poly_montgomery
+               |          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+               |          
+                --0.96%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     1.94%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     1.69%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_mld_poly_decompose_88_avx2
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_mld_poly_decompose_88_avx2
+               |          
+                --1.69%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_decompose
+                          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     1.51%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyeta_unpack
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyeta_unpack
+               |          
+               |--0.78%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvecl_unpack_eta
+               |          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_unpack_sk
+               |          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+               |          
+                --0.73%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_unpack_eta
+                          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_unpack_sk
+                          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     1.46%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyt0_unpack
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyt0_unpack
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_unpack_t0
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     1.18%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_mld_rej_uniform_avx2
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_mld_rej_uniform_avx2
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_uniform_4x
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvec_matrix_expand
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     1.06%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_reduce
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_reduce
+               |          
+                --0.57%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     0.81%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_mld_polyz_unpack_17_avx2
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_mld_polyz_unpack_17_avx2
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_uniform_gamma1_4x
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvecl_uniform_gamma1
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     0.77%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_mld_poly_chknorm_avx2
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_mld_poly_chknorm_avx2
+               |          
+                --0.76%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_chknorm
+
+     0.70%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_caddq_avx2
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_caddq_avx2
+               |          
+                --0.52%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_caddq
+                          PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     0.66%  bench_sign  bench_sign            [.] .shake128_squeeze_loop
+            |
+            ---.shake128_squeeze_loop
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_uniform_4x
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvec_matrix_expand
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     0.64%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_challenge
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_challenge
+               |          
+                --0.63%--PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     0.55%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_nttunpack_avx2
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_nttunpack_avx2
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvec_matrix_expand
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     0.55%  bench_sign  bench_sign            [.] .shake256_squeeze_loop
+            |
+            ---.shake256_squeeze_loop
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_uniform_gamma1_4x
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvecl_uniform_gamma1
+               PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature_internal
+
+     0.53%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_add
+            |
+            ---PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_add
+
+     0.28%  bench_sign  libc.so.6             [.] 0x000000000019943a
+     0.27%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_uniform_gamma1_4x
+     0.25%  bench_sign  libc.so.6             [.] malloc
+     0.24%  bench_sign  bench_sign            [.] keccak_1600_save_state_x4
+     0.22%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_make_hint
+     0.22%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_uniform_4x
+     0.22%  bench_sign  libc.so.6             [.] pthread_rwlock_unlock
+     0.22%  bench_sign  bench_sign            [.] SHA3_shake256_inc_absorb_avx512vl
+     0.20%  bench_sign  bench_sign            [.] SHA3_shake128_x4_inc_ctx_reset_avx512vl
+     0.18%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_sub
+     0.13%  bench_sign  libcrypto.so.3        [.] OSSL_PARAM_locate
+     0.13%  bench_sign  bench_sign            [.] .ymm_loop
+     0.11%  bench_sign  bench_sign            [.] SHA3_shake256_inc_squeeze_avx512vl
+     0.11%  bench_sign  bench_sign            [.] keccak_1600_save_state
+     0.10%  bench_sign  libc.so.6             [.] cfree
+     0.09%  bench_sign  bench_sign            [.] keccak_1600_partial_add
+     0.08%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyvec_matrix_expand
+     0.07%  bench_sign  bench_sign            [.] keccak_1600_load_state
+     0.07%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_signature
+     0.07%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_chknorm
+     0.07%  bench_sign  bench_sign            [.] keccak_1600_load_state_x4
+     0.06%  bench_sign  libc.so.6             [.] 0x000000000019b153
+     0.06%  bench_sign  libc.so.6             [.] pthread_rwlock_rdlock
+     0.06%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_chknorm
+     0.06%  bench_sign  bench_sign            [.] .lt_8_bytes
+     0.05%  bench_sign  libc.so.6             [.] pthread_rwlock_wrlock
+     0.05%  bench_sign  bench_sign            [.] SHA3_shake256_x4_inc_finalize_avx512vl
+     0.05%  bench_sign  bench_sign            [.] SHA3_shake256_x4_inc_absorb_avx512vl
+     0.04%  bench_sign  [unknown]             [k] 0xffffffff9400128c
+     0.04%  bench_sign  [vdso]                [.] 0x0000000000000b00
+     0.04%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_decompose
+     0.04%  bench_sign  libc.so.6             [.] 0x000000000019b150
+     0.04%  bench_sign  libc.so.6             [.] 0x000000000019b142
+     0.04%  bench_sign  libcrypto.so.3        [.] EVP_RAND_get_state
+     0.04%  bench_sign  bench_sign            [.] .shake128_squeeze_done
+     0.04%  bench_sign  bench_sign            [.] SHA3_shake256_inc_init_avx512vl
+     0.04%  bench_sign  libcrypto.so.3        [.] strcmp@plt
+     0.04%  bench_sign  bench_sign            [.] SHA3_shake128_x4_inc_absorb_avx512vl
+     0.04%  bench_sign  bench_sign            [.] cmp_u64
+     0.04%  bench_sign  [unknown]             [k] 0xffffffff92df82a5
+     0.03%  bench_sign  bench_sign            [.] CRYPTO_malloc@plt
+     0.03%  bench_sign  bench_sign            [.] keccak_1600_permute
+     0.03%  bench_sign  bench_sign            [.] OQS_MEM_aligned_alloc
+     0.03%  bench_sign  bench_sign            [.] OQS_SHA3_shake256_x4_inc_ctx_reset
+     0.03%  bench_sign  libcrypto.so.3        [.] EVP_CIPHER_CTX_get_key_length
+     0.03%  bench_sign  libcrypto.so.3        [.] malloc@plt
+     0.03%  bench_sign  libcrypto.so.3        [.] 0x00000000000c4f74
+     0.03%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_pack_w1
+     0.03%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_decompose
+     0.03%  bench_sign  libc.so.6             [.] 0x0000000000049970
+     0.03%  bench_sign  libc.so.6             [.] 0x0000000000049954
+     0.03%  lscpu       [unknown]             [k] 0xffffffff92da5da7
+     0.02%  bench_sign  libc.so.6             [.] 0x0000000000060d9f
+     0.02%  bench_sign  [unknown]             [k] 0xffffffff94000080
+     0.02%  bench_sign  [unknown]             [k] 0xffffffff92fa4edd
+     0.02%  bench_sign  [unknown]             [k] 0xffffffff93e4d2fe
+     0.02%  bench_sign  libc.so.6             [.] 0x00000000000ab19a
+     0.02%  bench_sign  bench_sign            [.] .shake256_squeeze_done
+     0.02%  bench_sign  libcrypto.so.3        [.] EVP_CIPHER_CTX_get_iv_length
+     0.02%  bench_sign  bench_sign            [.] SHA3_shake256_x4_inc_squeeze_avx512vl
+     0.02%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_add
+     0.02%  bench_sign  libcrypto.so.3        [.] 0x00000000000c4f5e
+     0.02%  bench_sign  bench_sign            [.] SHA3_shake256_inc_ctx_release_avx512vl
+     0.02%  bench_sign  libcrypto.so.3        [.] EVP_CipherInit_ex
+     0.02%  bench_sign  libcrypto.so.3        [.] 0x00000000003dff40
+     0.02%  bench_sign  libc.so.6             [.] 0x0000000000060d40
+     0.02%  bench_sign  bench_sign            [.] OQS_MEM_aligned_free
+     0.02%  bench_sign  libcrypto.so.3        [.] EVP_EncryptUpdate
+     0.02%  bench_sign  libc.so.6             [.] 0x00000000000ab2a6
+     0.02%  bench_sign  libcrypto.so.3        [.] 0x00000000003e2808
+     0.02%  bench_sign  bench_sign            [.] keccak_1600_extract_bytes
+     0.02%  bench_sign  bench_sign            [.] worker_fn
+     0.02%  bench_sign  libc.so.6             [.] 0x00000000000ab1c5
+     0.02%  bench_sign  bench_sign            [.] SHA3_shake256_inc_finalize_avx512vl
+     0.02%  bench_sign  bench_sign            [.] OQS_SHA3_shake256_x4_absorb_once
+     0.02%  bench_sign  libcrypto.so.3        [.] 0x00000000000c4f47
+     0.02%  bench_sign  bench_sign            [.] OQS_SHA3_shake256_x4_inc_init
+     0.02%  bench_sign  libcrypto.so.3        [.] 0x00000000003d2c1c
+     0.02%  bench_sign  libc.so.6             [.] __getpid
+     0.02%  bench_sign  bench_sign            [.] OQS_SHA3_shake256_x4_inc_squeeze
+     0.02%  bench_sign  libcrypto.so.3        [.] OSSL_PARAM_set_uint64
+     0.02%  bench_sign  libcrypto.so.3        [.] RAND_get_rand_method
+     0.02%  bench_sign  bench_sign            [.] SHA3_sha3_256_inc_ctx_reset_avx512vl
+     0.02%  bench_sign  [unknown]             [k] 0xffffffff94001993
+     0.02%  bench_sign  libcrypto.so.3        [.] 0x00000000003e26f1
+     0.02%  bench_sign  libcrypto.so.3        [.] 0x00000000003d2bec
+     0.02%  bench_sign  bench_sign            [.] .lt_32_bytes
+     0.02%  bench_sign  libcrypto.so.3        [.] 0x00000000003e295a
+     0.02%  bench_sign  libc.so.6             [.] 0x00000000000ab1ce
+     0.02%  bench_sign  [vdso]                [.] 0x0000000000000b4d
+     0.02%  bench_sign  bench_sign            [.] .shake256_absorb_exit
+     0.02%  bench_sign  [unknown]             [k] 0xffffffff93e62a57
+     0.02%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_invntt_tomont
+     0.02%  lscpu       [unknown]             [k] 0xffffffff93da8ddc
+     0.02%  bench_sign  libc.so.6             [.] 0x000000000019b136
+     0.02%  bench_sign  [unknown]             [k] 0xffffffff940001cd
+     0.01%  bench_sign  libc.so.6             [.] memcpy@plt
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019af58
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff93dd2c17
+     0.01%  sh          [unknown]             [k] 0xffffffff93dd2c17
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d88810
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92cc7a57
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92c69261
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff9306f6c8
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92e0cac2
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d9b4c4
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92c7c7d3
+     0.01%  bench_sign  bench_sign            [.] SHA3_shake128_x4_inc_finalize_avx512vl
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e27b9
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d56b07
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e0843
+     0.01%  bench_sign  libcrypto.so.3        [.] pthread_rwlock_rdlock@plt
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff930ce8d8
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e0977
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e26e0
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000060d83
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000069f50
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000060d50
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d881f1
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000069461
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92da66b7
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff940019a0
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003d3373
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000060d55
+     0.01%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_pointwise_montgomery
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e00c2
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000ab1c1
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000060d8f
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d6e238
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019b14c
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003def92
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003995e2
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000069dc6
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff9302f1de
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff930abb20
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff940019a8
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003d32b9
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003dfef5
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000005f0bb
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x000000000021ea57
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000198c89
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92df829e
+     0.01%  bench_sign  libcrypto.so.3        [.] CRYPTO_THREAD_unlock
+     0.01%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_make_hint
+     0.01%  bench_sign  libcrypto.so.3        [.] CRYPTO_malloc
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000069dca
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000ab18e
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000001fefbe
+     0.01%  bench_sign  bench_sign            [.] OQS_SHA3_shake128_x4_inc_absorb
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e2e60
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000692ce
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000001f8c0b
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019b15d
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000006926c
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff940000a0
+     0.01%  bench_sign  bench_sign            [.] .shake128_squeeze_final_extract
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000000c4f98
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000000c2540
+     0.01%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_reduce
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000000c2550
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff940000a9
+     0.01%  bench_sign  bench_sign            [.] SHA3_shake128_x4_inc_squeeze_avx512vl
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e2cf4
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019898e
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000049950
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d385d5
+     0.01%  bench_sign  bench_sign            [.] .shake256_absorb_main_loop_start
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000001989a6
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000060d5c
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff93e51ed1
+     0.01%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_pack_sig_z
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92ddb61f
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019af5e
+     0.01%  bench_sign  libcrypto.so.3        [.] OPENSSL_sk_value
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e2d73
+     0.01%  bench_sign  bench_sign            [.] OQS_SHA3_shake128_x4_inc_squeeze
+     0.01%  bench_sign  bench_sign            [.] OQS_SHA3_shake256_inc_finalize
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff940000c8
+     0.01%  bench_sign  bench_sign            [.] clock_gettime@plt
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d38610
+     0.01%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_poly_invntt_tomont
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000001f9028
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000ab359
+     0.01%  bench_sign  bench_sign            [.] PQCP_MLDSA_NATIVE_MLDSA44_X86_64_polyveck_pointwise_poly_montgomery
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019b15b
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e2dae
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003dff51
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d3867f
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019b128
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e2d34
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000198b43
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003d1ec1
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000ab202
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000ab1ed
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000000c254b
+     0.01%  bench_sign  bench_sign            [.] OQS_SIG_sign
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e09cb
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff93e4b6c0
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000ab29d
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000001f8be6
+     0.01%  bench_sign  bench_sign            [.] .shake256_absorb_while_loop_done
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff94001999
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d3862b
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000006b5d3
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff93e4b6c6
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff940000d7
+     0.01%  bench_sign  libcrypto.so.3        [.] time@plt
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000004997c
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000060c0a
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000000c4e54
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000000c4fa9
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000006a3fe
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003e27ed
+     0.01%  bench_sign  libcrypto.so.3        [.] pthread_rwlock_unlock@plt
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x0000000000399557
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000069c24
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000006a094
+     0.01%  bench_sign  libcrypto.so.3        [.] RAND_status
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000006a09a
+     0.01%  bench_sign  libcrypto.so.3        [.] CRYPTO_THREAD_run_once
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000060d79
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000ab1ba
+     0.01%  bench_sign  libcrypto.so.3        [.] 0x00000000003d2bdb
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019b95c
+     0.01%  lscpu       libc.so.6             [.] 0x000000000006f70a
+     0.01%  lscpu       [unknown]             [k] 0xffffffff931cf428
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93da896c
+     0.01%  lscpu       [unknown]             [k] 0xffffffff94000080
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019af7b
+     0.01%  lscpu       [unknown]             [k] 0xffffffff9311c6cd
+     0.01%  lscpu       [unknown]             [k] 0xffffffff940019a8
+     0.01%  lscpu       [unknown]             [k] 0xffffffff931310cd
+     0.01%  lscpu       libc.so.6             [.] 0x000000000006f6c9
+     0.01%  lscpu       libc.so.6             [.] 0x000000000006d42e
+     0.01%  lscpu       [unknown]             [k] 0xffffffff931d0baf
+     0.01%  lscpu       [unknown]             [k] 0xffffffff92da66cc
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000006a5ce
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93dd32ea
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93dc5eb3
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93e537f6
+     0.01%  lscpu       [unknown]             [k] 0xffffffff9310a3c4
+     0.01%  lscpu       [unknown]             [k] 0xffffffff931292f9
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93e537e3
+     0.01%  lscpu       [unknown]             [k] 0xffffffff930fcc5a
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000019894b
+     0.01%  lscpu       [unknown]             [k] 0xffffffff9310b93e
+     0.01%  lscpu       [unknown]             [k] 0xffffffff92de4a4f
+     0.01%  bench_sign  libc.so.6             [.] __fprintf_chk
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93366762
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000006b66a
+     0.01%  lscpu       [unknown]             [k] 0xffffffff940001cd
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93369712
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000069d85
+     0.01%  lscpu       [unknown]             [k] 0xffffffff930d2ae9
+     0.01%  lscpu       [unknown]             [k] 0xffffffff931d0509
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000692d3
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93071ca2
+     0.01%  lscpu       [unknown]             [k] 0xffffffff9310c20a
+     0.01%  bench_sign  libc.so.6             [.] 0x00000000000695aa
+     0.01%  lscpu       lscpu                 [.] 0x00000000000059c4
+     0.01%  bench_sign  libc.so.6             [.] 0x0000000000060d53
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93118072
+     0.01%  lscpu       [unknown]             [k] 0xffffffff9311c6b9
+     0.01%  lscpu       [unknown]             [k] 0xffffffff93131138
+     0.01%  bench_sign  libc.so.6             [.] 0x000000000006a090
+     0.01%  sh          [unknown]             [k] 0xffffffff93e537e3
+     0.01%  lscpu       [unknown]             [k] 0xffffffff92c7d18b
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92d8801a
+     0.01%  free        free                  [.] 0x00000000000038c8
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff92fa1187
+     0.01%  sh          [unknown]             [k] 0xffffffff92d8b86f
+     0.01%  xargs       [unknown]             [k] 0xffffffff93e5cb7d
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff93dce57d
+     0.01%  sh          [unknown]             [.] 0000000000000000
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff9306e0fb
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff93470230
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff93dc62ea
+     0.01%  bench_sign  [unknown]             [k] 0xffffffff93030e55
+     0.00%  lscpu       [unknown]             [k] 0xffffffff93dca36f
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff9310b5be
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff93dc731f
+     0.00%  sh          [unknown]             [k] 0xffffffff92fc68ad
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff92ffbf40
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff9353b627
+     0.00%  xargs       [unknown]             [k] 0xffffffff93009d2e
+     0.00%  bench_sign  libc.so.6             [.] 0x00000000000985d0
+     0.00%  sh          [unknown]             [k] 0xffffffff9306c35c
+     0.00%  bench_sign  libcrypto.so.3        [.] 0x000000000021d50f
+     0.00%  bench_sign  libcrypto.so.3        [.] 0x000000000021dd40
+     0.00%  bench_sign  bench_sign            [.] __isoc23_fscanf@plt
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff92e06e1b
+     0.00%  echo        [unknown]             [k] 0xffffffff92fc6894
+     0.00%  sh          [unknown]             [k] 0xffffffff92cdccd1
+     0.00%  grep        [unknown]             [k] 0xffffffff9311c10f
+     0.00%  sh          [unknown]             [k] 0xffffffff93e537ee
+     0.00%  xargs       [unknown]             [k] 0xffffffff93dad8a9
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff930cb593
+     0.00%  bench_sign  libc.so.6             [.] 0x000000000006ada3
+     0.00%  sh          [unknown]             [k] 0xffffffff92d67433
+     0.00%  xargs       [unknown]             [k] 0xffffffff92f9ef7a
+     0.00%  awk         [unknown]             [k] 0xffffffff930ce8e7
+     0.00%  sh          [unknown]             [k] 0xffffffff93dc2017
+     0.00%  sh          [unknown]             [k] 0xffffffff92fa754b
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff92fa441d
+     0.00%  grep        libc.so.6             [.] 0x00000000000ab961
+     0.00%  sh          [unknown]             [k] 0xffffffff92fc6894
+     0.00%  sh          [unknown]             [k] 0xffffffff92fc6dbd
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff92c1d365
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff93037bc9
+     0.00%  cc          libc.so.6             [.] readlink
+     0.00%  lscpu       [unknown]             [k] 0xffffffff93dc7135
+     0.00%  numactl     [unknown]             [k] 0xffffffff93364ab7
+     0.00%  awk         [unknown]             [k] 0xffffffff92cc7c44
+     0.00%  sh          [unknown]             [k] 0xffffffff93e5cb7d
+     0.00%  echo        [unknown]             [k] 0xffffffff9305e5a4
+     0.00%  paste       [unknown]             [k] 0xffffffff93030395
+     0.00%  cut         [unknown]             [k] 0xffffffff9315befd
+     0.00%  awk         [unknown]             [k] 0xffffffff930d0aeb
+     0.00%  xargs       [unknown]             [k] 0xffffffff93018487
+     0.00%  grep        [unknown]             [k] 0xffffffff92de12a5
+     0.00%  cc          [unknown]             [k] 0xffffffff92fd9487
+     0.00%  tr          libc.so.6             [.] _IO_link_in
+     0.00%  head        libc.so.6             [.] 0x0000000000037541
+     0.00%  uname       [unknown]             [k] 0xffffffff92fa6dc5
+     0.00%  sh          [unknown]             [k] 0xffffffff92f9bc17
+     0.00%  xargs       [unknown]             [k] 0xffffffff92fb2cf7
+     0.00%  free        [unknown]             [k] 0xffffffff940001cd
+     0.00%  bench_sign  libc.so.6             [.] 0x0000000000069e2f
+     0.00%  tr          [unknown]             [k] 0xffffffff92fb2f30
+     0.00%  sh          [unknown]             [k] 0xffffffff9306c31e
+     0.00%  pkg-config  libpkgconf.so.3.0.0   [.] pkgconf_tuple_parse
+     0.00%  sh          [unknown]             [k] 0xffffffff93e53802
+     0.00%  pkg-config  [unknown]             [k] 0xffffffff930d37c9
+     0.00%  sh          [unknown]             [k] 0xffffffff92c0f499
+     0.00%  cat         [unknown]             [k] 0xffffffff930d2819
+     0.00%  sh          [unknown]             [k] 0xffffffff92fa7175
+     0.00%  pkg-config  [unknown]             [k] 0xffffffff9379a165
+     0.00%  echo        [unknown]             [k] 0xffffffff9303e0bd
+     0.00%  tr          [unknown]             [k] 0xffffffff9347aebd
+     0.00%  cut         [unknown]             [k] 0xffffffff94000080
+     0.00%  sh          [unknown]             [k] 0xffffffff933c3b80
+     0.00%  sh          [unknown]             [k] 0xffffffff93223461
+     0.00%  cat         [unknown]             [k] 0xffffffff92fc6894
+     0.00%  grep        [unknown]             [k] 0xffffffff92f9ef7a
+     0.00%  sh          [unknown]             [k] 0xffffffff9306e568
+     0.00%  bench_sign  ld-linux-x86-64.so.2  [.] 0x000000000000f8eb
+     0.00%  lscpu       [unknown]             [k] 0xffffffff931d176f
+     0.00%  cat         [unknown]             [k] 0xffffffff930985b5
+     0.00%  awk         ld-linux-x86-64.so.2  [.] 0x000000000000b148
+     0.00%  pkg-config  [unknown]             [k] 0xffffffff93048d5f
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff92fa7142
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff92fa725c
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff93e62ad1
+     0.00%  pkg-config  [unknown]             [k] 0xffffffff933c63ae
+     0.00%  paste       ld-linux-x86-64.so.2  [.] 0x000000000000fafb
+     0.00%  echo        [unknown]             [k] 0xffffffff92fc6840
+     0.00%  cut         ld-linux-x86-64.so.2  [.] 0x000000000000a3b0
+     0.00%  cc          ld-linux-x86-64.so.2  [.] 0x000000000000f2fc
+     0.00%  pkg-config  [unknown]             [k] 0xffffffff92de12a5
+     0.00%  grep        [unknown]             [k] 0xffffffff9379ce7c
+     0.00%  pkg-config  ld-linux-x86-64.so.2  [.] 0x000000000000a544
+     0.00%  awk         [unknown]             [k] 0xffffffff92fc36dd
+     0.00%  awk         [unknown]             [k] 0xffffffff9310b447
+     0.00%  numactl     [unknown]             [k] 0xffffffff92c61d8a
+     0.00%  lscpu       [unknown]             [k] 0xffffffff93dacf1e
+     0.00%  sh          [unknown]             [k] 0xffffffff92fd0095
+     0.00%  cc          ld-linux-x86-64.so.2  [.] 0x000000000000b0d0
+     0.00%  head        [unknown]             [k] 0xffffffff93e4d2fe
+     0.00%  xargs       [unknown]             [k] 0xffffffff93dc607f
+     0.00%  free        [unknown]             [k] 0xffffffff93dac647
+     0.00%  sh          [unknown]             [k] 0xffffffff93db3886
+     0.00%  free        [unknown]             [k] 0xffffffff93048d69
+     0.00%  sh          [unknown]             [k] 0xffffffff92f9ef8a
+     0.00%  free        ld-linux-x86-64.so.2  [.] 0x000000000000a7e5
+     0.00%  bench_sign  libc.so.6             [.] 0x000000000005f0b8
+     0.00%  free        [unknown]             [k] 0xffffffff92f9ef7a
+     0.00%  lscpu       [unknown]             [k] 0xffffffff93e521f5
+     0.00%  lscpu       [unknown]             [k] 0xffffffff930c5987
+     0.00%  tr          [unknown]             [k] 0xffffffff92fb0ce5
+     0.00%  bench_sign  libcrypto.so.3        [.] OPENSSL_LH_insert
+     0.00%  bench_sign  libcrypto.so.3        [.] 0x000000000021d4fc
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff9306cc48
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff93dbd8b7
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff93dc5eac
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff93e5cb7d
+     0.00%  cat         ld-linux-x86-64.so.2  [.] 0x0000000000028664
+     0.00%  cat         [unknown]             [k] 0xffffffff92ddb61f
+     0.00%  cat         [unknown]             [k] 0xffffffff92fc3847
+     0.00%  cat         [unknown]             [k] 0xffffffff93dbc742
+     0.00%  cut         ld-linux-x86-64.so.2  [.] 0x00000000000188a4
+     0.00%  cut         [unknown]             [k] 0xffffffff92f9ef7a
+     0.00%  echo        ld-linux-x86-64.so.2  [.] 0x0000000000018bf5
+     0.00%  free        [unknown]             [k] 0xffffffff9310c156
+     0.00%  grep        [unknown]             [k] 0xffffffff92da5db2
+     0.00%  head        [unknown]             [k] 0xffffffff9303a965
+     0.00%  paste       [unknown]             [k] 0xffffffff92e0fca6
+     0.00%  pkg-config  [unknown]             [k] 0xffffffff93dd2c17
+     0.00%  pkg-config  [unknown]             [k] 0xffffffff93e537ee
+     0.00%  sh          ld-linux-x86-64.so.2  [.] 0x000000000000b1d9
+     0.00%  sh          ld-linux-x86-64.so.2  [.] 0x000000000001a653
+     0.00%  sh          ld-linux-x86-64.so.2  [.] 0x00000000000285ae
+     0.00%  sh          libc.so.6             [.] __libc_early_init
+     0.00%  sh          [unknown]             [k] 0xffffffff92ccf9c3
+     0.00%  sh          [unknown]             [k] 0xffffffff92de1280
+     0.00%  sh          [unknown]             [k] 0xffffffff92de128e
+     0.00%  sh          [unknown]             [k] 0xffffffff93029899
+     0.00%  sh          [unknown]             [k] 0xffffffff9302a482
+     0.00%  sh          [unknown]             [k] 0xffffffff9303d9d9
+     0.00%  sh          [unknown]             [k] 0xffffffff93045df0
+     0.00%  sh          [unknown]             [k] 0xffffffff93048f1f
+     0.00%  sh          [unknown]             [k] 0xffffffff93056be7
+     0.00%  sh          [unknown]             [k] 0xffffffff93068883
+     0.00%  sh          [unknown]             [k] 0xffffffff930d1d9d
+     0.00%  sh          [unknown]             [k] 0xffffffff930ff214
+     0.00%  sh          [unknown]             [k] 0xffffffff9312fd71
+     0.00%  sh          [unknown]             [k] 0xffffffff9335591c
+     0.00%  sh          [unknown]             [k] 0xffffffff93db11fa
+     0.00%  sh          [unknown]             [k] 0xffffffff93dcf6b4
+     0.00%  tr          [unknown]             [k] 0xffffffff92da5d3f
+     0.00%  tr          [unknown]             [k] 0xffffffff9306f634
+     0.00%  uname       ld-linux-x86-64.so.2  [.] 0x000000000002159a
+     0.00%  uname       [unknown]             [k] 0xffffffff92fffb32
+     0.00%  xargs       ld-linux-x86-64.so.2  [.] 0x00000000000210f8
+     0.00%  xargs       [unknown]             [k] 0xffffffff93108836
+     0.00%  free        [unknown]             [k] 0xffffffff93e5ebf0
+     0.00%  sh          [unknown]             [k] 0xffffffff93dd2c8b
+     0.00%  sh          [unknown]             [k] 0xffffffff93dd3111
+     0.00%  echo        [unknown]             [k] 0xffffffff93106028
+     0.00%  sh          [unknown]             [k] 0xffffffff92f9ef7a
+     0.00%  sh          [unknown]             [k] 0xffffffff9400128c
+     0.00%  sh          [unknown]             [k] 0xffffffff9304bf30
+     0.00%  lscpu       [unknown]             [k] 0xffffffff930ed7af
+     0.00%  cat         [unknown]             [k] 0xffffffff92f9e0e2
+     0.00%  cat         [unknown]             [k] 0xffffffff92fc67c0
+     0.00%  awk         [unknown]             [k] 0xffffffff93dd2c17
+     0.00%  awk         [unknown]             [k] 0xffffffff93dceaea
+     0.00%  bench_sign  ld-linux-x86-64.so.2  [.] 0x000000000000a41f
+     0.00%  bench_sign  [unknown]             [k] 0xffffffff9310879c
+     0.00%  sh          ld-linux-x86-64.so.2  [.] 0x00000000000101ed
+     0.00%  numactl     [unknown]             [k] 0xffffffff92fc6da5
+     0.00%  sh          [unknown]             [k] 0xffffffff9310c13c
+     0.00%  tr          ld-linux-x86-64.so.2  [.] 0x000000000001e214
+     0.00%  grep        [unknown]             [k] 0xffffffff9303c888
+     0.00%  sh          [unknown]             [k] 0xffffffff93067eb6
+     0.00%  sh          ld-linux-x86-64.so.2  [.] 0x000000000000a3b0
+     0.00%  sh          ld-linux-x86-64.so.2  [.] 0x0000000000018c9c
+
+
+#
+# (Cannot load tips.txt file, please install perf!)
+#

@@ -1,0 +1,2 @@
+algo,threads,cores_str,pin_strategy,run_id,total_signatures,wall_clock_ns,ops_per_sec_total,ops_per_sec_per_thread,mean_ns,median_ns,p95_ns,p99_ns,p99_9_ns,max_ns,stddev_ns,speedup_vs_1thread,parallel_efficiency_pct
+dilithium2,96,"0-95",explicit,0,9600000,20486559003,468599.92,4881.25,203005.5,172662,421251,594406,840940,3173476,110644.9,-1,-1
