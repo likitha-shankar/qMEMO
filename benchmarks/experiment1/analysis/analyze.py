@@ -500,6 +500,67 @@ def fig8_freq_time(metrics: pd.DataFrame, agg: pd.DataFrame, out_dir: str, fmt: 
 
 
 # ═════════════════════════════════════════════════════════════════════════════
+# Figure 9 — Ed25519 ctx-mode comparison (fresh vs reuse)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def fig9_ctx_comparison(raw: pd.DataFrame, out_dir: str, fmt: str, dpi: int):
+    """Plot Ed25519 signing throughput: fresh context vs reuse context vs threads."""
+    if "ctx_mode" not in raw.columns:
+        print("  SKIP fig9: no ctx_mode column (run with new bench_sign that emits ctx_mode)")
+        return
+
+    ed = raw[raw["algo"] == "ed25519"].copy()
+    if ed.empty:
+        print("  SKIP fig9: no Ed25519 rows")
+        return
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+
+    styles = {"fresh": ("-", "o", "#1f77b4"), "reuse": ("--", "s", "#aec7e8")}
+    for ctx_mode, (ls, marker, color) in styles.items():
+        sub = (ed[(ed["ctx_mode"] == ctx_mode) & (ed["pin_strategy"] == "compact")]
+               .groupby("threads", as_index=False)
+               .agg(ops_mean=("ops_per_sec_total", "mean"),
+                    ops_std=("ops_per_sec_total", "std")))
+        if sub.empty:
+            continue
+        sub = sub.sort_values("threads")
+        label = f"Ed25519 ({ctx_mode})"
+        ax.errorbar(sub["threads"], sub["ops_mean"] / 1e6,
+                    yerr=sub["ops_std"] / 1e6,
+                    fmt=f"{marker}{ls}", color=color, label=label,
+                    linewidth=1.8, markersize=5, capsize=3, elinewidth=1)
+
+    ax.axvline(24, color="gray", lw=0.8, ls=":", alpha=0.7)
+    ax.axvline(48, color="gray", lw=0.8, ls=":", alpha=0.7)
+    ax.annotate("qMEMO wallet uses\nfresh context",
+                xy=(1, 0), xytext=(3, 0.02),
+                xycoords=("data", "axes fraction"),
+                textcoords=("data", "axes fraction"),
+                fontsize=8, color="#1f77b4",
+                arrowprops=dict(arrowstyle="->", color="#1f77b4", lw=0.8))
+    ax.annotate("reuse via\ncontext pooling",
+                xy=(1, 0), xytext=(3, 0.12),
+                xycoords=("data", "axes fraction"),
+                textcoords=("data", "axes fraction"),
+                fontsize=8, color="#aec7e8",
+                arrowprops=dict(arrowstyle="->", color="#aec7e8", lw=0.8))
+
+    ax.set_xscale("log", base=2)
+    ax.set_xticks(THREAD_TICKS)
+    ax.get_xaxis().set_major_formatter(mticker.ScalarFormatter())
+    ax.set_xlabel("Software threads")
+    ax.set_ylabel("Total throughput (Mops/s)")
+    ax.set_title("Fig 9 — Ed25519: fresh context (qMEMO wallet) vs context reuse\n"
+                 "(compact pinning, Cascade Lake-R)")
+    ax.legend()
+    ax.grid(True, which="both", alpha=0.3)
+
+    savefig(fig, out_dir, "fig9_ed25519_ctx_comparison", fmt, dpi)
+    plt.close(fig)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
 # Table 1 — Full grid
 # ═════════════════════════════════════════════════════════════════════════════
 
@@ -551,6 +612,8 @@ def main():
     parser.add_argument("--fmt",         default="pdf", choices=["pdf", "png"])
     parser.add_argument("--dpi",         default=150,   type=int)
     parser.add_argument("--no-show",     action="store_true")
+    parser.add_argument("--include-ctx-comparison", action="store_true",
+                        help="Generate fig9: Ed25519 fresh vs reuse context throughput comparison")
     args = parser.parse_args()
 
     out_dir = args.out_dir or os.path.join(args.results_dir, "figures")
@@ -589,6 +652,8 @@ def main():
     fig6_avx(agg, out_dir, args.fmt, args.dpi)
     fig7_pinning(agg, out_dir, args.fmt, args.dpi)
     fig8_freq_time(metrics, agg, out_dir, args.fmt, args.dpi)
+    if args.include_ctx_comparison or ("ctx_mode" in raw.columns and raw["ctx_mode"].nunique() > 1):
+        fig9_ctx_comparison(raw, out_dir, args.fmt, args.dpi)
     table1(agg, out_dir)
 
     print(f"\nDone. {len(list(Path(out_dir).glob(f'*.{args.fmt}')))} figures written to {out_dir}")

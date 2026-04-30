@@ -154,6 +154,42 @@ for algo in "${ALGOS[@]}"; do
     done
 done
 
+# ── Ed25519 ctx-mode reuse (compact only) ────────────────────────────────────
+# Runs ed25519 with --ctx-mode reuse so fig9 can compare fresh vs reuse.
+# Only compact pinning, all thread counts. ML-DSA and Falcon do not use
+# EVP_MD_CTX so ctx-mode variation is not needed for them.
+echo ""
+echo "=== Ed25519 ctx-mode reuse (compact) ==="
+if [[ -z "$ALGO_FILTER" || "$ALGO_FILTER" == "ed25519" ]]; then
+    for t in "${THREADS_COMPACT[@]}"; do
+        local_prefix="${OUTDIR}/ed25519_ctx_reuse_t${t}_compact"
+        local_tag="ed25519_ctx_reuse_t${t}_compact_${TIMESTAMP}"
+        DONE=$(( DONE + 1 ))
+        local_pct=$(( DONE * 100 / TOTAL ))
+        printf "[%3d/%3d extra] ed25519 ctx=reuse threads=%-3d pin=compact\n" \
+            "$DONE" "$TOTAL" "$t"
+        if [[ $DRYRUN -eq 0 ]]; then
+            "$BENCH" \
+                --algo ed25519 \
+                --threads "$t" \
+                --pin-strategy compact \
+                --ctx-mode reuse \
+                --iterations "$ITERS" \
+                --warmup "$WARMUP" \
+                --message-size "$MSGSIZE" \
+                --message-mode fresh \
+                --runs 5 \
+                --verify-after-sign 1 \
+                --output-prefix "$local_prefix" \
+                --tag "$local_tag" \
+                >> "${OUTDIR}/sweep.log" 2>&1 || true
+            cooldown
+        else
+            echo "  DRY: $BENCH --algo ed25519 --threads $t --pin-strategy compact --ctx-mode reuse ..."
+        fi
+    done
+fi
+
 # ── Message-mode control: fixed vs fresh at threads=1 ────────────────────────
 echo ""
 echo "=== Control: fixed vs fresh message mode ==="

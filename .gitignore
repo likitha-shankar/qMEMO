@@ -30,9 +30,9 @@ venv/
 *.swp
 *.swo
 
-# Logs (runtime output — committed only as snapshots under benchmarks/results/)
+# Logs and raw per-iteration data (too large for git; keep aggregated CSVs only)
 *.log
-!benchmarks/results/**/*.log
+*_latencies.csv
 
 # Runtime pid markers
 *.pid

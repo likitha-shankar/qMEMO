@@ -568,19 +568,22 @@ static void write_summary_row(const char *prefix, const config_t *cfg,
     double sd  = total > 0 ? stddev_f(all, total, m) : 0;
     double ops = wall_ns > 0 ? (double)total / ((double)wall_ns / 1e9) : 0;
 
+    const char *ctx_mode_str = (cfg->ctx_mode == 1) ? "reuse" : "fresh";  /* CTX_REUSE=1 */
+
     if (run_id == 0)
-        fprintf(f, "algo,threads,cores_str,pin_strategy,run_id,"
+        fprintf(f, "algo,threads,cores_str,pin_strategy,ctx_mode,run_id,"
                    "total_signatures,wall_clock_ns,"
                    "ops_per_sec_total,ops_per_sec_per_thread,"
                    "mean_ns,median_ns,p95_ns,p99_ns,p99_9_ns,max_ns,stddev_ns,"
                    "speedup_vs_1thread,parallel_efficiency_pct\n");
 
-    fprintf(f, "%s,%d,\"%s\",%s,%d,"
+    fprintf(f, "%s,%d,\"%s\",%s,%s,%d,"
                "%ld,%lu,"
                "%.2f,%.2f,"
                "%.1f,%lu,%lu,%lu,%lu,%lu,%.1f,"
                "-1,-1\n",
-            cfg->algo_str, cfg->n_threads, cfg->cores_str, cfg->pin_strategy_str, run_id,
+            cfg->algo_str, cfg->n_threads, cfg->cores_str, cfg->pin_strategy_str,
+            ctx_mode_str, run_id,
             total, (unsigned long)wall_ns,
             ops, ops / cfg->n_threads,
             m,
