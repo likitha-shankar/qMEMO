@@ -1,0 +1,33 @@
+{
+  "cpu_model": "Intel(R) Xeon(R) Gold 6240R CPU @ 2.40GHz",
+  "kernel": "6.8.0-106-generic",
+  "microcode": "0x5003901",
+  "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "openssl_version": "OpenSSL 3.0.13 30 Jan 2024",
+  "oqs_version": "unknown",
+  "n_logical_cpus": 96,
+  "governor_cpu0": "performance",
+  "no_turbo": "1",
+  "thp": "always madvise [never]",
+  "free_mem_mb": "188862",
+  "temperatures_mc": "34000,59000,57000",
+  "lscpu": "Architecture:                            x86_64|CPU op-mode(s):                          32-bit, 64-bit|Address sizes:                           46 bits physical, 48 bits virtual|Byte Order:                              Little Endian|CPU(s):                                  96|On-line CPU(s) list:                     0-95|Vendor ID:                               GenuineIntel|Model name:                              Intel(R) Xeon(R) Gold 6240R CPU @ 2.40GHz|CPU family:                              6|Model:",
+  "numactl": "available: 2 nodes (0-1)|node 0 cpus: 0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52 54 56 58 60 62 64 66 68 70 72 74 76 78 80 82 84 86 88 90 92 94|node 0 size: 95128 MB|node 0 free: 71592 MB|node 1 cpus: 1 3 5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 41 43 45 47 49 51 53 55 57 59 61 63 65 67 69 71 73 75 77 79 81 83 85 87 89 91 93 95|node 1 size: 96745 MB|node 1 free: 95743 MB|node distances:|node   0   1 |  0:  10  21 |  1:  21  10 |",
+  "cli": {
+    "algo": "falcon512",
+    "threads": 2,
+    "cores_str": "0,1",
+    "pin_strategy": "compact",
+    "iterations": 100000,
+    "warmup": 1000,
+    "runs": 5,
+    "message_size": 32,
+    "message_mode": "fresh",
+    "ctx_mode": "fresh",
+    "verify_after_sign": 1,
+    "numa_node": -1,
+    "tag": "falcon512_t2_compact_20260430_025704"
+  },
+  "t_start_ns": 179796320192686,
+  "t_end_ns": 179984622473009
+}
