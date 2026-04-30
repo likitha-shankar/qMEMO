@@ -1,0 +1,6 @@
+algo,threads,cores_str,pin_strategy,signature_mix,run_id,total_verifies,valid_verifies,invalid_verifies,wall_clock_ns,ops_per_sec_total,ops_per_sec_per_thread,mean_ns_valid,mean_ns_invalid,median_ns_valid,median_ns_invalid,p95_ns_valid,p99_ns_valid,p99_9_ns_valid,max_ns_valid,p95_ns_invalid,p99_ns_invalid,p99_9_ns_invalid,max_ns_invalid,stddev_ns_total,speedup_vs_1thread,parallel_efficiency_pct,correctness_audit_pass
+falcon512,1,"0",compact,invalid,0,100000,0,100000,6625820796,15092.47,15092.47,0.0,65397.8,0,65413,0,0,0,0,67320,67813,70390,129975,819.1,-1,-1,1
+falcon512,1,"0",compact,invalid,1,100000,0,100000,6651833751,15033.45,15033.45,0.0,65648.2,0,65531,0,0,0,0,67595,67929,70563,135043,770.8,-1,-1,1
+falcon512,1,"0",compact,invalid,2,100000,0,100000,6647734578,15042.72,15042.72,0.0,65679.4,0,65535,0,0,0,0,67629,67958,71171,121973,727.9,-1,-1,1
+falcon512,1,"0",compact,invalid,3,100000,0,100000,6649647899,15038.39,15038.39,0.0,65698.1,0,65558,0,0,0,0,67627,67920,71075,123017,719.3,-1,-1,1
+falcon512,1,"0",compact,invalid,4,100000,0,100000,6648528932,15040.92,15040.92,0.0,65667.3,0,65525,0,0,0,0,67611,67915,70855,111133,723.3,-1,-1,1

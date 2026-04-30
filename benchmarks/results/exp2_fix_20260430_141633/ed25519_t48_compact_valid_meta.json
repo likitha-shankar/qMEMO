@@ -1,0 +1,22 @@
+{
+  "cpu_model": "Intel(R) Xeon(R) Gold 6240R CPU @ 2.40GHz",
+  "kernel": "6.8.0-106-generic",
+  "governor_cpu0": "performance",
+  "no_turbo": "1",
+  "thp": "always madvise [never]",
+  "cli": {
+    "algo": "ed25519",
+    "threads": 48,
+    "cores_str": "0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;45;46;47",
+    "pin_strategy": "compact",
+    "iterations": 100000,
+    "warmup": 1000,
+    "message_size": 32,
+    "signature_mix": "valid",
+    "invalid_mode": "flip-bit",
+    "batch_size": 1,
+    "tag": ""
+  },
+  "t_start_ns": 219951405049986,
+  "t_end_ns": 219973092097440
+}

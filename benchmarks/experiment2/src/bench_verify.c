@@ -715,6 +715,7 @@ static int parse_args(int argc, char **argv, config_t *cfg) {
         case 'c': {
             /* parse "0,2,4" or "0-7" into cpu_ids */
             strncpy(cfg->cores_str, optarg, MAX_CORES_STR-1);
+            for (char *p = cfg->cores_str; *p; p++) if (*p == ',') *p = ';';
             char *tok, *s = strdup(optarg);
             tok = strtok(s, ",");
             while (tok && cfg->n_explicit_cpus < MAX_THREADS) {
@@ -776,7 +777,7 @@ static int parse_args(int argc, char **argv, config_t *cfg) {
     if (cfg->cores_str[0] == '\0') {
         char *p = cfg->cores_str; int rem = MAX_CORES_STR - 1;
         for (int i = 0; i < cfg->n_threads && rem > 0; i++) {
-            int n = snprintf(p, rem, "%s%d", i ? "," : "", cfg->cpu_ids[i]);
+            int n = snprintf(p, rem, "%s%d", i ? ";" : "", cfg->cpu_ids[i]);
             p += n; rem -= n;
         }
     }

@@ -1,0 +1,6 @@
+algo,threads,cores_str,pin_strategy,signature_mix,run_id,total_verifies,valid_verifies,invalid_verifies,wall_clock_ns,ops_per_sec_total,ops_per_sec_per_thread,mean_ns_valid,mean_ns_invalid,median_ns_valid,median_ns_invalid,p95_ns_valid,p99_ns_valid,p99_9_ns_valid,max_ns_valid,p95_ns_invalid,p99_ns_invalid,p99_9_ns_invalid,max_ns_invalid,stddev_ns_total,speedup_vs_1thread,parallel_efficiency_pct,correctness_audit_pass
+dilithium2,8,"0;1;2;3;4;5;6;7",compact,invalid,0,800000,0,800000,3206669233,249480.05,31185.01,0.0,31475.3,0,31479,0,0,0,0,31701,34649,35444,328727,823.1,-1,-1,1
+dilithium2,8,"0;1;2;3;4;5;6;7",compact,invalid,1,800000,0,800000,3216522280,248715.83,31089.48,0.0,31403.1,0,31301,0,0,0,0,31688,34714,35706,583642,1032.6,-1,-1,1
+dilithium2,8,"0;1;2;3;4;5;6;7",compact,invalid,2,800000,0,800000,3190655037,250732.21,31341.53,0.0,31332.8,0,31182,0,0,0,0,31595,34491,35390,284175,682.1,-1,-1,1
+dilithium2,8,"0;1;2;3;4;5;6;7",compact,invalid,3,800000,0,800000,3210669119,249169.24,31146.16,0.0,31311.9,0,31167,0,0,0,0,31650,34419,35209,273723,649.1,-1,-1,1
+dilithium2,8,"0;1;2;3;4;5;6;7",compact,invalid,4,800000,0,800000,3192575333,250581.40,31322.68,0.0,31315.5,0,31184,0,0,0,0,31553,34438,35266,226244,630.1,-1,-1,1

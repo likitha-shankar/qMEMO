@@ -1,0 +1,22 @@
+{
+  "cpu_model": "Intel(R) Xeon(R) Gold 6240R CPU @ 2.40GHz",
+  "kernel": "6.8.0-106-generic",
+  "governor_cpu0": "performance",
+  "no_turbo": "1",
+  "thp": "always madvise [never]",
+  "cli": {
+    "algo": "dilithium2",
+    "threads": 1,
+    "cores_str": "0",
+    "pin_strategy": "compact",
+    "iterations": 100000,
+    "warmup": 1000,
+    "message_size": 32,
+    "signature_mix": "invalid",
+    "invalid_mode": "flip-bit",
+    "batch_size": 1,
+    "tag": "dilithium2_t1_compact_invalid_20260430_052617"
+  },
+  "t_start_ns": 190851360784720,
+  "t_end_ns": 190854539136298
+}

@@ -1,0 +1,6 @@
+algo,threads,cores_str,pin_strategy,signature_mix,run_id,total_verifies,valid_verifies,invalid_verifies,wall_clock_ns,ops_per_sec_total,ops_per_sec_per_thread,mean_ns_valid,mean_ns_invalid,median_ns_valid,median_ns_invalid,p95_ns_valid,p99_ns_valid,p99_9_ns_valid,max_ns_valid,p95_ns_invalid,p99_ns_invalid,p99_9_ns_invalid,max_ns_invalid,stddev_ns_total,speedup_vs_1thread,parallel_efficiency_pct,correctness_audit_pass
+dilithium2,1,"0",compact,invalid,0,100000,0,100000,3178351578,31462.85,31462.85,0.0,31397.8,0,31317,0,0,0,0,31390,33721,35063,108472,592.2,-1,-1,1
+dilithium2,1,"0",compact,invalid,1,100000,0,100000,3198690903,31262.79,31262.79,0.0,31628.9,0,31624,0,0,0,0,31725,34025,35248,111333,600.9,-1,-1,1
+dilithium2,1,"0",compact,invalid,2,100000,0,100000,3198077025,31268.79,31268.79,0.0,31627.4,0,31644,0,0,0,0,31790,34061,35349,103668,599.7,-1,-1,1
+dilithium2,1,"0",compact,invalid,3,100000,0,100000,3184083749,31406.21,31406.21,0.0,31478.5,0,31321,0,0,0,0,31706,33899,35064,104257,641.7,-1,-1,1
+dilithium2,1,"0",compact,invalid,4,100000,0,100000,3174937875,31496.68,31496.68,0.0,31396.8,0,31305,0,0,0,0,31682,33727,35030,104366,568.6,-1,-1,1
