@@ -401,7 +401,7 @@ bool validator_create_and_submit_block(Validator* v) {
              fetch_limit, remaining_budget, max_txs_per_block);
     zmq_send(v->pool_req, request, strlen(request), 0);
     size = zmq_recv(v->pool_req, buffer, validator_buffer_size - 1, 0);
-    uint64_t t2_ns = get_time_ns();
+    uint64_t t2_ns = get_current_time_ns();
 
     // Diagnostic timestamp arrays from TXTS sidecar.
     // Copied into owned heap arrays immediately — buffer is reused for step 3 balance query.
@@ -462,7 +462,7 @@ bool validator_create_and_submit_block(Validator* v) {
             blockchain__transaction_batch__free_unpacked(batch, NULL);
         }
     }
-    uint64_t t2_5_ns = get_time_ns();
+    uint64_t t2_5_ns = get_current_time_ns();
 
     if (size > 8 && memcmp(buffer, "BIN:", 4) == 0) {
         uint32_t expected = 0;
@@ -673,7 +673,7 @@ bool validator_create_and_submit_block(Validator* v) {
                 batch_valid[bi] = 0;
                 batch_sig_fail++;
             }
-            batch_t3[bi] = get_time_ns();
+            batch_t3[bi] = get_current_time_ns();
         }
 
         total_sig_ms += get_current_time_ms() - sig_start;

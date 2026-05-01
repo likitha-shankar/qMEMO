@@ -335,10 +335,10 @@ int main(int argc, char* argv[]) {
                     LOG_INFO("📤 GET_FOR_WINNER: requesting %u TXs for block #%u (pool pending: %u)",
                              max_count, block_height, pool->pending_count);
 
-                    uint64_t ts_handler   = get_time_ns();
+                    uint64_t ts_handler   = get_current_time_ns();
                     uint32_t fill_before  = pool->pending_count;
 
-                    uint64_t scan_start   = get_time_ns();
+                    uint64_t scan_start   = get_current_time_ns();
                     uint32_t count = 0;
                     uint8_t* pubkeys = NULL;
                     uint64_t* t0_ns = NULL;
@@ -346,7 +346,7 @@ int main(int argc, char* argv[]) {
                     Transaction** txs = pool_get_pending_with_pubkeys(
                         pool, max_count, block_height, &count, &pubkeys,
                         &t0_ns, &t1_ns);
-                    uint64_t scan_duration_ns = get_time_ns() - scan_start;
+                    uint64_t scan_duration_ns = get_current_time_ns() - scan_start;
 
                     if (scan_duration_ns > 100000000ULL)
                         LOG_WARN("⚠️  pool scan took %lu ms (>100ms) — scan is a bottleneck",
@@ -398,7 +398,7 @@ int main(int argc, char* argv[]) {
                     }
                     
                     // Pack protobuf and build TXTS response (sidecar + protobuf)
-                    uint64_t pack_start = get_time_ns();
+                    uint64_t pack_start = get_current_time_ns();
                     size_t pb_size = blockchain__transaction_batch__get_packed_size(&batch);
                     // TXTS format: "TXTS"(4) + count(4) + t0_ns[count](count*8) + t1_ns[count](count*8) + pb
                     size_t ts_hdr  = 4 + 4 + (size_t)count * 16;
@@ -411,7 +411,7 @@ int main(int argc, char* argv[]) {
                     if (count > 0 && t1_ns) memcpy(response + 8 + count * 8, t1_ns, count * 8);
                     else if (count > 0)     memset(response + 8 + count * 8, 0, count * 8);
                     blockchain__transaction_batch__pack(&batch, response + ts_hdr);
-                    uint64_t pack_duration_ns = get_time_ns() - pack_start;
+                    uint64_t pack_duration_ns = get_current_time_ns() - pack_start;
 
                     // pool_fetches_<pid>.csv — one row per fetch
                     static FILE* pool_csv = NULL;

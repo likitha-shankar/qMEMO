@@ -243,7 +243,7 @@ Transaction** pool_get_pending_with_pubkeys(TransactionPool* pool, uint32_t max_
             txs[count] = tx_copy;
             entry_indices[count] = i;
             if (t0_raw) t0_raw[count] = entry->received_time * 1000000ULL;
-            if (t1_raw) t1_raw[count] = get_time_ns();
+            if (t1_raw) t1_raw[count] = get_current_time_ns();
             count++;
         }
     }
