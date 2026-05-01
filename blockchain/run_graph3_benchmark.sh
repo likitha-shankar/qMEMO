@@ -36,7 +36,7 @@ for MAX_TXS in "${CONFIGS[@]}"; do
     echo "━━━ Running with MAX_TXS_PER_BLOCK=$MAX_TXS ━━━"
     
     # Run benchmark
-    ./benchmark.sh "$TOTAL_TXS" 1 16 10 auto "$MAX_TXS" "$BATCH_SIZE" "$NUM_THREADS" 2>&1 | \
+    ./benchmark.sh "$TOTAL_TXS" 1000 16 10 auto "$MAX_TXS" "$BATCH_SIZE" "$NUM_THREADS" 2>&1 | \
         tee "$RESULTS_DIR/run_${MAX_TXS}.log" | \
         grep -E "Submission TPS|End-to-End TPS|Confirmation Rate|Avg TX"
     

@@ -33,7 +33,7 @@
 // CONFIGURATION DEFAULTS
 // =============================================================================
 
-#define BLOCK_INTERVAL_DEFAULT      6       // Seconds between blocks
+#define BLOCK_INTERVAL_DEFAULT      1000    // Milliseconds between blocks
 #define DIFFICULTY_ADJUST_INTERVAL  5       // Adjust every N blocks
 #define BASE_MINING_REWARD          10000      // Base mining reward (before fees)
 #define HALVING_INTERVAL            10000000     // Halve reward every N blocks (effectively disabled for benchmarks)
@@ -87,7 +87,7 @@ typedef struct {
     void* notify_pull;     // PULL for block confirmations from blockchain (v29)
     
     // Configuration
-    uint32_t block_interval;
+    uint32_t block_interval_ms;
     uint32_t difficulty_adjust_interval;
     uint64_t base_mining_reward;
     uint32_t halving_interval;
@@ -134,7 +134,7 @@ typedef struct {
 // METRONOME FUNCTIONS
 // =============================================================================
 
-Metronome* metronome_create(uint32_t block_interval,
+Metronome* metronome_create(uint32_t block_interval_ms,
                             uint32_t difficulty_adjust_interval,
                             uint32_t k_param,
                             uint32_t initial_validator_count,

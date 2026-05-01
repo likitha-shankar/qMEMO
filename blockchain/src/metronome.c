@@ -58,7 +58,7 @@ static int compare_quality(const uint8_t* a, const uint8_t* b) {
 // METRONOME CREATION
 // =============================================================================
 
-Metronome* metronome_create(uint32_t block_interval,
+Metronome* metronome_create(uint32_t block_interval_ms,
                             uint32_t difficulty_adjust_interval,
                             uint32_t k_param,
                             uint32_t initial_validator_count,
@@ -68,7 +68,7 @@ Metronome* metronome_create(uint32_t block_interval,
     Metronome* m = safe_malloc(sizeof(Metronome));
     memset(m, 0, sizeof(Metronome));
     
-    m->block_interval = block_interval > 0 ? block_interval : BLOCK_INTERVAL_DEFAULT;
+    m->block_interval_ms = block_interval_ms > 0 ? block_interval_ms : BLOCK_INTERVAL_DEFAULT;
     m->difficulty_adjust_interval = difficulty_adjust_interval > 0 ? 
                                     difficulty_adjust_interval : DIFFICULTY_ADJUST_INTERVAL;
     m->base_mining_reward = base_mining_reward > 0 ? base_mining_reward : BASE_MINING_REWARD;
@@ -96,7 +96,7 @@ Metronome* metronome_create(uint32_t block_interval,
     m->empty_blocks_created = 0;
     
     // Compute initial proof window
-    uint64_t block_time_ms = m->block_interval * 1000;
+    uint64_t block_time_ms = m->block_interval_ms;
     m->t_proof_window_ms = block_time_ms - TIMING_INITIAL_ESTIMATE_MS - TIMING_MARGIN_MS;
     if (m->t_proof_window_ms < block_time_ms / 2) {
         m->t_proof_window_ms = block_time_ms / 2;  // never less than 50% of block time
@@ -104,7 +104,7 @@ Metronome* metronome_create(uint32_t block_interval,
     
     LOG_INFO("📡 ════════════════════════════════════════════════════════════");
     LOG_INFO("📡 METRONOME CREATED (v45.2 - Strict Timing + Adaptive Window)");
-    LOG_INFO("   ├─ Block interval:    %u seconds (STRICT - never exceeds)", m->block_interval);
+    LOG_INFO("   ├─ Block interval:    %u ms (STRICT - never exceeds)", m->block_interval_ms);
     LOG_INFO("   ├─ Proof window:      %lu ms (adaptive, initial)", m->t_proof_window_ms);
     LOG_INFO("   ├─ Create budget:     %lu ms (adaptive, initial)", m->t_create_avg_ms);
     LOG_INFO("   ├─ Safety margin:     %u ms", TIMING_MARGIN_MS);
@@ -791,7 +791,7 @@ static void update_overhead(Metronome* m, uint64_t overhead_ms) {
     //   → next proof window compressed → fewer proofs → empty blocks → wasted ticks
     //   A 650ms proof window still gives plenty of time for proof search.
     //   A 200ms minimum budget guarantees we NEVER overrun even in worst case.
-    uint64_t block_time_ms = (uint64_t)m->block_interval * 1000;
+    uint64_t block_time_ms = (uint64_t)m->block_interval_ms;
     uint64_t budget = worst + worst / 2;  // worst * 1.5
     if (budget < m->t_create_avg_ms * 2) budget = m->t_create_avg_ms * 2;
     if (budget < TIMING_MIN_BUDGET_MS) budget = TIMING_MIN_BUDGET_MS;
@@ -924,7 +924,7 @@ void metronome_run(Metronome* m) {
     if (!m) return;
     
     m->running = true;
-    uint64_t block_time_ms = (uint64_t)m->block_interval * 1000;
+    uint64_t block_time_ms = (uint64_t)m->block_interval_ms;
     
     LOG_INFO("");
     LOG_INFO("🚀 METRONOME STARTED (v45.3 - Strict 1-Second Blocks)");

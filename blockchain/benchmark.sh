@@ -32,7 +32,7 @@ POOL_PUB_PORT=5561
 
 # Benchmark parameters
 NUM_TRANSACTIONS=${1:-1000}
-BLOCK_INTERVAL=${2:-1}
+BLOCK_INTERVAL=${2:-1000}
 K_PARAM=${3:-16}
 NUM_FARMERS=${4:-10}
 WARMUP_BLOCKS=${5:-auto}  # "auto" = use FUND_WALLET (skip warmup mining)
@@ -194,7 +194,7 @@ print_header "BLOCKCHAIN BENCHMARK v6 (END-TO-END)"
 echo ""
 echo "Configuration:"
 print_metric "Transactions to send" "$NUM_TRANSACTIONS"
-print_metric "Block interval" "${BLOCK_INTERVAL}s"
+print_metric "Block interval" "${BLOCK_INTERVAL}ms"
 print_metric "K parameter" "$K_PARAM (2^$K_PARAM = $((1 << K_PARAM)) entries)"
 print_metric "Number of farmers" "$NUM_FARMERS"
 print_metric "Warmup blocks" "$WARMUP_BLOCKS"
@@ -391,7 +391,7 @@ if [ "$EFFECTIVE_BLOCK_SIZE" -gt 10000 ]; then
 fi
 if [ "$EFFECTIVE_BLOCK_SIZE" -lt 1 ]; then EFFECTIVE_BLOCK_SIZE=1; fi
 BLOCKS_NEEDED=$((NUM_TRANSACTIONS / EFFECTIVE_BLOCK_SIZE + 5))
-MAX_WAIT=$((BLOCKS_NEEDED * BLOCK_INTERVAL + 60))
+MAX_WAIT=$((BLOCKS_NEEDED * BLOCK_INTERVAL / 1000 + 60))
 if [ "$MAX_WAIT" -lt 120 ]; then MAX_WAIT=120; fi
 if [ "$MAX_WAIT" -gt 600 ]; then MAX_WAIT=600; fi
 
@@ -673,7 +673,7 @@ print_subheader "BLOCK METRICS"
 print_metric "Blocks created during benchmark" "$BLOCKS_CREATED"
 print_metric "Blocks per second" "$BPS"
 print_metric "Average transactions per block" "$AVG_TX_BLOCK"
-print_metric "Block interval (configured)" "${BLOCK_INTERVAL}s"
+print_metric "Block interval (configured)" "${BLOCK_INTERVAL}ms"
 print_metric "Chain height (before → after)" "$HEIGHT_BEFORE → $HEIGHT_AFTER"
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -717,10 +717,10 @@ if [ -f "$BLOCK_TIMES_FILE" ] && grep -q "^BLOCK_TIME:" "$BLOCK_TIMES_FILE" 2>/d
     echo ""
     if [ "$BLOCK_COUNT" -gt 1 ]; then
         AVG_INTERVAL_MS=$((TOTAL_INTERVAL_MS / BLOCK_COUNT))
-        OVERHEAD_MS=$((AVG_INTERVAL_MS - BLOCK_INTERVAL * 1000))
+        OVERHEAD_MS=$((AVG_INTERVAL_MS - BLOCK_INTERVAL))
         
         print_metric "Blocks observed (PUB/SUB)" "$BLOCK_COUNT"
-        print_metric "Average block interval" "${AVG_INTERVAL_MS}ms (target: ${BLOCK_INTERVAL}000ms)"
+        print_metric "Average block interval" "${AVG_INTERVAL_MS}ms (target: ${BLOCK_INTERVAL}ms)"
         if [ "$MIN_INTERVAL_MS" -lt 999999 ]; then
             print_metric "Min / Max interval" "${MIN_INTERVAL_MS}ms / ${MAX_INTERVAL_MS}ms"
         fi
@@ -728,7 +728,7 @@ if [ -f "$BLOCK_TIMES_FILE" ] && grep -q "^BLOCK_TIME:" "$BLOCK_TIMES_FILE" 2>/d
         
         echo ""
         echo "  📊 OVERHEAD BREAKDOWN (v45.3 strict 1-second blocks):"
-        echo "     Block time (configured):              ${BLOCK_INTERVAL}000 ms (HARD DEADLINE)"
+        echo "     Block time (configured):              ${BLOCK_INTERVAL} ms (HARD DEADLINE)"
         echo "     ├─ Proof collection window:            adaptive (~800 ms)"
         echo "     ├─ Winner announce + block creation:   adaptive (~85 ms)"
         echo "     ├─ Blockchain validation + confirm:    async via PUB/SUB"
@@ -842,7 +842,7 @@ proofs_found,$PROOFS_FOUND,count
 valid_proofs,$VALID_PROOFS,count
 k_param,$K_PARAM,value
 num_farmers,$NUM_FARMERS,count
-block_interval,$BLOCK_INTERVAL,seconds
+block_interval,$BLOCK_INTERVAL,ms
 max_txs_per_block,$MAX_TXS_PER_BLOCK,value
 batch_size,$BATCH_SIZE,value
 num_threads,$NUM_THREADS,value
@@ -1038,7 +1038,7 @@ cat >> "$HTML_FILE" << 'HTMLEOF'
         document.getElementById('chain-height').textContent = data.heightBefore + ' → ' + data.heightAfter;
         
         document.getElementById('k-param').textContent = data.kParam + ' (2^' + data.kParam + ' entries)';
-        document.getElementById('block-interval').textContent = data.blockInterval + 's';
+        document.getElementById('block-interval').textContent = data.blockInterval + 'ms';
         document.getElementById('difficulty').textContent = data.difficulty;
         document.getElementById('num-farmers').textContent = data.numFarmers;
         

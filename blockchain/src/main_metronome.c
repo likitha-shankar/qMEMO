@@ -56,7 +56,7 @@ void print_usage(const char* prog) {
     printf("Usage: %s [options]\n", prog);
     printf("\n");
     printf("Timing Options:\n");
-    printf("  -i, --interval <sec>      Block interval in seconds (default: 6)\n");
+    printf("  -i, --interval <ms>       Block interval in milliseconds (default: 1000)\n");
     printf("\n");
     printf("Difficulty Options:\n");
     printf("  -d, --difficulty <1-256>  Initial difficulty (default: auto = k + log2(v))\n");
@@ -80,7 +80,7 @@ void print_usage(const char* prog) {
 }
 
 int main(int argc, char* argv[]) {
-    uint32_t block_interval = 6;
+    uint32_t block_interval = 1000;
     uint32_t difficulty = 0;
     uint32_t k_param = 20;
     uint32_t validators = 3;
@@ -162,7 +162,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    LOG_INFO("🚀 Metronome starting - first challenge in %u seconds...", block_interval);
+    LOG_INFO("🚀 Metronome starting - first challenge in %u ms...", block_interval);
     
     /*
      * MAIN LOOP (v29):

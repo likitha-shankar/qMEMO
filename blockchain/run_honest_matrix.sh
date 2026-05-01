@@ -82,7 +82,7 @@ for SCHEME in 1 2 4 3; do
       TAG="s${SCHEME}_tx${TX}_r${REP}"
       echo "[$(date +%H:%M:%S)] scheme=$SNAME tx=$TX rep=$REP ..."
       # Args: NUM_TX BLOCK_INTERVAL K NUM_FARMERS WARMUP MAX_TXS_PER_BLOCK BATCH THREADS
-      ./benchmark.sh "$TX" 1 16 1 0 "$MAX_BLOCK" 64 8 \
+      ./benchmark.sh "$TX" 1000 16 1 0 "$MAX_BLOCK" 64 8 \
         > "$OUT_DIR/${TAG}.log" 2>&1 || true
 
       LATEST_CSV="$(ls -1t benchmark_results/benchmark_*.csv 2>/dev/null | head -1 || true)"

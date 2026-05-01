@@ -18,7 +18,7 @@ K=16
 FARMERS=1
 BATCH=64
 THREADS=8
-BLOCK_INTERVAL=1
+BLOCK_INTERVAL=1000
 
 echo "================================================================"
 echo " Phase A: Pipeline Diagnostic Matrix"
