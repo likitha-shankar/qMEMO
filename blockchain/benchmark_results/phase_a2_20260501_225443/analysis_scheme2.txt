@@ -1,0 +1,45 @@
+Loading CSVs...
+  Loaded 30 rows from benchmark_results/phase_a2_20260501_225443/block_diag_scheme2.csv
+  Loaded 100000 rows from benchmark_results/phase_a2_20260501_225443/tx_diag_scheme2.csv
+  Loaded 30 rows from benchmark_results/phase_a2_20260501_225443/pool_fetches_scheme2.csv
+
+=== POOL FETCH ANALYSIS ===
+Rows: 30
+scan_duration  p50=20.11ms  p95=28.17ms  max=403.32ms
+pack_duration  p50=1.53ms  p95=13.04ms  max=13.81ms
+
+=== PER-BLOCK STAGE DATA SUMMARY ===
+  Groups (blocks) found in tx_diag: 13
+
+=== STAGE DURATIONS (per-block, n=13 blocks) ===
+  Stage                             p50(ms)  p95(ms)  max(ms)
+  -----------------------------------------------------------
+  T2->T2_5   protobuf unpack           52.0     52.6     52.7
+  T2_5->T2_75  balance prep             0.2      0.3      0.3
+  T2_75->T2_875 GET_BAL RTT             0.4      0.7      0.9
+  T2_875->T3  verify+seqbal            50.8     51.2     51.3
+  T3_last->T4  finaliz gap             21.2     21.6     35.5
+  T4->T5  ADD_BLOCK ACK               113.4    114.8    127.8
+  T5->T2[next]  dark zone             768.0    928.5   1759.3
+
+=== BUDGET RECONCILIATION (p50, ~1000ms block interval) ===
+  protobuf unpack                   52.0 ms  (  5.2%)
+  balance prep                       0.2 ms  (  0.0%)
+  GET_BAL ZMQ RTT                    0.4 ms  (  0.0%)
+  verify + seq bal                  50.8 ms  (  5.1%)
+  finalization gap                  21.2 ms  (  2.1%)
+  ADD_BLOCK ACK                    113.4 ms  ( 11.3%)
+  ------------------------------------------------
+  MEASURED TOTAL                   238.1 ms  ( 23.8%)
+  DARK ZONE (est.)                 761.9 ms  ( 76.2%)
+
+=== BOTTLENECK VERDICT (ranked) ===
+  dark zone               761.9ms   76.2%  ######################################
+  ADD_BLOCK ACK           113.4ms   11.3%  #####
+  protobuf unpack          52.0ms    5.2%  ##
+  verify+seqbal            50.8ms    5.1%  ##
+  finalization gap         21.2ms    2.1%  #
+  GET_BAL ZMQ RTT           0.4ms    0.0%  
+  balance prep              0.2ms    0.0%  
+
+  PRIMARY BOTTLENECK: dark zone at 761.9ms (76.2% of block interval)
