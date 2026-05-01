@@ -401,10 +401,36 @@ bool validator_create_and_submit_block(Validator* v) {
              fetch_limit, remaining_budget, max_txs_per_block);
     zmq_send(v->pool_req, request, strlen(request), 0);
     size = zmq_recv(v->pool_req, buffer, validator_buffer_size - 1, 0);
-    
-    if (size > 0 && size > 4 && memcmp(buffer, "TXPB", 4) == 0) {
-        Blockchain__TransactionBatch* batch = 
-            blockchain__transaction_batch__unpack(NULL, size - 4, (uint8_t*)(buffer + 4));
+    uint64_t t2_ns = get_time_ns();
+
+    // Diagnostic timestamp arrays from TXTS sidecar.
+    // Copied into owned heap arrays immediately — buffer is reused for step 3 balance query.
+    uint64_t* diag_t0 = NULL;
+    uint64_t* diag_t1 = NULL;
+    uint32_t  diag_ts_count = 0;
+
+    const uint8_t* pool_pb_data = NULL;
+    size_t pool_pb_len = 0;
+
+    if (size > 8 && memcmp(buffer, "TXTS", 4) == 0) {
+        memcpy(&diag_ts_count, buffer + 4, 4);
+        size_t ts_hdr = 8 + (size_t)diag_ts_count * 16;
+        if ((size_t)size > ts_hdr && diag_ts_count > 0) {
+            diag_t0 = safe_malloc(diag_ts_count * sizeof(uint64_t));
+            diag_t1 = safe_malloc(diag_ts_count * sizeof(uint64_t));
+            memcpy(diag_t0, buffer + 8,                      diag_ts_count * 8);
+            memcpy(diag_t1, buffer + 8 + diag_ts_count * 8, diag_ts_count * 8);
+            pool_pb_data = (uint8_t*)buffer + ts_hdr;
+            pool_pb_len  = (size_t)size - ts_hdr;
+        }
+    } else if (size > 4 && memcmp(buffer, "TXPB", 4) == 0) {
+        pool_pb_data = (uint8_t*)buffer + 4;
+        pool_pb_len  = (size_t)size - 4;
+    }
+
+    if (pool_pb_data && pool_pb_len > 0) {
+        Blockchain__TransactionBatch* batch =
+            blockchain__transaction_batch__unpack(NULL, pool_pb_len, pool_pb_data);
         if (batch) {
             for (size_t i = 0; i < batch->n_transactions && tx_count < max_txs_per_block; i++) {
                 Blockchain__Transaction* pt = batch->transactions[i];
@@ -435,7 +461,10 @@ bool validator_create_and_submit_block(Validator* v) {
             }
             blockchain__transaction_batch__free_unpacked(batch, NULL);
         }
-    } else if (size > 8 && memcmp(buffer, "BIN:", 4) == 0) {
+    }
+    uint64_t t2_5_ns = get_time_ns();
+
+    if (size > 8 && memcmp(buffer, "BIN:", 4) == 0) {
         uint32_t expected = 0;
         memcpy(&expected, buffer + 4, 4);
         uint8_t* tx_data = (uint8_t*)(buffer + 8);
@@ -507,6 +536,8 @@ bool validator_create_and_submit_block(Validator* v) {
     Block* block = block_create();
     if (!block) {
         LOG_ERROR("[%s] Failed to create block", v->name);
+        if (diag_t0) free(diag_t0);
+        if (diag_t1) free(diag_t1);
         free(buffer); free(txs);
         return false;
     }
@@ -546,6 +577,8 @@ bool validator_create_and_submit_block(Validator* v) {
     
     if (!coinbase_placeholder) {
         LOG_ERROR("[%s] Failed to create coinbase", v->name);
+        if (diag_t0) free(diag_t0);
+        if (diag_t1) free(diag_t1);
         block_destroy(block); free(buffer);
         for (uint32_t i = 0; i < tx_count; i++) if (txs[i]) transaction_destroy(txs[i]);
         free(txs);
@@ -585,7 +618,18 @@ bool validator_create_and_submit_block(Validator* v) {
     
     // Pre-allocate per-batch validity array (reused across batches)
     uint8_t* batch_valid = safe_malloc(VERIFY_BATCH_SIZE);
-    
+
+    // tx_diag_<pid>.csv — per-TX pipeline timestamps
+    static FILE* tx_csv = NULL;
+    if (!tx_csv) {
+        char csv_path[64];
+        snprintf(csv_path, sizeof(csv_path), "tx_diag_%d.csv", (int)getpid());
+        tx_csv = fopen(csv_path, "w");
+        if (tx_csv)
+            fprintf(tx_csv,
+                "tx_nonce_hex,tx_size_bytes,t0_ns,t1_ns,t2_ns,t2_5_ns,t3_ns,src_addr_hex\n");
+    }
+
     for (uint32_t batch_start = 0; batch_start < tx_count && !block_full; batch_start += VERIFY_BATCH_SIZE) {
         // ── DEADLINE CHECK before each batch ──
         int64_t time_left = (int64_t)(v->deadline_ms - get_current_time_ms());
@@ -616,22 +660,44 @@ bool validator_create_and_submit_block(Validator* v) {
         memset(batch_valid, 1, batch_size);
         uint32_t batch_sig_fail = 0;
         uint64_t sig_start = get_current_time_ms();
+        uint64_t* batch_t3 = safe_malloc(batch_size * sizeof(uint64_t));
 
         #pragma omp parallel for schedule(static) reduction(+:batch_sig_fail)
         for (uint32_t bi = 0; bi < batch_size; bi++) {
             uint32_t i = batch_start + bi;
             Transaction* tx = txs[i];
-            if (!tx) { batch_valid[bi] = 0; batch_sig_fail++; continue; }
+            if (!tx) { batch_valid[bi] = 0; batch_sig_fail++; batch_t3[bi] = 0; continue; }
 
             // TX carries its own pubkey inline — dispatch by sig_type
             if (!transaction_verify(tx)) {
                 batch_valid[bi] = 0;
                 batch_sig_fail++;
             }
+            batch_t3[bi] = get_time_ns();
         }
-        
+
         total_sig_ms += get_current_time_ms() - sig_start;
         sig_failures += batch_sig_fail;
+
+        // Write per-TX diagnostics for this batch
+        if (tx_csv) {
+            char src_hex[41];
+            for (uint32_t bi = 0; bi < batch_size; bi++) {
+                uint32_t i = batch_start + bi;
+                Transaction* tx = txs[i];
+                if (!tx) continue;
+                size_t tx_bytes = 64 + tx->sig_len + tx->pubkey_len;
+                uint64_t t0 = (diag_t0 && i < diag_ts_count) ? diag_t0[i] : 0;
+                uint64_t t1 = (diag_t1 && i < diag_ts_count) ? diag_t1[i] : 0;
+                bytes_to_hex_buf(tx->source_address, 20, src_hex);
+                fprintf(tx_csv, "%016lx,%zu,%lu,%lu,%lu,%lu,%lu,%s\n",
+                        (unsigned long)tx->nonce, tx_bytes,
+                        (unsigned long)t0, (unsigned long)t1,
+                        (unsigned long)t2_ns, (unsigned long)t2_5_ns,
+                        (unsigned long)batch_t3[bi], src_hex);
+            }
+        }
+        free(batch_t3);
         
         // ──────────────────────────────────────────────────────────────
         // PHASE B: SEQUENTIAL balance check + add to block
@@ -719,6 +785,8 @@ bool validator_create_and_submit_block(Validator* v) {
     uint64_t ser_ms = get_current_time_ms() - step6_start;
     if (!block_pb) {
         LOG_ERROR("[%s] Failed to serialize block", v->name);
+        if (diag_t0) free(diag_t0);
+        if (diag_t1) free(diag_t1);
         block_destroy(block); free(buffer);
         for (uint32_t i = 0; i < tx_count; i++) if (txs[i]) transaction_destroy(txs[i]);
         free(txs);
@@ -774,6 +842,8 @@ bool validator_create_and_submit_block(Validator* v) {
     }
     
     // Cleanup
+    if (diag_t0) free(diag_t0);
+    if (diag_t1) free(diag_t1);
     for (uint32_t i = 0; i < tx_count; i++)
         if (txs[i]) transaction_destroy(txs[i]);
     block_destroy(block);
@@ -877,8 +947,8 @@ void validator_stop(Validator* v) {
 
 void validator_set_max_txs_per_block(uint32_t max_txs) {
     max_txs_per_block = max_txs > 0 ? max_txs : MAX_TXS_PER_BLOCK_DEFAULT;
-    // Scale buffer: 200 bytes per TX in protobuf (with headroom)
-    size_t needed = (size_t)max_txs_per_block * 200;
+    // Scale buffer: 200 bytes per TX in protobuf + 16 bytes per TX for TXTS sidecar + 8 byte header
+    size_t needed = (size_t)max_txs_per_block * 216 + 8;
     if (needed < VALIDATOR_BASE_BUFFER_SIZE) needed = VALIDATOR_BASE_BUFFER_SIZE;
     validator_buffer_size = needed;
     LOG_INFO("MAX_TXS_PER_BLOCK set to %u (buffer: %zu bytes)", max_txs_per_block, validator_buffer_size);

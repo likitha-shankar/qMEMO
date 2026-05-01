@@ -67,6 +67,9 @@ uint64_t get_current_timestamp(void);
 // Get current time in milliseconds
 uint64_t get_current_time_ms(void);
 
+// Get current time in nanoseconds (CLOCK_MONOTONIC)
+uint64_t get_time_ns(void);
+
 // Format timestamp to string
 void format_timestamp(uint64_t ts, char* buffer, size_t size);
 

@@ -332,15 +332,25 @@ int main(int argc, char* argv[]) {
                     uint32_t block_height = 0;
                     sscanf(buffer + 15, "%u:%u", &max_count, &block_height);
                     
-                    LOG_INFO("📤 GET_FOR_WINNER: requesting %u TXs for block #%u (pool pending: %u)", 
+                    LOG_INFO("📤 GET_FOR_WINNER: requesting %u TXs for block #%u (pool pending: %u)",
                              max_count, block_height, pool->pending_count);
-                    
-                    uint64_t fetch_start = get_current_time_ms();
+
+                    uint64_t ts_handler   = get_time_ns();
+                    uint32_t fill_before  = pool->pending_count;
+
+                    uint64_t scan_start   = get_time_ns();
                     uint32_t count = 0;
                     uint8_t* pubkeys = NULL;
+                    uint64_t* t0_ns = NULL;
+                    uint64_t* t1_ns = NULL;
                     Transaction** txs = pool_get_pending_with_pubkeys(
-                        pool, max_count, block_height, &count, &pubkeys);
-                    uint64_t fetch_ms = get_current_time_ms() - fetch_start;
+                        pool, max_count, block_height, &count, &pubkeys,
+                        &t0_ns, &t1_ns);
+                    uint64_t scan_duration_ns = get_time_ns() - scan_start;
+
+                    if (scan_duration_ns > 100000000ULL)
+                        LOG_WARN("⚠️  pool scan took %lu ms (>100ms) — scan is a bottleneck",
+                                 scan_duration_ns / 1000000ULL);
                     
                     // Build protobuf TransactionBatch (zero-copy pointers)
                     Blockchain__TransactionBatch batch = BLOCKCHAIN__TRANSACTION_BATCH__INIT;
@@ -387,15 +397,43 @@ int main(int argc, char* argv[]) {
                         }
                     }
                     
-                    // Pack protobuf and send
+                    // Pack protobuf and build TXTS response (sidecar + protobuf)
+                    uint64_t pack_start = get_time_ns();
                     size_t pb_size = blockchain__transaction_batch__get_packed_size(&batch);
-                    size_t resp_size = 4 + pb_size;
+                    // TXTS format: "TXTS"(4) + count(4) + t0_ns[count](count*8) + t1_ns[count](count*8) + pb
+                    size_t ts_hdr  = 4 + 4 + (size_t)count * 16;
+                    size_t resp_size = ts_hdr + pb_size;
                     uint8_t* response = safe_malloc(resp_size);
-                    memcpy(response, "TXPB", 4);
-                    blockchain__transaction_batch__pack(&batch, response + 4);
-                    
-                    LOG_INFO("📤 ✅ Returned %u TXs (fees: %lu, %zu bytes pb, fetch: %lums)", 
-                             count, total_fees, resp_size, fetch_ms);
+                    memcpy(response, "TXTS", 4);
+                    memcpy(response + 4, &count, 4);
+                    if (count > 0 && t0_ns) memcpy(response + 8,             t0_ns, count * 8);
+                    else if (count > 0)     memset(response + 8, 0, count * 8);
+                    if (count > 0 && t1_ns) memcpy(response + 8 + count * 8, t1_ns, count * 8);
+                    else if (count > 0)     memset(response + 8 + count * 8, 0, count * 8);
+                    blockchain__transaction_batch__pack(&batch, response + ts_hdr);
+                    uint64_t pack_duration_ns = get_time_ns() - pack_start;
+
+                    // pool_fetches_<pid>.csv — one row per fetch
+                    static FILE* pool_csv = NULL;
+                    if (!pool_csv) {
+                        char csv_path[64];
+                        snprintf(csv_path, sizeof(csv_path), "pool_fetches_%d.csv", (int)getpid());
+                        pool_csv = fopen(csv_path, "w");
+                        if (pool_csv)
+                            fprintf(pool_csv,
+                                "timestamp_ns,pool_fill_count,txs_returned,"
+                                "scan_duration_ns,pack_duration_ns\n");
+                    }
+                    if (pool_csv)
+                        fprintf(pool_csv, "%lu,%u,%u,%lu,%lu\n",
+                                (unsigned long)ts_handler, fill_before, count,
+                                (unsigned long)scan_duration_ns,
+                                (unsigned long)pack_duration_ns);
+
+                    LOG_INFO("📤 ✅ Returned %u TXs (fees: %lu, %zu bytes, scan: %lums, pack: %lums)",
+                             count, total_fees, resp_size,
+                             (unsigned long)(scan_duration_ns / 1000000ULL),
+                             (unsigned long)(pack_duration_ns / 1000000ULL));
                     zmq_send(rep_socket, response, resp_size, 0);
                     
                     // Cleanup (AFTER pack - zero-copy pointers must stay valid during pack)
@@ -404,6 +442,8 @@ int main(int argc, char* argv[]) {
                     }
                     if (txs) free(txs);
                     if (pubkeys) free(pubkeys);
+                    if (t0_ns) free(t0_ns);
+                    if (t1_ns) free(t1_ns);
                     if (pb_ptrs) free(pb_ptrs);
                     if (pb_arr) free(pb_arr);
                     free(response);

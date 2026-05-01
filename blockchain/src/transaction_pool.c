@@ -185,15 +185,20 @@ static int sort_entry_compare(const void* a, const void* b) {
 
 Transaction** pool_get_pending(TransactionPool* pool, uint32_t max_count,
                                uint32_t current_block, uint32_t* out_count) {
-    return pool_get_pending_with_pubkeys(pool, max_count, current_block, out_count, NULL);
+    return pool_get_pending_with_pubkeys(pool, max_count, current_block, out_count,
+                                        NULL, NULL, NULL);
 }
 
 Transaction** pool_get_pending_with_pubkeys(TransactionPool* pool, uint32_t max_count,
                                             uint32_t current_block, uint32_t* out_count,
-                                            uint8_t** pubkeys_out) {
+                                            uint8_t** pubkeys_out,
+                                            uint64_t** t0_ns_out,
+                                            uint64_t** t1_ns_out) {
     if (!pool || max_count == 0) {
         if (out_count) *out_count = 0;
         if (pubkeys_out) *pubkeys_out = NULL;
+        if (t0_ns_out) *t0_ns_out = NULL;
+        if (t1_ns_out) *t1_ns_out = NULL;
         return NULL;
     }
     
@@ -214,6 +219,8 @@ Transaction** pool_get_pending_with_pubkeys(TransactionPool* pool, uint32_t max_
 
     Transaction** txs = safe_malloc(max_count * sizeof(Transaction*));
     uint32_t* entry_indices = safe_malloc(max_count * sizeof(uint32_t));
+    uint64_t* t0_raw = t0_ns_out ? safe_malloc(max_count * sizeof(uint64_t)) : NULL;
+    uint64_t* t1_raw = t1_ns_out ? safe_malloc(max_count * sizeof(uint64_t)) : NULL;
     uint32_t count = 0;
 
     for (uint32_t i = 0; i < pool->capacity && count < max_count; i++) {
@@ -235,6 +242,8 @@ Transaction** pool_get_pending_with_pubkeys(TransactionPool* pool, uint32_t max_
             memcpy(tx_copy, entry->tx, sizeof(Transaction));
             txs[count] = tx_copy;
             entry_indices[count] = i;
+            if (t0_raw) t0_raw[count] = entry->received_time * 1000000ULL;
+            if (t1_raw) t1_raw[count] = get_time_ns();
             count++;
         }
     }
@@ -243,6 +252,10 @@ Transaction** pool_get_pending_with_pubkeys(TransactionPool* pool, uint32_t max_
 
     if (count == 0) {
         free(txs); free(entry_indices);
+        if (t0_raw) free(t0_raw);
+        if (t1_raw) free(t1_raw);
+        if (t0_ns_out) *t0_ns_out = NULL;
+        if (t1_ns_out) *t1_ns_out = NULL;
         return NULL;
     }
 
@@ -256,14 +269,23 @@ Transaction** pool_get_pending_with_pubkeys(TransactionPool* pool, uint32_t max_
     qsort(sort_arr, count, sizeof(SortEntry), sort_entry_compare);
 
     uint32_t* sorted_entry_indices = safe_malloc(count * sizeof(uint32_t));
+    uint64_t* t0_sorted = t0_raw ? safe_malloc(count * sizeof(uint64_t)) : NULL;
+    uint64_t* t1_sorted = t1_raw ? safe_malloc(count * sizeof(uint64_t)) : NULL;
     for (uint32_t i = 0; i < count; i++) {
         txs[i] = sort_arr[i].tx;
         sorted_entry_indices[i] = entry_indices[sort_arr[i].orig_idx];
+        if (t0_sorted) t0_sorted[i] = t0_raw[sort_arr[i].orig_idx];
+        if (t1_sorted) t1_sorted[i] = t1_raw[sort_arr[i].orig_idx];
     }
-    
+
     free(sort_arr);
     free(entry_indices);
-    
+    if (t0_raw) free(t0_raw);
+    if (t1_raw) free(t1_raw);
+
+    if (t0_ns_out) *t0_ns_out = t0_sorted; else if (t0_sorted) free(t0_sorted);
+    if (t1_ns_out) *t1_ns_out = t1_sorted; else if (t1_sorted) free(t1_sorted);
+
     // Save entry indices as SEARCH HINT for pool_confirm (optimization only)
     // Status stays PENDING — no ASSIGNED marking
     pool->assigned_count = count < MAX_ASSIGNED ? count : MAX_ASSIGNED;
@@ -271,7 +293,7 @@ Transaction** pool_get_pending_with_pubkeys(TransactionPool* pool, uint32_t max_
         pool->assigned_indices[i] = sorted_entry_indices[i];
     }
     free(sorted_entry_indices);
-    
+
     return txs;
 }
 

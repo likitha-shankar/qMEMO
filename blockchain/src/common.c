@@ -145,6 +145,12 @@ uint64_t get_current_time_ms(void) {
     return (uint64_t)tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
+uint64_t get_time_ns(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
+}
+
 void format_timestamp(uint64_t ts, char* buffer, size_t size) {
     time_t t = (time_t)ts;
     struct tm* tm_info = localtime(&t);

@@ -96,7 +96,9 @@ Transaction** pool_get_pending(TransactionPool* pool, uint32_t max_count,
                                uint32_t current_block, uint32_t* out_count);
 Transaction** pool_get_pending_with_pubkeys(TransactionPool* pool, uint32_t max_count,
                                             uint32_t current_block, uint32_t* out_count,
-                                            uint8_t** pubkeys_out);
+                                            uint8_t** pubkeys_out,
+                                            uint64_t** t0_ns_out,
+                                            uint64_t** t1_ns_out);
 bool pool_confirm(TransactionPool* pool, const uint8_t tx_hash[TX_HASH_SIZE]);
 uint32_t pool_confirm_batch(TransactionPool* pool, const uint8_t* hashes, uint32_t hash_count);
 void pool_return_assigned(TransactionPool* pool, uint32_t block_height);
