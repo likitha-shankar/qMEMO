@@ -463,6 +463,11 @@ bool validator_create_and_submit_block(Validator* v) {
         }
     }
     uint64_t t2_5_ns = get_current_time_ns();
+#ifndef DIAG_OFF
+    uint64_t t2_75_ns  = 0;   // before GET_BALANCES_BATCH send
+    uint64_t t2_875_ns = 0;   // after  GET_BALANCES_BATCH recv
+    uint64_t t3_last_ns = 0;  // max T3 across all batches (last TX verified)
+#endif
 
     if (size > 8 && memcmp(buffer, "BIN:", 4) == 0) {
         uint32_t expected = 0;
@@ -513,8 +518,14 @@ bool validator_create_and_submit_block(Validator* v) {
         memcpy(req + 19, &unique_count, 4);
         for (uint32_t i = 0; i < unique_count; i++)
             memcpy(req + 23 + i * 20, unique_addrs[i], 20);
+#ifndef DIAG_OFF
+        t2_75_ns = get_current_time_ns();
+#endif
         zmq_send(v->blockchain_req, req, req_size, 0);
         int bal_size = zmq_recv(v->blockchain_req, buffer, validator_buffer_size - 1, 0);
+#ifndef DIAG_OFF
+        t2_875_ns = get_current_time_ns();
+#endif
         if (bal_size >= 8 && memcmp(buffer, "BAL:", 4) == 0) {
             uint32_t bal_count = 0;
             memcpy(&bal_count, buffer + 4, 4);
@@ -628,7 +639,8 @@ bool validator_create_and_submit_block(Validator* v) {
         tx_csv = fopen(csv_path, "w");
         if (tx_csv) {
             fprintf(tx_csv,
-                "tx_nonce_hex,tx_size_bytes,t0_ns,t1_ns,t2_ns,t2_5_ns,t3_ns,src_addr_hex\n");
+                "tx_nonce_hex,tx_size_bytes,t0_ns,t1_ns,t2_ns,t2_5_ns,"
+                "t2_75_ns,t2_875_ns,t3_ns,src_addr_hex\n");
             fflush(tx_csv);
         }
     }
@@ -683,8 +695,10 @@ bool validator_create_and_submit_block(Validator* v) {
         total_sig_ms += get_current_time_ms() - sig_start;
         sig_failures += batch_sig_fail;
 
-        // Write per-TX diagnostics for this batch
+        // Write per-TX diagnostics for this batch; track t3_last
 #ifndef DIAG_OFF
+        for (uint32_t bi = 0; bi < batch_size; bi++)
+            if (batch_t3[bi] > t3_last_ns) t3_last_ns = batch_t3[bi];
         if (tx_csv) {
             char src_hex[41];
             for (uint32_t bi = 0; bi < batch_size; bi++) {
@@ -695,10 +709,11 @@ bool validator_create_and_submit_block(Validator* v) {
                 uint64_t t0 = (diag_t0 && i < diag_ts_count) ? diag_t0[i] : 0;
                 uint64_t t1 = (diag_t1 && i < diag_ts_count) ? diag_t1[i] : 0;
                 bytes_to_hex_buf(tx->source_address, 20, src_hex);
-                fprintf(tx_csv, "%016lx,%zu,%lu,%lu,%lu,%lu,%lu,%s\n",
+                fprintf(tx_csv, "%016lx,%zu,%lu,%lu,%lu,%lu,%lu,%lu,%lu,%s\n",
                         (unsigned long)tx->nonce, tx_bytes,
                         (unsigned long)t0, (unsigned long)t1,
                         (unsigned long)t2_ns, (unsigned long)t2_5_ns,
+                        (unsigned long)t2_75_ns, (unsigned long)t2_875_ns,
                         (unsigned long)batch_t3[bi], src_hex);
             }
             fflush(tx_csv);
@@ -809,10 +824,38 @@ bool validator_create_and_submit_block(Validator* v) {
     memcpy(msg + PB_BLOCK_HEADER_SIZE, block_pb, pb_len);
     free(block_pb);
     
+#ifndef DIAG_OFF
+    uint64_t t4_ns = get_current_time_ns();
+#endif
     zmq_send(v->blockchain_req, msg, msg_len, 0);
     size = zmq_recv(v->blockchain_req, buffer, validator_buffer_size - 1, 0);
+#ifndef DIAG_OFF
+    uint64_t t5_ns = get_current_time_ns();
+    // block_diag_<pid>.csv — one row per submitted block
+    static FILE* blk_csv = NULL;
+    if (!blk_csv) {
+        char csv_path[64];
+        snprintf(csv_path, sizeof(csv_path), "block_diag_%d.csv", (int)getpid());
+        blk_csv = fopen(csv_path, "w");
+        if (blk_csv) {
+            fprintf(blk_csv,
+                "block_height,block_txs,t3_last_ns,t4_ns,t5_ns,"
+                "submission_duration_ns,ack_duration_ns\n");
+            fflush(blk_csv);
+        }
+    }
+    if (blk_csv) {
+        fprintf(blk_csv, "%u,%u,%lu,%lu,%lu,%lu,%lu\n",
+                v->current_challenge.target_block_height, txs_added,
+                (unsigned long)t3_last_ns,
+                (unsigned long)t4_ns, (unsigned long)t5_ns,
+                (unsigned long)(t3_last_ns > 0 ? t4_ns - t3_last_ns : 0),
+                (unsigned long)(t5_ns - t4_ns));
+        fflush(blk_csv);
+    }
+#endif
     free(msg);
-    
+
     bool blockchain_accepted = false;
     if (size > 0) {
         buffer[size] = '\0';
