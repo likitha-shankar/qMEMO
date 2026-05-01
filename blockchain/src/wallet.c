@@ -375,13 +375,47 @@ void wallet_derive_address(const uint8_t* pubkey, size_t len, uint8_t address[20
 }
 
 void wallet_name_to_address(const char* name, uint8_t address[20]) {
-    // MUST match wallet_create_named() derivation:
-    //   seed = sha256(name) → Ed25519 keypair → address = hash160(pubkey)
-    // This ensures "farmer1" resolves to the same address everywhere:
-    //   wallet CLI, blockchain server, benchmark, validator.
+    // Derives the canonical address for a wallet name under the active SIG_SCHEME.
+    // Uses the same key-derivation path as wallet_create_named() so that
+    // balance queries, FUND_WALLET, and batch_send all resolve to the same address.
+    // Inlined (not delegated to wallet_create_named) to avoid circular calls.
     uint8_t seed[32];
     sha256((const uint8_t*)name, strlen(name), seed);
-    
+
+#if SIG_SCHEME == SIG_FALCON512
+    {
+        OQS_SIG* oqs = OQS_SIG_new(OQS_SIG_alg_falcon_512);
+        if (oqs) {
+            uint8_t pub[OQS_SIG_falcon_512_length_public_key];
+            uint8_t sec[OQS_SIG_falcon_512_length_secret_key];
+            RAND_seed(seed, 32);
+            if (OQS_SIG_keypair(oqs, pub, sec) == OQS_SUCCESS)
+                hash160(pub, OQS_SIG_falcon_512_length_public_key, address);
+            OQS_SIG_free(oqs);
+            return;
+        }
+    }
+#elif SIG_SCHEME == SIG_ML_DSA44
+    {
+        OQS_SIG* oqs = OQS_SIG_new(OQS_SIG_alg_ml_dsa_44);
+        if (oqs) {
+            uint8_t pub[OQS_SIG_ml_dsa_44_length_public_key];
+            uint8_t sec[OQS_SIG_ml_dsa_44_length_secret_key];
+            RAND_seed(seed, 32);
+            if (OQS_SIG_keypair(oqs, pub, sec) == OQS_SUCCESS)
+                hash160(pub, OQS_SIG_ml_dsa_44_length_public_key, address);
+            OQS_SIG_free(oqs);
+            return;
+        }
+    }
+#elif SIG_SCHEME == SIG_HYBRID
+    {
+        // Hybrid: address derived from Ed25519 pubkey (the "base" component).
+        // Matches the address stored in the hybrid wallet's address field.
+    }
+#endif
+
+    // SIG_ED25519 (default) or HYBRID fallback: Ed25519 pubkey → hash160
     EVP_PKEY* key = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, seed, 32);
     if (key) {
         uint8_t pubkey[32];
@@ -390,7 +424,6 @@ void wallet_name_to_address(const char* name, uint8_t address[20]) {
         EVP_PKEY_free(key);
         hash160(pubkey, 32, address);
     } else {
-        // Fallback if Ed25519 fails: use BLAKE3(seed) as pseudo-pubkey
         uint8_t pseudo_pubkey[32];
         blake3_hash(seed, 32, pseudo_pubkey);
         hash160(pseudo_pubkey, 32, address);
