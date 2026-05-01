@@ -224,16 +224,18 @@ int cmd_nonce(const char* name_or_addr, const char* blockchain_addr) {
 }
 
 int cmd_address(const char* name) {
-    uint8_t addr[20];
-    wallet_name_to_address(name, addr);
-    
-    char hex[41];
-    address_to_hex(addr, hex);
-    
+    // Use wallet_create_named so the address matches the active SIG_SCHEME.
+    // wallet_name_to_address always derives an Ed25519 address, which is wrong
+    // for PQC schemes: FUND_WALLET would credit the wrong (Ed25519) address.
+    Wallet* w = wallet_create_named(name, SIG_SCHEME);
+    if (!w) {
+        fprintf(stderr, "Failed to derive address for '%s'\n", name);
+        return 1;
+    }
     printf("\n");
-    printf("📍 Address for '%s': %s\n", name, hex);
+    printf("📍 Address for '%s': %s\n", name, w->address_hex);
     printf("\n");
-    
+    wallet_destroy(w);
     return 0;
 }
 
