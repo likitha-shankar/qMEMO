@@ -620,15 +620,19 @@ bool validator_create_and_submit_block(Validator* v) {
     uint8_t* batch_valid = safe_malloc(VERIFY_BATCH_SIZE);
 
     // tx_diag_<pid>.csv — per-TX pipeline timestamps
+#ifndef DIAG_OFF
     static FILE* tx_csv = NULL;
     if (!tx_csv) {
         char csv_path[64];
         snprintf(csv_path, sizeof(csv_path), "tx_diag_%d.csv", (int)getpid());
         tx_csv = fopen(csv_path, "w");
-        if (tx_csv)
+        if (tx_csv) {
             fprintf(tx_csv,
                 "tx_nonce_hex,tx_size_bytes,t0_ns,t1_ns,t2_ns,t2_5_ns,t3_ns,src_addr_hex\n");
+            fflush(tx_csv);
+        }
     }
+#endif
 
     for (uint32_t batch_start = 0; batch_start < tx_count && !block_full; batch_start += VERIFY_BATCH_SIZE) {
         // ── DEADLINE CHECK before each batch ──
@@ -680,6 +684,7 @@ bool validator_create_and_submit_block(Validator* v) {
         sig_failures += batch_sig_fail;
 
         // Write per-TX diagnostics for this batch
+#ifndef DIAG_OFF
         if (tx_csv) {
             char src_hex[41];
             for (uint32_t bi = 0; bi < batch_size; bi++) {
@@ -696,7 +701,9 @@ bool validator_create_and_submit_block(Validator* v) {
                         (unsigned long)t2_ns, (unsigned long)t2_5_ns,
                         (unsigned long)batch_t3[bi], src_hex);
             }
+            fflush(tx_csv);
         }
+#endif
         free(batch_t3);
         
         // ──────────────────────────────────────────────────────────────

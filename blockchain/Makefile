@@ -51,8 +51,9 @@ OPENMP_LDFLAGS := -fopenmp
 endif
 endif
 
+CFLAGS_EXTRA ?=
 CFLAGS = -Wall -Wextra -O2 -g -I./include -I./proto $(OPENMP_CFLAGS) \
-         -DSIG_SCHEME=$(SIG_SCHEME)
+         -DSIG_SCHEME=$(SIG_SCHEME) $(CFLAGS_EXTRA)
 LDFLAGS = -lzmq -lssl -lcrypto -lm -lprotobuf-c $(OPENMP_LDFLAGS)
 
 ifneq ($(OPENSSL_ROOT),)

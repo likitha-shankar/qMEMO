@@ -414,21 +414,27 @@ int main(int argc, char* argv[]) {
                     uint64_t pack_duration_ns = get_current_time_ns() - pack_start;
 
                     // pool_fetches_<pid>.csv — one row per fetch
+#ifndef DIAG_OFF
                     static FILE* pool_csv = NULL;
                     if (!pool_csv) {
                         char csv_path[64];
                         snprintf(csv_path, sizeof(csv_path), "pool_fetches_%d.csv", (int)getpid());
                         pool_csv = fopen(csv_path, "w");
-                        if (pool_csv)
+                        if (pool_csv) {
                             fprintf(pool_csv,
                                 "timestamp_ns,pool_fill_count,txs_returned,"
                                 "scan_duration_ns,pack_duration_ns\n");
+                            fflush(pool_csv);
+                        }
                     }
-                    if (pool_csv)
+                    if (pool_csv) {
                         fprintf(pool_csv, "%lu,%u,%u,%lu,%lu\n",
                                 (unsigned long)ts_handler, fill_before, count,
                                 (unsigned long)scan_duration_ns,
                                 (unsigned long)pack_duration_ns);
+                        fflush(pool_csv);
+                    }
+#endif
 
                     LOG_INFO("📤 ✅ Returned %u TXs (fees: %lu, %zu bytes, scan: %lums, pack: %lums)",
                              count, total_fees, resp_size,
