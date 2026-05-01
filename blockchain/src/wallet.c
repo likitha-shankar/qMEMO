@@ -12,6 +12,37 @@
 #include <oqs/oqs.h>
 #endif
 
+#if SIG_SCHEME == SIG_FALCON512 || SIG_SCHEME == SIG_ML_DSA44 || SIG_SCHEME == SIG_HYBRID
+static uint8_t  _det_seed[32];
+static uint64_t _det_ctr = 0;
+
+static void _det_bytes(uint8_t *out, size_t len) {
+    size_t done = 0;
+    while (done < len) {
+        uint8_t in[40];
+        memcpy(in, _det_seed, 32);
+        memcpy(in + 32, &_det_ctr, 8);
+        _det_ctr++;
+        uint8_t blk[32];
+        sha256(in, 40, blk);
+        size_t take = (len - done < 32) ? (len - done) : 32;
+        memcpy(out + done, blk, take);
+        done += take;
+    }
+}
+
+static void det_prng_init(const uint8_t seed[32]) {
+    memcpy(_det_seed, seed, 32);
+    _det_ctr = 0;
+    OQS_randombytes_custom_algorithm(_det_bytes);
+}
+
+static void det_prng_release(void) {
+    OQS_randombytes_switch_algorithm(OQS_RAND_alg_system);
+    memset(_det_seed, 0, 32);
+}
+#endif
+
 // =============================================================================
 // WALLET CREATION
 // =============================================================================
@@ -83,9 +114,9 @@ Wallet* wallet_create_named(const char* name, uint8_t sig_type) {
         OQS_SIG* oqs = OQS_SIG_new(OQS_SIG_alg_falcon_512);
         if (!oqs) { free(wallet); return NULL; }
 
-        // Seed the PRNG deterministically (liboqs uses OpenSSL RAND internally)
-        RAND_seed(seed, 32);
+        det_prng_init(seed);
         OQS_STATUS rc = OQS_SIG_keypair(oqs, wallet->public_key, wallet->oqs_seckey);
+        det_prng_release();
         OQS_SIG_free(oqs);
         if (rc != OQS_SUCCESS) { free(wallet); return NULL; }
 
@@ -100,8 +131,9 @@ Wallet* wallet_create_named(const char* name, uint8_t sig_type) {
         OQS_SIG* oqs = OQS_SIG_new(OQS_SIG_alg_ml_dsa_44);
         if (!oqs) { free(wallet); return NULL; }
 
-        RAND_seed(seed, 32);
+        det_prng_init(seed);
         OQS_STATUS rc = OQS_SIG_keypair(oqs, wallet->public_key, wallet->oqs_seckey);
+        det_prng_release();
         OQS_SIG_free(oqs);
         if (rc != OQS_SUCCESS) { free(wallet); return NULL; }
 
@@ -388,8 +420,10 @@ void wallet_name_to_address(const char* name, uint8_t address[20]) {
         if (oqs) {
             uint8_t pub[OQS_SIG_falcon_512_length_public_key];
             uint8_t sec[OQS_SIG_falcon_512_length_secret_key];
-            RAND_seed(seed, 32);
-            if (OQS_SIG_keypair(oqs, pub, sec) == OQS_SUCCESS)
+            det_prng_init(seed);
+            OQS_STATUS rc_kp = OQS_SIG_keypair(oqs, pub, sec);
+            det_prng_release();
+            if (rc_kp == OQS_SUCCESS)
                 hash160(pub, OQS_SIG_falcon_512_length_public_key, address);
             OQS_SIG_free(oqs);
             return;
@@ -401,8 +435,10 @@ void wallet_name_to_address(const char* name, uint8_t address[20]) {
         if (oqs) {
             uint8_t pub[OQS_SIG_ml_dsa_44_length_public_key];
             uint8_t sec[OQS_SIG_ml_dsa_44_length_secret_key];
-            RAND_seed(seed, 32);
-            if (OQS_SIG_keypair(oqs, pub, sec) == OQS_SUCCESS)
+            det_prng_init(seed);
+            OQS_STATUS rc_kp = OQS_SIG_keypair(oqs, pub, sec);
+            det_prng_release();
+            if (rc_kp == OQS_SUCCESS)
                 hash160(pub, OQS_SIG_ml_dsa_44_length_public_key, address);
             OQS_SIG_free(oqs);
             return;
