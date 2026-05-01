@@ -50,3 +50,4 @@ benchmarks/results/hybrid_matrix_apr18/*
 # Personal presentation drafts
 GCASR_2026_ABSTRACT_DRAFT.md
 defense_presentation.md
+benchmarks/results/phase_a_*/tx_diag_*.csv
