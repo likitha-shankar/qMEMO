@@ -997,8 +997,15 @@ void validator_stop(Validator* v) {
 
 void validator_set_max_txs_per_block(uint32_t max_txs) {
     max_txs_per_block = max_txs > 0 ? max_txs : MAX_TXS_PER_BLOCK_DEFAULT;
-    // Scale buffer: 200 bytes per TX in protobuf + 16 bytes per TX for TXTS sidecar + 8 byte header
-    size_t needed = (size_t)max_txs_per_block * 216 + 8;
+    // Scale buffer per scheme: TX size varies widely across signature schemes
+#if SIG_SCHEME == SIG_ML_DSA44
+    size_t bytes_per_tx = 3820;   /* pubkey=1312 + sig=2420 + protobuf overhead */
+#elif SIG_SCHEME == SIG_FALCON512
+    size_t bytes_per_tx = 1620;   /* pubkey=897 + sig=666 + protobuf overhead */
+#else
+    size_t bytes_per_tx = 216;    /* Ed25519: pubkey=32 + sig=64 + overhead */
+#endif
+    size_t needed = (size_t)max_txs_per_block * (bytes_per_tx + 16) + 8;
     if (needed < VALIDATOR_BASE_BUFFER_SIZE) needed = VALIDATOR_BASE_BUFFER_SIZE;
     validator_buffer_size = needed;
     LOG_INFO("MAX_TXS_PER_BLOCK set to %u (buffer: %zu bytes)", max_txs_per_block, validator_buffer_size);
