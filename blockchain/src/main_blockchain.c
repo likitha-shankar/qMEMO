@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
     
     LOG_INFO("🚀 Blockchain server ready!");
     
-    int timeout = 100;
+    int timeout = 1;  // 1ms poll: eliminates ~50ms avg wake-up latency at 100ms timeout
     zmq_setsockopt(socket, ZMQ_RCVTIMEO, &timeout, sizeof(timeout));
     
     // 16MB buffer - enough for blocks with up to 65K transactions
