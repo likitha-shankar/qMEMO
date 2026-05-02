@@ -92,14 +92,27 @@ Metronome* metronome_create(uint32_t block_interval_ms,
     // Initialize strict timing (v45.2)
     m->timing_idx = 0;
     m->timing_count = 0;
-    m->t_create_avg_ms = TIMING_INITIAL_ESTIMATE_MS;
+    // Floor-aligned initial estimate: forces proof_window_init to 40% floor from round 1.
+    // Ensures validator has a viable budget even before adaptive fires.
+    // Formula: sched_initial = min(300, block_time*3/5 - proportional_margin)
+    // 1000ms: min(300,550)=300. 500ms:250. 250ms:125. 125ms:63.
+    uint64_t sched_margin_init = TIMING_MARGIN_MS;
+    if (sched_margin_init > m->block_interval_ms / 10) sched_margin_init = m->block_interval_ms / 10;
+    uint64_t max_initial_ms = (m->block_interval_ms * 3 / 5 > sched_margin_init)
+        ? m->block_interval_ms * 3 / 5 - sched_margin_init : 0;
+    uint64_t sched_initial_ms = TIMING_INITIAL_ESTIMATE_MS;
+    if (sched_initial_ms > max_initial_ms) sched_initial_ms = max_initial_ms;
+    m->t_create_avg_ms = sched_initial_ms;
     m->empty_blocks_created = 0;
     
     // Compute initial proof window
     uint64_t block_time_ms = m->block_interval_ms;
-    m->t_proof_window_ms = block_time_ms - TIMING_INITIAL_ESTIMATE_MS - TIMING_MARGIN_MS;
-    if (m->t_proof_window_ms < block_time_ms / 2) {
-        m->t_proof_window_ms = block_time_ms / 2;  // never less than 50% of block time
+    // Proportional margin: min(50, interval/10). 1000/500ms→50 (unchanged), 250ms→25, 125ms→12
+    uint64_t sched_margin_ms = TIMING_MARGIN_MS;
+    if (sched_margin_ms > block_time_ms / 10) sched_margin_ms = block_time_ms / 10;
+    m->t_proof_window_ms = block_time_ms - sched_initial_ms - sched_margin_ms;
+    if (m->t_proof_window_ms < block_time_ms * 2 / 5) {
+        m->t_proof_window_ms = block_time_ms * 2 / 5;  // floor: 40% of block time
     }
     
     LOG_INFO("📡 ════════════════════════════════════════════════════════════");
@@ -107,7 +120,7 @@ Metronome* metronome_create(uint32_t block_interval_ms,
     LOG_INFO("   ├─ Block interval:    %u ms (STRICT - never exceeds)", m->block_interval_ms);
     LOG_INFO("   ├─ Proof window:      %lu ms (adaptive, initial)", m->t_proof_window_ms);
     LOG_INFO("   ├─ Create budget:     %lu ms (adaptive, initial)", m->t_create_avg_ms);
-    LOG_INFO("   ├─ Safety margin:     %u ms", TIMING_MARGIN_MS);
+    LOG_INFO("   ├─ Safety margin:     %lu ms (proportional)", sched_margin_ms);
     LOG_INFO("   ├─ Difficulty:        %u (k=%u)", actual_diff, k_param);
     LOG_INFO("   ├─ Mining reward:     %lu (halves every %u blocks)",
              m->base_mining_reward, m->halving_interval);
@@ -794,13 +807,24 @@ static void update_overhead(Metronome* m, uint64_t overhead_ms) {
     uint64_t block_time_ms = (uint64_t)m->block_interval_ms;
     uint64_t budget = worst + worst / 2;  // worst * 1.5
     if (budget < m->t_create_avg_ms * 2) budget = m->t_create_avg_ms * 2;
-    if (budget < TIMING_MIN_BUDGET_MS) budget = TIMING_MIN_BUDGET_MS;
-    budget += TIMING_MARGIN_MS;
+    // Proportional margin: min(50, interval/10). 1000/500ms→50 (unchanged), 250ms→25, 125ms→12
+    uint64_t sched_margin_ms = TIMING_MARGIN_MS;
+    if (sched_margin_ms > block_time_ms / 10) sched_margin_ms = block_time_ms / 10;
+    // Proportional min budget: min(TIMING_MIN_BUDGET_MS, block_time/2 - sched_margin_ms)
+    // Keeps budget+margin <= block_time/2, so the proof_window 40% floor stays binding.
+    // 1000ms: min(200,450)=200 (unchanged). 500ms: min(200,200)=200 (unchanged).
+    // 250ms: min(200,100)=100. 125ms: min(200,50)=50.
+    uint64_t max_min_budget = (block_time_ms / 2 > sched_margin_ms)
+        ? block_time_ms / 2 - sched_margin_ms : 0;
+    uint64_t sched_min_budget = TIMING_MIN_BUDGET_MS;
+    if (sched_min_budget > max_min_budget) sched_min_budget = max_min_budget;
+    if (budget < sched_min_budget) budget = sched_min_budget;
+    budget += sched_margin_ms;
     
-    if (budget < block_time_ms / 2) {
+    if (budget < block_time_ms * 2 / 5) {
         m->t_proof_window_ms = block_time_ms - budget;
     } else {
-        m->t_proof_window_ms = block_time_ms / 2;  // floor: 50% of block time
+        m->t_proof_window_ms = block_time_ms * 2 / 5;  // floor: 40% of block time
     }
     
     LOG_INFO("   📊 Adaptive: overhead=%lums, worst=%lums, avg=%lums → budget=%lums, window=%lums",
@@ -942,7 +966,10 @@ void metronome_run(Metronome* m) {
         // t_tick = start of this round (set FRESH each iteration)
         // ═════════════════════════════════════════════════════════════
         uint64_t t_tick = get_current_time_ms();
-        uint64_t t_deadline = t_tick + block_time_ms - TIMING_MARGIN_MS;
+        // Proportional margin: min(50, interval/10). 1000/500ms→50 (unchanged), 250ms→25, 125ms→12
+        uint64_t sched_margin_ms = TIMING_MARGIN_MS;
+        if (sched_margin_ms > block_time_ms / 10) sched_margin_ms = block_time_ms / 10;
+        uint64_t t_deadline = t_tick + block_time_ms - sched_margin_ms;
         uint64_t t_next = t_tick + block_time_ms;
         
         // Drain any stale PULL messages from previous rounds.
