@@ -213,7 +213,7 @@ echo "  ✓ Environment ready"
 # Build
 print_header "BUILDING PROJECT"
 make clean >/dev/null 2>&1 || true
-if make 2>&1 | tail -5; then
+if make SIG_SCHEME=${SIG_SCHEME:-1} 2>&1 | tail -5; then
     echo "✓ Build successful"
 else
     echo -e "${RED}Build failed${NC}"
