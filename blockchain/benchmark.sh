@@ -41,6 +41,44 @@ BATCH_SIZE=${7:-64}        # TXs per batch message (64, 128, 256)
 NUM_THREADS=${8:-8}        # OpenMP threads per sender
 NUM_SENDERS=${NUM_FARMERS}  # Separate sender wallets (not validators)
 
+# === Optional flags after positional args ===
+REGENERATE_PLOTS=0
+CONFIRMATION_WINDOW_MS=""  # empty = use default formula
+shift_count=0
+for arg_idx in $(seq 1 $#); do
+    if [ "$arg_idx" -le 8 ]; then continue; fi
+done
+# Re-parse: peel off remaining args after the first 8 positionals
+if [ $# -gt 8 ]; then
+    shift 8
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --regenerate-plots)         REGENERATE_PLOTS=1; shift ;;
+            --confirmation-window-ms)   CONFIRMATION_WINDOW_MS="$2"; shift 2 ;;
+            *) echo "Unknown flag: $1"; exit 1 ;;
+        esac
+    done
+fi
+
+# Compute default confirmation window if not set:
+#   max(15000ms, ceil(NUM_TX / MAX_BLOCK_SIZE) * BLOCK_INTERVAL * 2)
+if [ -z "$CONFIRMATION_WINDOW_MS" ]; then
+    blocks_needed=$(( (NUM_TRANSACTIONS + MAX_TXS_PER_BLOCK - 1) / MAX_TXS_PER_BLOCK ))
+    formula_ms=$(( blocks_needed * BLOCK_INTERVAL * 2 ))
+    if [ "$formula_ms" -lt 15000 ]; then
+        CONFIRMATION_WINDOW_MS=15000
+    else
+        CONFIRMATION_WINDOW_MS=$formula_ms
+    fi
+fi
+echo "  Confirmation window: ${CONFIRMATION_WINDOW_MS}ms (default formula or --confirmation-window-ms)"
+
+# Honor --regenerate-plots BEFORE build (so wallet+address derivation happens fresh)
+if [ "$REGENERATE_PLOTS" = "1" ] && [ -d plots_persistent ]; then
+    echo "  --regenerate-plots: removing plots_persistent/"
+    rm -rf plots_persistent
+fi
+
 # Mining reward per block (must match metronome.h BASE_MINING_REWARD)
 BASE_MINING_REWARD=10000
 
@@ -391,9 +429,8 @@ if [ "$EFFECTIVE_BLOCK_SIZE" -gt 10000 ]; then
 fi
 if [ "$EFFECTIVE_BLOCK_SIZE" -lt 1 ]; then EFFECTIVE_BLOCK_SIZE=1; fi
 BLOCKS_NEEDED=$((NUM_TRANSACTIONS / EFFECTIVE_BLOCK_SIZE + 5))
-MAX_WAIT=$((BLOCKS_NEEDED * BLOCK_INTERVAL / 1000 + 60))
-if [ "$MAX_WAIT" -lt 120 ]; then MAX_WAIT=120; fi
-if [ "$MAX_WAIT" -gt 600 ]; then MAX_WAIT=600; fi
+# wait_confirm timeout in seconds = ceil(CONFIRMATION_WINDOW_MS / 1000)
+MAX_WAIT=$(( (CONFIRMATION_WINDOW_MS + 999) / 1000 ))
 
 RECEIVER_INITIAL=$(get_balance bench_receiver)
 SUBMIT_PROGRESS_DIR="$BENCHMARK_DIR/submit_progress"

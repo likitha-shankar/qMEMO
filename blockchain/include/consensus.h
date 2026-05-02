@@ -123,6 +123,14 @@ bool plot_generate(Plot* plot);
 // Sort plot entries by hash (required before binary search)
 void plot_sort(Plot* plot);
 
+// Persist plot to disk (binary format with magic header).
+// Returns true on success.
+bool plot_save_to_file(const Plot* plot, const char* path);
+
+// Load plot from disk. Returns NULL on missing/corrupt file.
+// Caller owns the returned Plot* and must call plot_destroy().
+Plot* plot_load_from_file(const char* path);
+
 // Find best proof for a challenge using binary search
 SpaceProof* plot_find_proof(const Plot* plot, 
                             const uint8_t challenge[32],

@@ -34,6 +34,7 @@
 #include "../include/transaction.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
@@ -158,8 +159,32 @@ bool validator_init_sockets(Validator* v,
 // PLOT GENERATION
 // =============================================================================
 
+// Plot persistence path: plots_persistent/{addr_hex}_k{k}.plot
+// Skip if plots_persistent/ directory does not exist.
+static void _build_plot_path(char* out, size_t out_len,
+                             const uint8_t addr[20], uint32_t k_param) {
+    char addr_hex[41];
+    bytes_to_hex_buf(addr, 20, addr_hex);
+    snprintf(out, out_len, "plots_persistent/%s_k%u.plot", addr_hex, k_param);
+}
+
 bool validator_generate_plot(Validator* v) {
     if (!v) return false;
+    
+    // Try to load persistent plot first (avoids 10-15s regeneration each run)
+    char plot_path[256];
+    _build_plot_path(plot_path, sizeof(plot_path), v->wallet->address, v->k_param);
+    struct stat st;
+    if (stat("plots_persistent", &st) == 0 && S_ISDIR(st.st_mode)) {
+        Plot* loaded = plot_load_from_file(plot_path);
+        if (loaded) {
+            v->plot = loaded;
+            char plot_id_hex[65];
+            bytes_to_hex_buf(v->plot->plot_id, 32, plot_id_hex);
+            LOG_INFO("🌾 [%s] Plot loaded from %s (ID: %.16s...)", v->name, plot_path, plot_id_hex);
+            return true;
+        }
+    }
     
     LOG_INFO("🌾 [%s] Generating plot with BLAKE3...", v->name);
     
@@ -178,8 +203,14 @@ bool validator_generate_plot(Validator* v) {
     
     char plot_id_hex[65];
     bytes_to_hex_buf(v->plot->plot_id, 32, plot_id_hex);
-    
     LOG_INFO("🌾 [%s] Plot ready! ID: %.16s...", v->name, plot_id_hex);
+    
+    // Auto-save if plots_persistent/ exists (created by setup_plots.sh)
+    if (stat("plots_persistent", &st) == 0 && S_ISDIR(st.st_mode)) {
+        if (plot_save_to_file(v->plot, plot_path)) {
+            LOG_INFO("🌾 [%s] Plot saved to %s for reuse", v->name, plot_path);
+        }
+    }
     
     return true;
 }

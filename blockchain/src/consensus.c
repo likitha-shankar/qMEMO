@@ -225,6 +225,88 @@ void plot_sort(Plot* plot) {
 }
 
 // ============================================================================
+// PLOT PERSISTENCE (binary format)
+// ============================================================================
+// File layout (little-endian):
+//   [8]  magic = "QMEMPLOT"
+//   [1]  version = 1
+//   [4]  k_param
+//   [8]  entry_count
+//   [1]  is_sorted
+//   [32] plot_id
+//   [20] farmer_address
+//   [entry_count * 32]  entries (PlotEntry array)
+// ============================================================================
+
+#define PLOT_FILE_MAGIC "QMEMPLOT"
+#define PLOT_FILE_VERSION 1
+
+bool plot_save_to_file(const Plot* plot, const char* path) {
+    if (!plot || !plot->entries || !path) return false;
+    FILE* f = fopen(path, "wb");
+    if (!f) {
+        LOG_ERROR("plot_save_to_file: cannot open %s for write", path);
+        return false;
+    }
+    bool ok = true;
+    uint8_t version = PLOT_FILE_VERSION;
+    uint8_t sorted = plot->is_sorted ? 1 : 0;
+    ok = ok && fwrite(PLOT_FILE_MAGIC, 8, 1, f) == 1;
+    ok = ok && fwrite(&version, 1, 1, f) == 1;
+    ok = ok && fwrite(&plot->k_param, sizeof(plot->k_param), 1, f) == 1;
+    ok = ok && fwrite(&plot->entry_count, sizeof(plot->entry_count), 1, f) == 1;
+    ok = ok && fwrite(&sorted, 1, 1, f) == 1;
+    ok = ok && fwrite(plot->plot_id, 32, 1, f) == 1;
+    ok = ok && fwrite(plot->farmer_address, 20, 1, f) == 1;
+    ok = ok && fwrite(plot->entries, sizeof(PlotEntry), plot->entry_count, f) == plot->entry_count;
+    fclose(f);
+    if (!ok) {
+        LOG_ERROR("plot_save_to_file: short write to %s", path);
+        return false;
+    }
+    return true;
+}
+
+Plot* plot_load_from_file(const char* path) {
+    if (!path) return NULL;
+    FILE* f = fopen(path, "rb");
+    if (!f) return NULL;
+    char magic[8];
+    uint8_t version, sorted;
+    if (fread(magic, 8, 1, f) != 1 || memcmp(magic, PLOT_FILE_MAGIC, 8) != 0) {
+        LOG_ERROR("plot_load_from_file: bad magic in %s", path);
+        fclose(f); return NULL;
+    }
+    if (fread(&version, 1, 1, f) != 1 || version != PLOT_FILE_VERSION) {
+        LOG_ERROR("plot_load_from_file: bad version in %s", path);
+        fclose(f); return NULL;
+    }
+    Plot* plot = (Plot*)safe_malloc(sizeof(Plot));
+    memset(plot, 0, sizeof(Plot));
+    if (fread(&plot->k_param, sizeof(plot->k_param), 1, f) != 1) goto fail;
+    if (fread(&plot->entry_count, sizeof(plot->entry_count), 1, f) != 1) goto fail;
+    if (fread(&sorted, 1, 1, f) != 1) goto fail;
+    plot->is_sorted = (sorted != 0);
+    if (fread(plot->plot_id, 32, 1, f) != 1) goto fail;
+    if (fread(plot->farmer_address, 20, 1, f) != 1) goto fail;
+    if (plot->entry_count == 0 || plot->entry_count > ((uint64_t)1 << K_PARAM_MAX)) goto fail;
+    plot->entries = (PlotEntry*)safe_malloc(sizeof(PlotEntry) * plot->entry_count);
+    if (fread(plot->entries, sizeof(PlotEntry), plot->entry_count, f) != plot->entry_count) {
+        free(plot->entries);
+        goto fail;
+    }
+    fclose(f);
+    LOG_INFO("✅ plot_load_from_file: loaded %lu entries (k=%u, sorted=%d) from %s",
+             plot->entry_count, plot->k_param, plot->is_sorted, path);
+    return plot;
+fail:
+    free(plot);
+    fclose(f);
+    LOG_ERROR("plot_load_from_file: short read from %s", path);
+    return NULL;
+}
+
+// ============================================================================
 // BINARY SEARCH - Find Entry Closest to Target
 // ============================================================================
 //

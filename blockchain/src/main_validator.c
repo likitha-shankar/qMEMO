@@ -86,9 +86,11 @@ int main(int argc, char* argv[]) {
         {"pool", required_argument, 0, 3},
         {"blockchain", required_argument, 0, 4},
         {"max-txs", required_argument, 0, 5},
+        {"generate-plot-only", no_argument, 0, 7},
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
+    bool generate_plot_only = false;
 
     int opt;
     while ((opt = getopt_long(argc, argv, "k:h", long_options, NULL)) != -1) {
@@ -106,6 +108,7 @@ int main(int argc, char* argv[]) {
             case 3: pool_addr = optarg; break;
             case 4: blockchain_addr = optarg; break;
             case 5: max_txs = atoi(optarg); break;
+            case 7: generate_plot_only = true; break;
             case 'h':
                 print_usage(argv[0]);
                 return 0;
@@ -143,11 +146,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    if (!validator_init_sockets(validator, metronome_req, metronome_sub,
-                                pool_addr, blockchain_addr)) {
-        LOG_ERROR("Failed to initialize sockets");
-        validator_destroy(validator);
-        return 1;
+    if (!generate_plot_only) {
+        if (!validator_init_sockets(validator, metronome_req, metronome_sub,
+                                    pool_addr, blockchain_addr)) {
+            LOG_ERROR("Failed to initialize sockets");
+            validator_destroy(validator);
+            return 1;
+        }
     }
     
     LOG_INFO("Generating plot...");
@@ -155,6 +160,12 @@ int main(int argc, char* argv[]) {
         LOG_ERROR("Failed to generate plot");
         validator_destroy(validator);
         return 1;
+    }
+    
+    if (generate_plot_only) {
+        LOG_INFO("--generate-plot-only: plot generation complete, exiting.");
+        validator_destroy(validator);
+        return 0;
     }
     
     LOG_INFO("Plot ready! Starting farming loop...");
