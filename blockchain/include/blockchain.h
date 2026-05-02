@@ -76,6 +76,12 @@ bool blockchain_process_block(Blockchain* bc, const Block* block);
 // Verify entire chain
 bool blockchain_verify(const Blockchain* bc);
 
+// Phase B-3 diagnostic timestamps set inside blockchain_add_block (CLOCK_MONOTONIC ns)
+#ifndef DIAG_OFF
+extern uint64_t bc_diag_t_validate_ns;
+extern uint64_t bc_diag_t_commit_ns;
+#endif
+
 // =============================================================================
 // SERIALIZATION (Protobuf-based)
 // =============================================================================

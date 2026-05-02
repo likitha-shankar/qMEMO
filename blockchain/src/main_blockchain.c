@@ -152,22 +152,64 @@ int main(int argc, char* argv[]) {
             // =============================================================
             if (size > 77 && starts_with(buffer, "ADD_BLOCK_PB:")) {
                 LOG_INFO("📥 ADD_BLOCK_PB (%d bytes)", size);
-                
+#ifndef DIAG_OFF
+                uint64_t blkd_t_recv_ns = get_current_time_ns();
+#endif
+
                 char farmer_name[64];
                 memcpy(farmer_name, buffer + 13, 64);
                 farmer_name[63] = '\0';
                 trim(farmer_name);
-                
+
                 uint8_t* block_data = (uint8_t*)(buffer + 77);  // 13 + 64
                 size_t block_len = size - 77;
                 Block* block = block_deserialize_pb(block_data, block_len);
-                
+#ifndef DIAG_OFF
+                uint64_t blkd_t_unpack_ns = get_current_time_ns();
+#endif
+
                 if (block) {
                     if (blockchain_add_block(blockchain, block)) {
-                        LOG_INFO("✅ Block #%u added (height: %lu, %u TXs)", 
+                        LOG_INFO("✅ Block #%u added (height: %lu, %u TXs)",
                                  block->header.height, blockchain->height,
                                  block->header.transaction_count);
+#ifndef DIAG_OFF
+                        uint64_t blkd_t_validate_ns = bc_diag_t_validate_ns;
+                        uint64_t blkd_t_commit_ns   = bc_diag_t_commit_ns;
+                        uint64_t blkd_t_send_ns     = get_current_time_ns();
+#endif
                         zmq_send(socket, "OK", 2, 0);
+#ifndef DIAG_OFF
+                        {
+                            static FILE* bc_csv = NULL;
+                            if (!bc_csv) {
+                                char csv_path[64];
+                                snprintf(csv_path, sizeof(csv_path),
+                                         "blockchain_diag_%d.csv", getpid());
+                                bc_csv = fopen(csv_path, "w");
+                                if (bc_csv) {
+                                    fprintf(bc_csv,
+                                        "block_height,block_txs,block_bytes,"
+                                        "t_recv_ns,t_unpack_ns,t_validate_ns,"
+                                        "t_commit_ns,t_send_ns,recv_to_send_ns\n");
+                                    fflush(bc_csv);
+                                }
+                            }
+                            if (bc_csv) {
+                                fprintf(bc_csv, "%u,%u,%zu,%lu,%lu,%lu,%lu,%lu,%lu\n",
+                                    block->header.height,
+                                    block->header.transaction_count,
+                                    block_len,
+                                    (unsigned long)blkd_t_recv_ns,
+                                    (unsigned long)blkd_t_unpack_ns,
+                                    (unsigned long)blkd_t_validate_ns,
+                                    (unsigned long)blkd_t_commit_ns,
+                                    (unsigned long)blkd_t_send_ns,
+                                    (unsigned long)(blkd_t_send_ns - blkd_t_recv_ns));
+                                fflush(bc_csv);
+                            }
+                        }
+#endif
                         
                         char block_hash_hex[65];
                         bytes_to_hex_buf(block->header.hash, 32, block_hash_hex);

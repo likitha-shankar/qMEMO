@@ -57,6 +57,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef DIAG_OFF
+uint64_t bc_diag_t_validate_ns = 0;
+uint64_t bc_diag_t_commit_ns   = 0;
+#endif
+
 // =============================================================================
 // BLOCKCHAIN CREATION
 // =============================================================================
@@ -97,27 +102,33 @@ bool blockchain_add_block(Blockchain* bc, Block* block) {
         LOG_ERROR("Block verification failed");
         return false;
     }
-    
+#ifndef DIAG_OFF
+    bc_diag_t_validate_ns = get_current_time_ns();
+#endif
+
     // Process transactions (update ledger)
     if (!blockchain_process_block(bc, block)) {
         LOG_ERROR("Block transaction processing failed");
         return false;
     }
-    
+
     // Add to chain
     Block* block_copy = block_create();
     memcpy(&block_copy->header, &block->header, sizeof(BlockHeader));
     block_copy->total_fees = block->total_fees;
-    
+
     for (uint32_t i = 0; i < block->header.transaction_count; i++) {
         if (block->transactions[i]) {
             block_add_transaction(block_copy, block->transactions[i]);
         }
     }
-    
+
     bc->blocks[bc->height++] = block_copy;
     memcpy(bc->last_hash, block->header.hash, 32);
-    
+#ifndef DIAG_OFF
+    bc_diag_t_commit_ns = get_current_time_ns();
+#endif
+
     LOG_INFO("🔗 Block #%u added to chain", block->header.height);
     
     return true;
